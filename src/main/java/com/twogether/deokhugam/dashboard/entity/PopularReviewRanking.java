@@ -59,10 +59,10 @@ public class PopularReviewRanking {
     @Column(name = "book_id", nullable = false)
     private UUID bookId;
 
-    @Column(name = "book_title", nullable = false, length = 100)
+    @Column(name = "book_title", nullable = false, length = 255)
     private String bookTitle;
 
-    @Column(name = "book_thumbnail_url")
+    @Column(name = "book_thumbnail_url", columnDefinition = "TEXT")
     private String bookThumbnailUrl;
 
     @Column(name = "created_at", nullable = false)

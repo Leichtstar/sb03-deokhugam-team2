@@ -44,13 +44,13 @@ public class PopularBookRanking {
     @Column(nullable = false)
     private int rank;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 255)
     private String title;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, length = 100)
     private String author;
 
-    @Column(name = "thumbnail_url")
+    @Column(name = "thumbnail_url", columnDefinition = "TEXT")
     private String thumbnailUrl;
 
     @Column(name = "created_at", nullable = false)

@@ -98,7 +98,7 @@ CREATE TYPE ranking_period AS ENUM ('DAILY', 'WEEKLY', 'MONTHLY', 'ALL_TIME');
 -- 알림 테이블 (ON DELETE CASCADE)
 CREATE TABLE notifications (
     id UUID                             PRIMARY KEY,
-    content VARCHAR(255)                NOT NULL,
+    content VARCHAR(300)                NOT NULL,
     confirmed BOOLEAN                   NOT NULL,
     created_at TIMESTAMPTZ              NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ              NOT NULL DEFAULT now(),
@@ -118,9 +118,9 @@ CREATE TABLE popular_book_ranking (
     review_count BIGINT                 NOT NULL,
     rating DOUBLE PRECISION             NOT NULL,
     rank INT                            NOT NULL,
-    title VARCHAR(100)                  NOT NULL,
-    author VARCHAR(50)                  NOT NULL,
-    thumbnail_url VARCHAR(255),
+    title VARCHAR(255)                  NOT NULL,
+    author VARCHAR(100)                  NOT NULL,
+    thumbnail_url TEXT,
     created_at TIMESTAMPTZ              NOT NULL DEFAULT now(),
 
     FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE SET NULL
@@ -140,8 +140,8 @@ CREATE TABLE popular_review_ranking (
     content TEXT                        NOT NULL,
     rating DOUBLE PRECISION             NOT NULL,
     book_id UUID                        NOT NULL,
-    book_title VARCHAR(100)             NOT NULL,
-    book_thumbnail_url VARCHAR(255),
+    book_title VARCHAR(255)             NOT NULL,
+    book_thumbnail_url TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 
     FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE SET NULL,

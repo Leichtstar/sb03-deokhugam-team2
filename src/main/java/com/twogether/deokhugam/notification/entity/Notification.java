@@ -1,12 +1,8 @@
-package com.twogether.deokhugam.notifications.entity;
+package com.twogether.deokhugam.notification.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -27,7 +23,7 @@ public class Notification {
     @Id
     private UUID id;
 
-    @Column(nullable = false, length = 255)
+    @Column(name = "content", length = 300, nullable = false)
     private String content;
 
     @Column(nullable = false)
