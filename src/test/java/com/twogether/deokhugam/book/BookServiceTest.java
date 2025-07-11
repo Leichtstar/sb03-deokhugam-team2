@@ -9,10 +9,9 @@ import com.twogether.deokhugam.book.dto.BookDto;
 import com.twogether.deokhugam.book.dto.request.BookCreateRequest;
 import com.twogether.deokhugam.book.entity.Book;
 import com.twogether.deokhugam.book.repository.BookRepository;
-import com.twogether.deokhugam.book.service.BookService;
-import java.time.Instant;
+import com.twogether.deokhugam.book.service.LocalBookService;
 import java.time.LocalDate;
-import java.util.UUID;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -26,13 +25,11 @@ class BookServiceTest {
   @Mock
   private BookRepository bookRepository;
 
-  @Mock
-  private ThumbnailUploader thumbnailUploader;
-
   @InjectMocks
-  private BookService bookService;
+  private LocalBookService bookService;
 
   @Test
+  @DisplayName("ISBN,썸네일 없이 도서 정보를 등록")
   void registerBook() {
     // given
     BookCreateRequest request = new BookCreateRequest(
@@ -45,22 +42,13 @@ class BookServiceTest {
     );
 
     ArgumentCaptor<Book> bookCaptor = ArgumentCaptor.forClass(Book.class);
-    UUID generatedId = UUID.randomUUID();
-    Instant now = Instant.now();
 
     Book savedBook = new Book(
-        generatedId,
         "더쿠의 심리학",
         "박인규",
         "더쿠에 대한 심도깊은 해설",
         "이북리더즈",
-        LocalDate.of(1989, 5, 12),
-        null,
-        null,
-        0,
-        0.0f,
-        now,
-        now
+        LocalDate.of(1989, 5, 12)
     );
 
     when(bookRepository.save(any(Book.class))).thenReturn(savedBook);
