@@ -1,10 +1,17 @@
 package com.twogether.deokhugam.dashboard.entity;
 
+import com.twogether.deokhugam.book.entity.Book;
+import com.twogether.deokhugam.review.entity.Review;
+import com.twogether.deokhugam.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -25,8 +32,9 @@ public class PopularReviewRanking {
     @Id
     private UUID id;
 
-    @Column(name = "review_id", nullable = false)
-    private UUID reviewId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "review_id", nullable = false, foreignKey = @ForeignKey(name = "fk_popular_review_ranking_review"))
+    private Review review;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -44,8 +52,9 @@ public class PopularReviewRanking {
     @Column(nullable = false)
     private int rank;
 
-    @Column(name = "user_id", nullable = false)
-    private UUID userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_popular_review_ranking_user"))
+    private User user;
 
     @Column(name = "user_nickname", nullable = false, length = 50)
     private String userNickname;
@@ -56,8 +65,9 @@ public class PopularReviewRanking {
     @Column(nullable = false)
     private double rating;
 
-    @Column(name = "book_id", nullable = false)
-    private UUID bookId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "book_id", nullable = false, foreignKey = @ForeignKey(name = "fk_popular_review_ranking_book"))
+    private Book book;
 
     @Column(name = "book_title", nullable = false, length = 255)
     private String bookTitle;
