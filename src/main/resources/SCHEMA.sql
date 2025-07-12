@@ -50,8 +50,8 @@ CREATE TABLE reviews
     book_id UUID                        NOT NULL,
     user_id UUID                        NOT NULL,
 
-    book_title VARCHAR(100)             NOT NULL,
-    book_thumbnail_url VARCHAR(255),
+    book_title VARCHAR(255)             NOT NULL,
+    book_thumbnail_url TEXT,
     user_nickname VARCHAR(50)           NOT NULL,
 
     content TEXT                        NOT NULL,
@@ -63,6 +63,7 @@ CREATE TABLE reviews
     updated_at TIMESTAMPTZ,
     is_deleted BOOLEAN                  NOT NULL,
 
+    CONSTRAINT uq_reviews_book_user UNIQUE (book_id, user_id),
     CONSTRAINT fk_reviews_book_id FOREIGN KEY (book_id) REFERENCES books (id) ON DELETE CASCADE,
     CONSTRAINT fk_reviews_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
