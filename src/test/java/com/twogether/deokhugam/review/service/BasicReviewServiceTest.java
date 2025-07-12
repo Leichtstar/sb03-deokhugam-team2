@@ -19,7 +19,6 @@ import com.twogether.deokhugam.review.mapper.ReviewMapper;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
 import com.twogether.deokhugam.user.entity.User;
 import com.twogether.deokhugam.user.repository.UserRepository;
-import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
@@ -112,6 +111,7 @@ public class BasicReviewServiceTest {
     @Test
     @DisplayName("도서를 찾을 수 없는 경우 예외가 발생한다.")
     void book_notFound() {
+        when(reviewRepository.existsByUserIdAndBookId(userId, bookId)).thenReturn(false);
         when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
 
         // when & then
@@ -126,8 +126,9 @@ public class BasicReviewServiceTest {
     @Test
     @DisplayName("사용자를 찾을 수 없는 경우 예외가 발생한다.")
     void user_notFound() {
-
         Book mockBook = mock(Book.class);
+
+        when(reviewRepository.existsByUserIdAndBookId(userId, bookId)).thenReturn(false);
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(mockBook));
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
