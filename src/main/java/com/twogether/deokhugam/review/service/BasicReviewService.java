@@ -6,11 +6,13 @@ import com.twogether.deokhugam.review.dto.ReviewDto;
 import com.twogether.deokhugam.review.dto.request.ReviewCreateRequest;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.review.exception.ReviewExistException;
+import com.twogether.deokhugam.review.exception.ReviewNotFoundException;
 import com.twogether.deokhugam.review.mapper.ReviewMapper;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
 import com.twogether.deokhugam.user.entity.User;
 import com.twogether.deokhugam.user.repository.UserRepository;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -48,6 +50,17 @@ public class BasicReviewService implements ReviewService{
         reviewRepository.save(review);
 
         log.info("[BasicReviewService] 리뷰 등록 성공");
+
+        return reviewMapper.toDto(review);
+    }
+
+    // 리뷰 상세 조회
+    @Override
+    @Transactional(readOnly = true)
+    public ReviewDto findById(UUID reviewId){
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(
+                        () -> new ReviewNotFoundException(reviewId));
 
         return reviewMapper.toDto(review);
     }
