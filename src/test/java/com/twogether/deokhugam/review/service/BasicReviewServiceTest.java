@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -141,4 +142,33 @@ public class BasicReviewServiceTest {
         // 혹시라도 save()가 호출되면 안 됨
         verify(reviewRepository, never()).save(any());
     }
+
+    @Nested
+    @DisplayName("리뷰 상세 조회 테스트")
+    class ReadReviewTest {
+
+        /**
+         * 리뷰 상세 기능에 대한 테스트 - RED 단계
+         * 아직 상세 조회 메서드가 존재하지 않으므로 컴파일 에러 발생
+         */
+        @Test
+        @DisplayName("id로 리뷰를 조회하면 해당하는 리뷰를 반환해야 한다.")
+        void shouldReturnReview_whenGivenValidId() {
+
+            // Given
+            UUID reviewId = UUID.randomUUID();
+            Review mockReview = mock(Review.class);
+            ReviewDto expectedDto = mock(ReviewDto.class);
+
+            when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(mockReview));
+            when(reviewMapper.toDto(mockReview)).thenReturn(expectedDto);
+
+            // When
+            ReviewDto result = basicReviewService.findById(reviewId);
+
+            // Then
+            assertEquals(expectedDto, result);
+        }
+    }
+
 }
