@@ -24,6 +24,7 @@ import com.twogether.deokhugam.review.repository.ReviewRepository;
 import com.twogether.deokhugam.user.entity.User;
 import com.twogether.deokhugam.user.repository.UserRepository;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
@@ -231,6 +232,28 @@ public class BasicReviewServiceTest {
             // Then
             assertEquals(expectedDto.likedByMe(), result.likedByMe());
             assertEquals(expectedDto, result);
+        }
+
+        @Test
+        @DisplayName("RED: 문자열로 리뷰 목록을 검색하면 조건에 맞는 목록이 조회되어야 한다.")
+        void shouldReturnReviewList_whenGivenValidFilter(){
+
+            // 테스트용 검색어
+            String keyword = "더쿠";
+
+            ReviewDto expectedDto1 = mock(ReviewDto.class);
+            ReviewDto expectedDto2 = mock(ReviewDto.class);
+            List<ReviewDto> expectedResult = List.of(expectedDto1, expectedDto2);
+
+            when(reviewRepository.findByFilter(keyword)).thenReturn(expectedResult);
+
+            // When
+            List<ReviewDto> result = basicReviewService.findReviews(keyword);
+
+            // Then
+            assertEquals(2, result.size());
+            assertEquals(expectedResult, result);
+            verify(reviewRepository).findByFilter(keyword);
         }
     }
 
