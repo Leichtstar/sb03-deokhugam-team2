@@ -1,6 +1,7 @@
 package com.twogether.deokhugam.review.controller;
 
 import com.twogether.deokhugam.review.dto.ReviewDto;
+import com.twogether.deokhugam.review.dto.ReviewLikeDto;
 import com.twogether.deokhugam.review.dto.request.ReviewCreateRequest;
 import com.twogether.deokhugam.review.exception.ReviewNotFoundException;
 import com.twogether.deokhugam.review.service.ReviewService;
@@ -43,10 +44,23 @@ public class ReviewController {
             @PathVariable("reviewId") UUID reviewId,
             @RequestHeader(value = "Deokhugam-Request-User-ID", required = true) UUID requestUserId
     ){
-        ReviewDto reviewDto = reviewService.findById(reviewId);
+        ReviewDto reviewDto = reviewService.findById(reviewId, requestUserId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(reviewDto);
+    }
+
+    // 리뷰 좋아요 스위치 요청
+    @PostMapping("/{reviewId}/like")
+    public ResponseEntity<ReviewLikeDto> reviewLike(
+            @PathVariable("reviewId") UUID reviewId,
+            @RequestHeader(value = "Deokhugam-Request-User-ID", required = true) UUID requestUserId
+    ){
+        ReviewLikeDto reviewLikeDto = reviewService.reviewLike(reviewId, requestUserId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(reviewLikeDto);
     }
 }
