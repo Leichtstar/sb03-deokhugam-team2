@@ -92,6 +92,7 @@ public class Review {
 
     public void updateLikeCount(long likeCount){
         this.likeCount = likeCount;
+        this.updatedAt = Instant.now();
     }
 
 }
