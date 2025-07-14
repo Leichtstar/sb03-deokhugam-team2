@@ -14,14 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class BookInfoController {
 
-  private final NaverBookClient naverBookClient;
+    private final NaverBookClient naverBookClient;
 
-  @GetMapping("/info")
-  public ResponseEntity<NaverBookDto> getBookInfo(@RequestParam("isbn") String isbn) {
-    NaverBookDto dto = naverBookClient.fetchInfoByIsbn(isbn);
-    if (dto == null) {
-      return ResponseEntity.notFound().build();
+    @GetMapping("/info")
+    public ResponseEntity<NaverBookDto> getBookInfo(@RequestParam("isbn") String isbn) {
+        NaverBookDto dto = naverBookClient.fetchInfoByIsbn(isbn);
+        if (dto == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(dto);
     }
-    return ResponseEntity.ok(dto);
-  }
 }
