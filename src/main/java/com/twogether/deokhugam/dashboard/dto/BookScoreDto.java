@@ -10,7 +10,12 @@ public record BookScoreDto(
     long reviewCount,
     double averageRating
 ) {
+    private static final double REVIEW_COUNT_WEIGHT = 0.4;
+    private static final double AVERAGE_RATING_WEIGHT = 0.6;
+
     public double calculateScore() {
-        return reviewCount * 0.4 + averageRating * 0.6;
+        double normalizedReviewCount = Math.log1p(reviewCount) / 10.0;
+        double normalizedRating = averageRating / 5.0;
+        return normalizedReviewCount * REVIEW_COUNT_WEIGHT + normalizedRating * AVERAGE_RATING_WEIGHT;
     }
 }
