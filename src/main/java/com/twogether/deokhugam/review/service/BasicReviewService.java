@@ -102,25 +102,54 @@ public class BasicReviewService implements ReviewService{
     // 리뷰 좋아요 기능
     @Override
     public ReviewLikeDto reviewLike(UUID reviewId, UUID userId) {
-        ReviewLike reviewLike = reviewLikeRepository.findByUserIdAndReviewId(userId, reviewId)
-                .orElseThrow(() -> new ReviewLikeNotFoundException());
+        if (reviewLikeRepository.findByUserIdAndReviewId(userId, reviewId).isEmpty()){
+            // 좋아요가 비어있다면
+            Review review = reviewRepository.findById(reviewId)
+                    .orElseThrow(
+                            () -> new ReviewNotFoundException(reviewId));
 
-        Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new ReviewNotFoundException(reviewId));
+            User reviewer = userRepository.findById(userId)
+                    .orElseThrow(
+                            () -> new NoSuchElementException("사용자를 찾을 수 없습니다. " + userId));
 
-        if (reviewLike.isLiked()){
-            // 좋아요 상태가 true 라면
-            reviewLike.updateLike(false);
-            review.updateLikeCount(review.getLikeCount() - 1);
+            ReviewLike reviewLike = new ReviewLike(
+                    review,
+                    reviewer,
+                    true
+            );
+
+            review.updateLikeCount(review.getLikeCount() + 1);
+
+            reviewLikeRepository.save(reviewLike);
+            reviewRepository.save(review);
+
+            return reviewLikeMapper.toDto(reviewLike);
         }
         else{
-            // 좋아요가 false 라면
-            reviewLike.updateLike(true);
-            review.updateLikeCount(review.getLikeCount() + 1);
-        }
-        reviewLikeRepository.save(reviewLike);
-        reviewRepository.save(review);
+            // 좋아요가 있다면
+            ReviewLike reviewLike = reviewLikeRepository.findByUserIdAndReviewId(userId, reviewId)
+                    .orElseThrow(
+                            () -> new ReviewLikeNotFoundException());
 
-        return reviewLikeMapper.toDto(reviewLike);
+            Review review = reviewRepository.findById(reviewId)
+                    .orElseThrow(
+                            () -> new ReviewNotFoundException(reviewId));
+
+            if (reviewLike.isLiked()){
+                // 좋아요 상태가 true 라면
+                reviewLike.updateLike(false);
+                review.updateLikeCount(review.getLikeCount() - 1);
+            }
+            else{
+                // 좋아요가 false 라면
+                reviewLike.updateLike(true);
+                review.updateLikeCount(review.getLikeCount() + 1);
+            }
+
+            reviewLikeRepository.save(reviewLike);
+            reviewRepository.save(review);
+
+            return reviewLikeMapper.toDto(reviewLike);
+        }
     }
 }
