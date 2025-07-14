@@ -20,77 +20,77 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Book {
 
-  @Id
-  @Column(name = "id", nullable = false)
-  @GeneratedValue(strategy = GenerationType.UUID)
-  private UUID id;
+    @Id
+    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+    @Setter
+    @Column(name = "title", nullable = false, length = 255)
+    private String title;
+    @Setter
+    @Column(name = "author", nullable = false, length = 100)
+    private String author;
+    @Setter
+    @Column(name = "description", columnDefinition = "TEXT", nullable = false, length = Integer.MAX_VALUE)
+    private String description;
+    @Setter
+    @Column(name = "publisher", nullable = false, length = 100)
+    private String publisher;
+    @Setter
+    @Column(name = "published_date", nullable = false)
+    private LocalDate publishedDate;
 
-  @Column(name = "title", nullable = false, length = 255)
-  private String title;
+    @Setter
+    @Column(name = "isbn", length = 13)
+    private String isbn;
 
-  @Column(name = "author", nullable = false, length = 100)
-  private String author;
+    @Setter
+    @Column(name = "thumbnail_url", columnDefinition = "TEXT")
+    private String thumbnailUrl;
 
-  @Column(name = "description", columnDefinition = "TEXT", nullable = false, length = Integer.MAX_VALUE)
-  private String description;
+    @Setter
+    @Column(name = "review_count", nullable = false)
+    private Integer reviewCount;
 
-  @Column(name = "publisher", nullable = false, length = 100)
-  private String publisher;
+    @Setter
+    @Column(name = "rating", nullable = false)
+    private Float rating;
 
-  @Column(name = "published_date", nullable = false)
-  private LocalDate publishedDate;
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
 
-  @Setter
-  @Column(name = "isbn", length = 13)
-  private String isbn;
+    @Column(name = "updated_at")
+    private Instant updatedAt;
 
-  @Setter
-  @Column(name = "thumbnail_url", columnDefinition = "TEXT")
-  private String thumbnailUrl;
+    @Setter
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
 
-  @Setter
-  @Column(name = "review_count", nullable = false)
-  private Integer reviewCount;
+    public Book(String title, String author, String description, String publisher, LocalDate publishedDate) {
+        this.title = title;
+        this.author = author;
+        this.description = description;
+        this.publisher = publisher;
+        this.publishedDate = publishedDate;
+        this.rating = 0F;
+        this.reviewCount = 0;
+        this.createdAt = Instant.now();
+    }
 
-  @Setter
-  @Column(name = "rating", nullable = false)
-  private Float rating;
-
-  @Column(name = "created_at", nullable = false)
-  private Instant createdAt;
-
-  @Column(name = "updated_at")
-  private Instant updatedAt;
-
-  @Setter
-  @Column(name = "is_deleted", nullable = false)
-  private Boolean isDeleted = false;
-
-  public Book(String title, String author, String description, String publisher, LocalDate publishedDate) {
-    this.title = title;
-    this.author = author;
-    this.description = description;
-    this.publisher = publisher;
-    this.publishedDate = publishedDate;
-    this.rating = 0F;
-    this.reviewCount = 0;
-    this.createdAt = Instant.now();
-  }
-
-  public BookDto toDto(){
-    return new BookDto(
-        this.id,
-        this.title,
-        this.author,
-        this.description,
-        this.publisher,
-        this.publishedDate,
-        this.isbn,
-        this.thumbnailUrl,
-        this.reviewCount,
-        this.rating,
-        this.createdAt,
-        this.updatedAt
-    );
-  }
+    public BookDto toDto(){
+        return new BookDto(
+            this.id,
+            this.title,
+            this.author,
+            this.description,
+            this.publisher,
+            this.publishedDate,
+            this.isbn,
+            this.thumbnailUrl,
+            this.reviewCount,
+            this.rating,
+            this.createdAt,
+            this.updatedAt
+        );
+    }
 }
