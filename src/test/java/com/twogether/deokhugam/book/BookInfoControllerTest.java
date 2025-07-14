@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.twogether.deokhugam.apiclient.NaverBookClient;
 import com.twogether.deokhugam.book.controller.BookInfoController;
 import com.twogether.deokhugam.book.dto.NaverBookDto;
 import java.time.LocalDate;
@@ -46,7 +47,7 @@ class BookInfoControllerTest {
     mockMvc.perform(get("/api/books/info")
             .header("X-Naver-Client-Id", "apiId")
             .header("X-Naver-Client-Secret", "secretkey")
-            .param("query", isbn)
+            .param("isbn", isbn)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.title").value("더쿠의 심리학"))
