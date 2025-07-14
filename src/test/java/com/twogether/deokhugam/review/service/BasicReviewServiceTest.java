@@ -23,7 +23,6 @@ import com.twogether.deokhugam.review.repository.ReviewLikeRepository;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
 import com.twogether.deokhugam.user.entity.User;
 import com.twogether.deokhugam.user.repository.UserRepository;
-import java.lang.reflect.Constructor;
 import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -69,6 +68,7 @@ public class BasicReviewServiceTest {
     private Book testBook;
     private User testUser;
     private Review testReview;
+    private ReviewLike testReviewLike;
 
     @BeforeEach
     void setup() {
@@ -107,6 +107,12 @@ public class BasicReviewServiceTest {
                 "재밌는 책입니다.",
                 3
         );
+
+        testReviewLike = new ReviewLike(
+                testReview,
+                testUser,
+                true
+        );
     }
 
     @Test
@@ -115,6 +121,7 @@ public class BasicReviewServiceTest {
         // Mock 객체
         Book mockBook = mock(Book.class);
         User mockUser = mock(User.class);
+        ReviewLike mockReviewLike = mock(ReviewLike.class);
         ReviewDto expectedDto = mock(ReviewDto.class);
 
         Review review = new Review(mockBook, mockUser, "재밌는 책이다.", 4);
@@ -123,6 +130,7 @@ public class BasicReviewServiceTest {
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(mockBook));
         when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
         when(reviewRepository.save(any(Review.class))).thenReturn(review);
+        when(reviewLikeRepository.save(any(ReviewLike.class))).thenReturn(mockReviewLike);
         when(reviewMapper.toDto(any(Review.class))).thenReturn(expectedDto);
 
         // When
@@ -131,6 +139,7 @@ public class BasicReviewServiceTest {
         // Then
         assertEquals(expectedDto, result);
         verify(reviewRepository).save(any(Review.class));
+        verify(reviewLikeRepository).save(any(ReviewLike.class));
     }
 
     @Test
@@ -182,28 +191,45 @@ public class BasicReviewServiceTest {
     }
 
     @Nested
-    @DisplayName("리뷰 상세 조회 테스트")
+    @DisplayName("리뷰 조회 테스트")
     class ReadReviewTest {
 
         /**
-         * 리뷰 상세 기능에 대한 테스트 - RED 단계
+         * 리뷰 상세 기능에 대한 테스트 - refactor 단계
          * 아직 상세 조회 메서드가 존재하지 않으므로 컴파일 에러 발생
          */
         @Test
-        @DisplayName("id로 리뷰를 조회하면 해당하는 리뷰를 반환해야 한다.")
+        @DisplayName("id로 리뷰를 조회하면 해당하는 리뷰를 반환해야 한다. - 리뷰 상세 조회")
         void shouldReturnReview_whenGivenValidId() {
 
             // Given
-            Review mockReview = mock(Review.class);
-            ReviewDto expectedDto = mock(ReviewDto.class);
+            testReview.updateLikeCount(5L); // 좋아요 수를 예시로 세팅
 
-            when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(mockReview));
-            when(reviewMapper.toDto(mockReview)).thenReturn(expectedDto);
+            // 기대하는 Dto
+            ReviewDto expectedDto = new ReviewDto(
+                    testReview.getId(),
+                    testBook.getId(),
+                    testBook.getTitle(),
+                    testBook.getThumbnailUrl(),
+                    testUser.getId(),
+                    testUser.getNickname(),
+                    testReview.getContent(),
+                    testReview.getRating(),
+                    testReview.getLikeCount(),
+                    testReview.getCommentCount(),
+                    true, // likedByMe
+                    testReview.getCreatedAt(),
+                    testReview.getUpdatedAt()
+            );
+
+            when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(testReview));
+            when(reviewLikeRepository.findByUserIdAndReviewId(userId, reviewId)).thenReturn(Optional.of(testReviewLike));
 
             // When
-            ReviewDto result = basicReviewService.findById(reviewId);
+            ReviewDto result = basicReviewService.findById(reviewId, userId);
 
             // Then
+            assertEquals(expectedDto.likedByMe(), result.likedByMe());
             assertEquals(expectedDto, result);
         }
     }
@@ -271,5 +297,7 @@ public class BasicReviewServiceTest {
         verify(reviewLikeRepository).save(reviewLike);
         verify(reviewRepository).save(testReview);
     }
+
+
 
 }
