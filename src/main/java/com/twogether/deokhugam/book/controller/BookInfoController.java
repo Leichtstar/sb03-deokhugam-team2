@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/books")
+@RequestMapping("/api/books/info")
 @RequiredArgsConstructor
 public class BookInfoController {
 
     private final NaverBookClient naverBookClient;
 
-    @GetMapping("/info")
+    @GetMapping
     public ResponseEntity<NaverBookDto> getBookInfo(@RequestParam("isbn") String isbn) {
         NaverBookDto dto = naverBookClient.fetchInfoByIsbn(isbn);
         if (dto == null) {
