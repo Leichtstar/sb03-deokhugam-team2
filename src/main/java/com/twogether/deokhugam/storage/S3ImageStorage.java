@@ -21,6 +21,9 @@ public class S3ImageStorage {
     @Value("${AWS_S3_BUCKET}")
     private String bucketName;
 
+    @Value("${AWS_S3_REGION}")
+    private String region;
+
     public S3ImageStorage(S3Client s3Client) {
         this.s3Client = s3Client;
     }
@@ -141,6 +144,6 @@ public class S3ImageStorage {
     private String generatePublicUrl(String s3Key) {
         // S3 공개 URL 형태
         // https://버킷명.s3.리전.amazonaws.com/파일경로
-        return String.format("https://%s.s3.ap-northeast-2.amazonaws.com/%s", bucketName, s3Key);
+        return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, region, s3Key);
     }
 }
