@@ -71,14 +71,32 @@ public class BasicReviewService implements ReviewService{
     // 리뷰 상세 조회
     @Override
     @Transactional(readOnly = true)
-    public ReviewDto findById(UUID reviewId){
+    public ReviewDto findById(UUID reviewId, UUID requestUserId){
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(
                         () -> new ReviewNotFoundException(reviewId));
 
+        boolean likeByMe = reviewLikeRepository.findByUserIdAndReviewId(requestUserId, reviewId)
+                    .map(ReviewLike::isLiked)
+                    .orElse(false);
+
         log.info("리뷰 조회 완료");
 
-        return reviewMapper.toDto(review);
+        return new ReviewDto(
+                review.getId(),
+                review.getBook().getId(),
+                review.getBookTitle(),
+                review.getBookThumbnailUrl(),
+                review.getUser().getId(),
+                review.getUserNickName(),
+                review.getContent(),
+                review.getRating(),
+                review.getLikeCount(),
+                review.getCommentCount(),
+                likeByMe,
+                review.getCreatedAt(),
+                review.getUpdatedAt()
+        );
     }
 
     // 리뷰 좋아요 기능

@@ -11,7 +11,7 @@ public interface ReviewService {
     ReviewDto create(ReviewCreateRequest request);
 
     // 리뷰 상세 정보 조회
-    ReviewDto findById(UUID reviewId);
+    ReviewDto findById(UUID reviewId, UUID requestUserId);
 
     // 리뷰 좋아요 기능
     ReviewLikeDto reviewLike(UUID reviewId, UUID userId);
