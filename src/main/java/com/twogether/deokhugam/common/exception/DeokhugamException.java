@@ -1,6 +1,7 @@
 package com.twogether.deokhugam.common.exception;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
 
@@ -18,7 +19,7 @@ public class DeokhugamException extends RuntimeException {
         super(errorCode.getMessage());
         this.timestamp = Instant.now();
         this.errorCode = errorCode;
-        this.details = Map.of();
+        this.details = new HashMap<>();
     }
 
     /**
@@ -28,7 +29,7 @@ public class DeokhugamException extends RuntimeException {
         super(errorCode.getMessage());
         this.timestamp = Instant.now();
         this.errorCode = errorCode;
-        this.details = details != null ? Map.copyOf(details) : Map.of();
+        this.details = details != null ? new HashMap<>(details) : new HashMap<>();
     }
 
     /**
@@ -38,7 +39,10 @@ public class DeokhugamException extends RuntimeException {
         super(errorCode.getMessage(), cause);
         this.timestamp = Instant.now();
         this.errorCode = errorCode;
-        this.details = Map.of();
+        this.details = new HashMap<>();
     }
 
+    public void addDetail(String key, Object value) {
+        this.details.put(key, value);
+    }
 }
