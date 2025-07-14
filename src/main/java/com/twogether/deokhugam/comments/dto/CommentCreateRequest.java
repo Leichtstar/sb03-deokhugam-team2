@@ -1,8 +1,13 @@
 package com.twogether.deokhugam.comments.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import java.util.UUID;
 
 public record CommentCreateRequest(
-    UUID reviewId,
-    String content
+    @NotNull(message = "userId는 필수입니다.") UUID userId,
+    @NotNull(message = "reviewId는 필수입니다.") UUID reviewId,
+    @NotBlank(message = "내용은 비어 있을 수 없습니다.") @Size(max = 200, message = "내용은 200자를 초과할 수 없습니다.") String content
 ) {}
