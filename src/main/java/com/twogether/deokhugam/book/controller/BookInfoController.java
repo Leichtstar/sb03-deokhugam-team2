@@ -18,6 +18,9 @@ public class BookInfoController {
 
     @GetMapping
     public ResponseEntity<NaverBookDto> getBookInfo(@RequestParam("isbn") String isbn) {
+        if (!isbn.matches("\\d{1,13}")) {
+            throw new IllegalArgumentException("ISBN은 최대 13자리의 숫자만 가능합니다.");
+        }
         NaverBookDto dto = naverBookClient.fetchInfoByIsbn(isbn);
         if (dto == null) {
             return ResponseEntity.notFound().build();

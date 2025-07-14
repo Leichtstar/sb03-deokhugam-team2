@@ -1,1 +1,31 @@
-spring.application.name=Deokhugam
+spring:
+  application:
+    name: Deokhugam
+  config:
+    import: optional:dotenv:.env
+  #DB 접속 정보
+  datasource:
+    url: jdbc:postgresql://localhost:5432/deokhugam
+    username: twogether
+    password: omega2503
+    driver-class-name: org.postgresql.Driver
+
+  #JPA설정
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
+        use_sql_comments: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+#naver:
+#  api:
+#    client-id: tPeuugLH4ksrELNGf7jX
+#    client-secret: ${NAVER_CLIENT_SECRET}
+
+logging:
+  level:
+    org.springframework.boot.context.config: DEBUG
