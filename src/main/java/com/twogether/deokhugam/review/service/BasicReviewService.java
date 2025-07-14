@@ -16,6 +16,7 @@ import com.twogether.deokhugam.review.repository.ReviewLikeRepository;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
 import com.twogether.deokhugam.user.entity.User;
 import com.twogether.deokhugam.user.repository.UserRepository;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -97,6 +98,13 @@ public class BasicReviewService implements ReviewService{
                 review.getCreatedAt(),
                 review.getUpdatedAt()
         );
+    }
+
+    // 리뷰 목록 조회
+    @Override
+    @Transactional(readOnly = true)
+    public List<Review> findReviews(String keyword) {
+        return reviewRepository.findByFilter(keyword);
     }
 
     // 리뷰 좋아요 기능

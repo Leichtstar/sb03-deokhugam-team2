@@ -1,6 +1,7 @@
 package com.twogether.deokhugam.review.repository;
 
 import com.twogether.deokhugam.review.entity.Review;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -9,4 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface ReviewRepository extends JpaRepository<Review, UUID> {
 
     boolean existsByUserIdAndBookId(UUID userId, UUID bookId);
+
+    List<Review> findByFilter(String keyword);
 }
