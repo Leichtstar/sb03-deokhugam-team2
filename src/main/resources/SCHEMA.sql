@@ -3,6 +3,7 @@
 -- CREATE USER twogether WITH PASSWORD 'omega2503';
 -- GRANT ALL PRIVILEGES ON DATABASE deokhugam TO twogether;
 -- create schema if not exists deokhugam authorization twogether;
+-- ALTER ROLE twogether SET search_path TO deokhugam;
 
 -- 테이블 초기화
 DROP TABLE IF EXISTS books CASCADE;
@@ -43,6 +44,7 @@ CREATE TABLE users
     password   varchar(50)              NOT NULL,
     is_deleted boolean                  NOT NULL
 );
+
 -- 리뷰 테이블
 CREATE TABLE reviews
 (
@@ -50,8 +52,8 @@ CREATE TABLE reviews
     book_id UUID                        NOT NULL,
     user_id UUID                        NOT NULL,
 
-    book_title VARCHAR(100)             NOT NULL,
-    book_thumbnail_url VARCHAR(255),
+    book_title VARCHAR(255)             NOT NULL,
+    book_thumbnail_url TEXT,
     user_nickname VARCHAR(50)           NOT NULL,
 
     content TEXT                        NOT NULL,
@@ -66,6 +68,11 @@ CREATE TABLE reviews
     CONSTRAINT fk_reviews_book_id FOREIGN KEY (book_id) REFERENCES books (id) ON DELETE CASCADE,
     CONSTRAINT fk_reviews_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
+
+-- Partial Unique Index 추가
+CREATE UNIQUE INDEX uq_reviews_book_user_partial
+    ON reviews (book_id, user_id)
+    WHERE is_deleted = FALSE;
 
 -- 리뷰_좋아요 테이블
 CREATE TABLE review_like
