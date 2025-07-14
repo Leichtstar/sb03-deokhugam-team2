@@ -56,8 +56,11 @@ public class NaverBookClientImpl implements NaverBookClient {
                     NaverBookSearchResponse.class
                 );
 
-                List<NaverBookItem> items = response.getBody().items();
-                if (items == null || items.isEmpty()) return null;
+                NaverBookSearchResponse body = response.getBody();
+                if (body == null || body.items() == null || body.items().isEmpty()) {
+                    return null;
+                }
+                List<NaverBookItem> items = body.items();
 
                 var item = items.get(0);
                 return new NaverBookDto(
