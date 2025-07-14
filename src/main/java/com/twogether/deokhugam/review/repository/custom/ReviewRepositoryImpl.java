@@ -27,7 +27,7 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
           FROM Review r
           WHERE r.createdAt >= :start AND r.createdAt < :end
           GROUP BY r.book.id, r.book.title, r.book.author, r.book.thumbnailUrl
-          ORDER BY COUNT(r) DESC, AVG(r.rating) DESC
+          ORDER BY COUNT(r) DESC, COALESCE(AVG(r.rating), 0) DESC
         """, BookScoreDto.class)
         .setParameter("start", start)
         .setParameter("end", end)
@@ -37,18 +37,18 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
     @Override
     public List<BookScoreDto> calculateBookScoresAllTime() {
         String jpql = """
-        SELECT new com.twogether.deokhugam.dashboard.dto.BookScoreDto(
-            r.book.id,
-            r.book.title,
-            r.book.author,
-            r.book.thumbnailUrl,
-            COUNT(r),
-            AVG(r.rating)
-        )
-        FROM Review r
-        GROUP BY r.book.id, r.book.title, r.book.author, r.book.thumbnailUrl
-        ORDER BY COUNT(r) DESC, AVG(r.rating) DESC
-    """;
+    SELECT new com.twogether.deokhugam.dashboard.dto.BookScoreDto(
+        r.book.id,
+        r.book.title,
+        r.book.author,
+        r.book.thumbnailUrl,
+        COUNT(r),
+        COALESCE(AVG(r.rating), 0)
+    )
+    FROM Review r
+    GROUP BY r.book.id, r.book.title, r.book.author, r.book.thumbnailUrl
+    ORDER BY COUNT(r) DESC, COALESCE(AVG(r.rating), 0) DESC
+""";
 
         return em.createQuery(jpql, BookScoreDto.class).getResultList();
     }
