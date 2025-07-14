@@ -41,4 +41,7 @@ public class DeokhugamException extends RuntimeException {
         this.details = Map.of();
     }
 
+    public void addDetail(String key, Object value) {
+        this.details.put(key, value);
+    }
 }
