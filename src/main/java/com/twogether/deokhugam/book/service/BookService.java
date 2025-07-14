@@ -10,7 +10,7 @@ public interface BookService {
     BookDto registerBook(BookCreateRequest request);
     BookDto getBookbyId(UUID bookId);
     List<BookDto> getAllBooks();
-    BookDto modifyBook(UUID bookId, BookUpdateRequest request);
+    BookDto updateBook(UUID bookId, BookUpdateRequest request);
     void deleteBook(UUID bookId);
     void deleteBookHard(UUID bookId);
 }

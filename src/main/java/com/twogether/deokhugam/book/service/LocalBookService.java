@@ -34,7 +34,7 @@ public class LocalBookService implements BookService {
 
     @Override
     public List<BookDto> getAllBooks() {
-        return bookRepository.findAll().stream().map(Book::toDto).toList();
+        return bookRepository.findAll().stream().filter(book -> !book.getIsDeleted()).map(Book::toDto).toList();
     }
 
     @Override
@@ -45,7 +45,7 @@ public class LocalBookService implements BookService {
     }
 
     @Override
-    public BookDto modifyBook(UUID bookId, BookUpdateRequest request) {
+    public BookDto updateBook(UUID bookId, BookUpdateRequest request) {
         Book targetbook = bookRepository.findById(bookId)
             .orElseThrow(() -> new NoSuchElementException("Book not found."));
 
