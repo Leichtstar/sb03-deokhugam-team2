@@ -12,13 +12,19 @@ import static org.mockito.Mockito.when;
 import com.twogether.deokhugam.book.entity.Book;
 import com.twogether.deokhugam.book.repository.BookRepository;
 import com.twogether.deokhugam.review.dto.ReviewDto;
+import com.twogether.deokhugam.review.dto.ReviewLikeDto;
 import com.twogether.deokhugam.review.dto.request.ReviewCreateRequest;
 import com.twogether.deokhugam.review.entity.Review;
+import com.twogether.deokhugam.review.entity.ReviewLike;
 import com.twogether.deokhugam.review.exception.ReviewExistException;
+import com.twogether.deokhugam.review.mapper.ReviewLikeMapper;
 import com.twogether.deokhugam.review.mapper.ReviewMapper;
+import com.twogether.deokhugam.review.repository.ReviewLikeRepository;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
 import com.twogether.deokhugam.user.entity.User;
 import com.twogether.deokhugam.user.repository.UserRepository;
+import java.lang.reflect.Constructor;
+import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,14 +51,24 @@ public class BasicReviewServiceTest {
     private BookRepository bookRepository;
 
     @Mock
+    private ReviewLikeRepository reviewLikeRepository;
+
+    @Mock
     private ReviewMapper reviewMapper;
+
+    @Mock
+    private ReviewLikeMapper reviewLikeMapper;
 
    @InjectMocks
    private BasicReviewService basicReviewService;
 
     private UUID bookId;
     private UUID userId;
+    private UUID reviewId;
     private ReviewCreateRequest reviewCreateRequest;
+    private Book testBook;
+    private User testUser;
+    private Review testReview;
 
     @BeforeEach
     void setup() {
@@ -65,9 +81,31 @@ public class BasicReviewServiceTest {
 
         bookId = UUID.randomUUID();
         userId = UUID.randomUUID();
+        reviewId = UUID.randomUUID();
 
         reviewCreateRequest = new ReviewCreateRequest(
                 bookId, userId, "재밌는 책이다.", 4
+        );
+
+        testBook = new Book(
+        "더쿠의 심리학",
+        "박인규",
+        "더쿠에 대한 심도깊은 해설",
+        "이북리더즈",
+        LocalDate.of(1989, 5, 12)
+        );
+
+        testUser = new User(
+                "test@test.com",
+                "테스트",
+                "Asdf1234!"
+        );
+
+        testReview = new Review(
+                testBook,
+                testUser,
+                "재밌는 책입니다.",
+                3
         );
     }
 
@@ -156,7 +194,6 @@ public class BasicReviewServiceTest {
         void shouldReturnReview_whenGivenValidId() {
 
             // Given
-            UUID reviewId = UUID.randomUUID();
             Review mockReview = mock(Review.class);
             ReviewDto expectedDto = mock(ReviewDto.class);
 
@@ -169,6 +206,70 @@ public class BasicReviewServiceTest {
             // Then
             assertEquals(expectedDto, result);
         }
+    }
+
+    @Test
+    @DisplayName("리뷰 좋아요를 취소할 수 있어야 한다.")
+    void shouldUpdate_ReviewLike_Unlike(){
+        // Given
+        testReview.updateLikeCount(3L);
+
+        ReviewLike reviewLike = new ReviewLike(
+                testReview,
+                testUser,
+                true
+        );
+
+        ReviewLikeDto expectedDto = new ReviewLikeDto(
+                reviewId,
+                userId,
+                false
+        );
+
+        when(reviewLikeRepository.findByUserIdAndReviewId(userId, reviewId)).thenReturn(Optional.of(reviewLike));
+        when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(testReview));
+        when(reviewLikeMapper.toDto(reviewLike)).thenReturn(expectedDto);
+
+        // When
+        ReviewLikeDto result = basicReviewService.reviewLike(reviewId, userId);
+
+        // Then
+        assertEquals(false, result.liked());
+        assertEquals(2L, testReview.getLikeCount());
+        verify(reviewLikeRepository).save(reviewLike);
+        verify(reviewRepository).save(testReview);
+    }
+
+    @Test
+    @DisplayName("리뷰 좋아요를 추가할 수 있어야 한다.")
+    void shouldUpdate_ReviewLike_like(){
+        // Given
+        testReview.updateLikeCount(3L);
+
+        ReviewLike reviewLike = new ReviewLike(
+                testReview,
+                testUser,
+                false
+        );
+
+        ReviewLikeDto expectedDto = new ReviewLikeDto(
+                reviewId,
+                userId,
+                true
+        );
+
+        when(reviewLikeRepository.findByUserIdAndReviewId(userId, reviewId)).thenReturn(Optional.of(reviewLike));
+        when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(testReview));
+        when(reviewLikeMapper.toDto(reviewLike)).thenReturn(expectedDto);
+
+        // When
+        ReviewLikeDto result = basicReviewService.reviewLike(reviewId, userId);
+
+        // Then
+        assertEquals(true, result.liked());
+        assertEquals(4L, testReview.getLikeCount());
+        verify(reviewLikeRepository).save(reviewLike);
+        verify(reviewRepository).save(testReview);
     }
 
 }
