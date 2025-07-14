@@ -5,10 +5,16 @@ import com.twogether.deokhugam.comments.dto.CommentResponse;
 import com.twogether.deokhugam.comments.entity.Comment;
 import com.twogether.deokhugam.comments.mapper.CommentMapper;
 import com.twogether.deokhugam.comments.repository.CommentRepository;
+import com.twogether.deokhugam.review.entity.Review;
+import com.twogether.deokhugam.review.repository.ReviewRepository;
+import com.twogether.deokhugam.user.entity.User;
+import com.twogether.deokhugam.user.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+
+import java.util.NoSuchElementException;
 
 /**
  * 댓글 도메인의 비즈니스 로직을 담당.
@@ -20,6 +26,8 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
+    private final ReviewRepository reviewRepository;
+    private final UserRepository userRepository;
 
     /**
      * 댓글 등록.
@@ -28,8 +36,11 @@ public class CommentService {
      * @return 등록 결과 DTO
      */
     public CommentResponse createComment(@Valid CommentCreateRequest request) {
-        Comment entity = commentMapper.toEntity(request);
-        // ▶ userId, reviewId 연관 로딩은 추후 도메인 완성 시점에 교체 예정
+        Review review = reviewRepository.findById(request.reviewId())
+            .orElseThrow(() -> new NoSuchElementException("해당 리뷰가 없습니다."));
+        User user = userRepository.findById(request.userId())
+            .orElseThrow(() -> new NoSuchElementException("해당 유저가 없습니다."));
+        Comment entity = new Comment(user, review, request.content());
         Comment saved = commentRepository.save(entity);
         return commentMapper.toResponse(saved);
     }
