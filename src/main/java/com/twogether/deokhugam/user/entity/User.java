@@ -41,12 +41,11 @@ public class User {
     private Instant updatedAt;
 
     @Column(nullable = false)
-    private Boolean isDeleted;
+    private Boolean isDeleted = false;
 
     public User(String email, String nickname, String password) {
         this.email = email;
         this.nickname = nickname;
         this.password = password;
-        this.isDeleted = false;
     }
 }
