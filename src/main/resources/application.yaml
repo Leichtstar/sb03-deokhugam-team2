@@ -1,1 +1,3 @@
-spring.application.name=Deokhugam
+spring:
+  profiles:
+    active: dev

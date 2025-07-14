@@ -1,0 +1,149 @@
+package com.twogether.deokhugam.storage;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectResponse;
+
+@Slf4j
+@Component
+public class S3ImageStorage {
+    private final S3Client s3Client;
+
+    @Value("${AWS_S3_BUCKET}")
+    private String bucketName;
+
+    @Value("${AWS_S3_REGION}")
+    private String region;
+
+    public S3ImageStorage(S3Client s3Client) {
+        this.s3Client = s3Client;
+    }
+
+    /**
+     * 이미지 파일을 S3에 업로드
+     * @param imageFile 업로드할 이미지 파일
+     * @param folderPath S3 내 저장 경로 (예: "thumbnail/")
+     * @return S3에 저장된 이미지 URL
+     */
+    public String uploadImage(MultipartFile imageFile, String folderPath) throws IOException {
+        log.info("이미지 업로드 시작 - 파일명: {}, 크기: {}바이트",
+            imageFile.getOriginalFilename(), imageFile.getSize());
+
+        // 파일 유효성 검증
+        validateImageFile(imageFile);
+
+        // 고유한 파일명 생성 (UUID + 타임스탬프)
+        String uniqueFileName = generateUniqueFileName(imageFile.getOriginalFilename());
+
+        // S3 저장 경로 생성 (폴더경로 + 파일명)
+        String s3Key = folderPath + uniqueFileName;
+
+        // S3 업로드 요청 객체 생성
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+            .bucket(bucketName)
+            .key(s3Key)
+            .contentType(imageFile.getContentType())
+            .contentLength(imageFile.getSize())
+            .build();
+
+        try {
+            // S3에 파일 업로드 실행
+            PutObjectResponse response = s3Client.putObject(
+                putObjectRequest,
+                RequestBody.fromBytes(imageFile.getBytes())
+            );
+
+            // 업로드된 파일의 공개 URL 생성
+            String publicUrl = generatePublicUrl(s3Key);
+
+            log.info("이미지 업로드 완료 - S3 Key: {}, ETag: {}", s3Key, response.eTag());
+            return publicUrl;
+
+        } catch (Exception e) {
+            log.error("이미지 업로드 실패 - 파일명: {}, 오류: {}", imageFile.getOriginalFilename(),
+                e.getMessage());
+            throw new RuntimeException("이미지 업로드 중 오류가 발생했습니다.", e);
+        }
+    }
+
+    /**
+     * 이미지 파일 유효성 검증
+     */
+    private void validateImageFile(MultipartFile file) {
+        // 파일이 비어있는지 확인
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("업로드할 이미지 파일이 없습니다.");
+        }
+
+        // 파일 타입이 이미지인지 확인
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new IllegalArgumentException("이미지 파일만 업로드 가능합니다. 현재 타입: " + contentType);
+        }
+
+        // 파일 크기 제한 (5MB)
+        long maxSizeInBytes = 5 * 1024 * 1024;
+        if (file.getSize() > maxSizeInBytes) {
+            throw new IllegalArgumentException("이미지 파일 크기는 5MB를 초과할 수 없습니다. 현재 크기: " + file.getSize() + "바이트");
+        }
+
+        // 지원하는 이미지 형식인지 확인
+        String[] supportedTypes = {"image/jpeg", "image/jpg", "image/png", "image/webp"};
+        boolean isSupported = false;
+        for (String type : supportedTypes) {
+            if (type.equals(contentType)) {
+                isSupported = true;
+                break;
+            }
+        }
+
+        if (!isSupported) {
+            throw new IllegalArgumentException("지원하지 않는 이미지 형식입니다. 지원 형식: JPEG, JPG, PNG, WebP");
+        }
+    }
+
+    /**
+     * 고유한 파일명 생성 (중복 방지)
+     */
+    private String generateUniqueFileName(String originalFileName) {
+        // 파일 확장자 추출
+        String extension = getFileExtension(originalFileName);
+
+        // 현재 시간을 문자열로 변환 (예: 20250711_103022)
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+
+        // UUID의 앞 8자리만 사용 (너무 길지 않게)
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+
+        // 최종 파일명: uuid_timestamp.확장자
+        return String.format("%s_%s.%s", uuid, timestamp, extension);
+    }
+
+    /**
+     * 파일 확장자 추출
+     */
+    private String getFileExtension(String fileName) {
+        if (fileName == null || !fileName.contains(".")) {
+            return "jpg";  // 기본 확장자
+        }
+        return fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+    }
+
+    /**
+     * S3 공개 URL 생성
+     */
+    private String generatePublicUrl(String s3Key) {
+        // S3 공개 URL 형태
+        // https://버킷명.s3.리전.amazonaws.com/파일경로
+        return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, region, s3Key);
+    }
+}

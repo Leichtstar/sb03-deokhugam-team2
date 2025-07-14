@@ -15,7 +15,6 @@ public record ReviewDto(
         long likeCount,
         long commentCount,
         boolean likedByMe,
-        boolean isDeleted,
         Instant createdAt,
         Instant updatedAt
 ) {}

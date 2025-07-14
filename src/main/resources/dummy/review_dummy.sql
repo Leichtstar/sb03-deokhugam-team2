@@ -1,0 +1,118 @@
+INSERT INTO reviews (
+    id,
+    book_id,
+    user_id,
+    book_title,
+    book_thumbnail_url,
+    user_nickname,
+    content,
+    rating,
+    like_count,
+    comment_count,
+    liked_by_me,
+    created_at,
+    updated_at,
+    is_deleted
+) VALUES
+-- 1
+(
+    '11111111-1111-1111-1111-111111111111',
+    '010121af-666e-419a-9eb7-e04829391323',
+    '1e3f6a5e-1a2d-4f2b-9c1f-0023a0c1d111',
+    'Testing with Junit',
+    NULL,
+    '김지우',
+    'JUnit을 처음 접하는 사람에게 추천하는 책입니다.',
+    4.0,
+    2,
+    1,
+    true,
+    '2025-07-10T10:00:00Z',
+    '2025-07-10T12:00:00Z',
+    false
+),
+-- 2
+(
+    '22222222-2222-2222-2222-222222222222',
+    '8a53eb25-c201-4a48-85cf-d67048397013',
+    '2a4c6f9b-3e5d-4871-832b-93e6b3f2c222',
+    'Spring Security 3/e (스프링 시큐리티를 이용한 애플리케이션 보안)',
+    'https://sprint-sb-project.s3.ap-northeast-2.amazonaws.com/deokhugam/0bde4816-9bea-4822-afb4-bc206e1d6395?...',
+    '이민서',
+    '스프링 시큐리티에 대해 깊이 있게 이해할 수 있었습니다.',
+    5.0,
+    5,
+    3,
+    false,
+    '2025-07-11T15:30:00Z',
+    '2025-07-11T16:00:00Z',
+    false
+),
+-- 3
+(
+    '33333333-3333-3333-3333-333333333333',
+    'd22f26e3-0ac8-41f6-8754-635563bc4f2f',
+    '3b7d8a6e-7f2a-4e11-a8bc-2ac3c4d3d333',
+    'Spring Security 3.1',
+    'https://sprint-sb-project.s3.ap-northeast-2.amazonaws.com/deokhugam/9d87c50b-ac4b-42b6-bf60-43cf06ce01c0?...',
+    '박지수',
+    '실제 프로젝트에 적용하기는 어려운 부분이 있었어요.',
+    2.5,
+    1,
+    0,
+    true,
+    '2025-07-09T08:15:00Z',
+    '2025-07-09T08:16:00Z',
+    false
+),
+-- 4
+(
+    '44444444-4444-4444-4444-444444444444',
+    'e0419d9c-ac6f-4c4c-aabf-d4a4267e7df2',
+    '4c8e9b7f-9a3c-4f99-b123-1fa7d5e4e444',
+    'Securing Docker',
+    'https://sprint-sb-project.s3.ap-northeast-2.amazonaws.com/deokhugam/e0d420ed-14ef-4c95-a8b1-57d5856364ab?...',
+    '최현우',
+    '기본적인 개념 설명은 좋았지만 심화 내용은 부족합니다.',
+    3.0,
+    3,
+    2,
+    false,
+    '2025-07-12T14:20:00Z',
+    '2025-07-12T14:25:00Z',
+    false
+),
+-- 5
+(
+    '55555555-5555-5555-5555-555555555555',
+    '188e0242-9675-4cb7-b7ea-7db6d090316c',
+    '5d9fac8a-2b4e-4e21-8421-9eb8f6f5f555',
+    'Practical 자바 유틸리티 (Git, 서브버전, 메이븐, 그레이들, JUnit, 트랙, 젠킨스, JMeter)',
+    NULL,
+    '정아라',
+    '실무에서 바로 써먹을 수 있는 정보가 많아서 유익했습니다.',
+    4.5,
+    7,
+    4,
+    true,
+    '2025-07-11T09:00:00Z',
+    '2025-07-11T09:05:00Z',
+    false
+),
+-- 6
+(
+    '66666666-6666-6666-6666-666666666666',
+    '867afa9d-494e-499c-b5ca-30dbf3281f77',
+    '6e10bd9b-3c5f-4a76-bb21-2cd9e7a6a666',
+    '자바 ORM 표준 JPA 프로그래밍 (스프링 데이터 예제 프로젝트로 배우는 전자정부 표준 데이터베이스 프레임워크)',
+    NULL,
+    '황민준',
+    'JPA에 대한 체계적인 설명이 돋보입니다.',
+    5.0,
+    8,
+    5,
+    true,
+    '2025-07-10T17:00:00Z',
+    '2025-07-10T17:10:00Z',
+    false
+);
