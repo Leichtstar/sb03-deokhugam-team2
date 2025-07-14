@@ -11,10 +11,10 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity
 @Table(name = "review_like")
-@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
+@Entity
 public class ReviewLike {
 
     @EmbeddedId
@@ -35,6 +35,10 @@ public class ReviewLike {
         this.reviewLikePK = new ReviewLikePK(review.getId(), user.getId());
         this.review = review;
         this.user = user;
+        this.liked = liked;
+    }
+
+    public void updateLike(boolean liked){
         this.liked = liked;
     }
 }
