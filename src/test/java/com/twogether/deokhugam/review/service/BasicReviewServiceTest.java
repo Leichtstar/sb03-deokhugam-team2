@@ -239,16 +239,16 @@ public class BasicReviewServiceTest {
         void shouldReturnReviewList_whenGivenValidFilter(){
 
             // 테스트용 검색어
-            String keyword = "더쿠";
+            String keyword = "더쿠감";
 
-            ReviewDto expectedDto1 = mock(ReviewDto.class);
-            ReviewDto expectedDto2 = mock(ReviewDto.class);
-            List<ReviewDto> expectedResult = List.of(expectedDto1, expectedDto2);
+            Review expectedReview1 = mock(Review.class);
+            Review expectedReview2 = mock(Review.class);
+            List<Review> expectedResult = List.of(expectedReview1, expectedReview2);
 
             when(reviewRepository.findByFilter(keyword)).thenReturn(expectedResult);
 
             // When
-            List<ReviewDto> result = basicReviewService.findReviews(keyword);
+            List<Review> result = basicReviewService.findReviews(keyword);
 
             // Then
             assertEquals(2, result.size());
