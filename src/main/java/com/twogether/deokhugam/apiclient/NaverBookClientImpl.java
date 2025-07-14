@@ -56,8 +56,11 @@ public class NaverBookClientImpl implements NaverBookClient {
                     NaverBookSearchResponse.class
                 );
 
-                List<NaverBookItem> items = response.getBody().items();
-                if (items == null || items.isEmpty()) return null;
+                NaverBookSearchResponse body = response.getBody();
+                if (body == null || body.items() == null || body.items().isEmpty()) {
+                    return null;
+                }
+                List<NaverBookItem> items = body.items();
 
                 var item = items.get(0);
                 return new NaverBookDto(
@@ -70,7 +73,7 @@ public class NaverBookClientImpl implements NaverBookClient {
                     downloadImageAsBase64(item.image())
                 );
             } catch (Exception e) {
-              System.err.println("Naver API 호출 실패: " + e.getMessage());
+              log.error("NaverApi 호출 실패: ISBN={}, 오류={}", isbn, e.getMessage());
               return null;
             }
     }
@@ -83,7 +86,7 @@ public class NaverBookClientImpl implements NaverBookClient {
                 return Base64.getEncoder().encodeToString(response.getBody());
             }
         } catch (Exception e) {
-            log.warn("이미지 다운로드 실패: IRL={}, 오류={}",imageUrl,e.getMessage());
+            log.warn("이미지 다운로드 실패: URL={}, 오류={}",imageUrl,e.getMessage());
         }
 
       return null;
