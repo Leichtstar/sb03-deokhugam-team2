@@ -14,10 +14,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -27,33 +29,29 @@ public class PopularBookBatchService {
 
     private final PopularBookRankingRepository rankingRepository;
     private final ReviewRepository reviewRepository;
+
     @PersistenceContext
     private EntityManager em;
+
+    @Value("${batch.ranking.batch-size:1000}")
+    private int batchSize;
+
+    public void calculateAndSaveDailyRanking() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime start = now.withHour(0).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime end = now.withHour(23).withMinute(59).withSecond(59).withNano(999_999_999);
+        calculateAndSaveRanking(RankingPeriod.DAILY, start, end);
+    }
 
     @Transactional
     public void calculateAndSaveRanking(RankingPeriod period, LocalDateTime start, LocalDateTime end) {
         log.info("[{}] 인기 도서 랭킹 계산 시작 - 기간: {} ~ {}", period.name(), start, end);
 
         try {
+            rankingRepository.deleteByPeriod(period);
             List<BookScoreDto> bookScores = reviewRepository.calculateBookScores(start, end);
-
-            List<PopularBookRanking> rankings = bookScores.stream()
-                .map(dto -> {
-                    Book bookRef = em.getReference(Book.class, dto.bookId());
-                    LocalDateTime now = LocalDateTime.now();
-                    return PopularBookRanking.builder()
-                        .book(bookRef)
-                        .title(dto.title())
-                        .author(dto.author())
-                        .thumbnailUrl(dto.thumbnailUrl())
-                        .score(dto.calculateScore())
-                        .period(period)
-                        .createdAt(now)
-                        .build();
-                })
-                .toList();
-
-            rankingRepository.saveAll(rankings);
+            List<PopularBookRanking> rankings = createRankings(bookScores, period);
+            saveInBatch(rankings);
 
             log.info("[{}] 인기 도서 랭킹 저장 완료 - 총 {}건", period.name(), rankings.size());
         } catch (Exception e) {
@@ -67,30 +65,49 @@ public class PopularBookBatchService {
         log.info("[역대] 인기 도서 랭킹 계산 시작");
 
         try {
+            rankingRepository.deleteByPeriod(RankingPeriod.ALL_TIME);
+
             List<BookScoreDto> bookScores = reviewRepository.calculateBookScoresAllTime();
+            List<PopularBookRanking> rankings = createRankings(bookScores, RankingPeriod.ALL_TIME);
 
-            List<PopularBookRanking> rankings = bookScores.stream()
-                .map(dto -> {
-                    Book bookRef = em.getReference(Book.class, dto.bookId());
-                    LocalDateTime now = LocalDateTime.now();
-                    return PopularBookRanking.builder()
-                        .book(bookRef)
-                        .title(dto.title())
-                        .author(dto.author())
-                        .thumbnailUrl(dto.thumbnailUrl())
-                        .score(dto.calculateScore())
-                        .period(RankingPeriod.ALL_TIME)
-                        .createdAt(now)
-                        .build();
-                })
-                .toList();
-
-            rankingRepository.saveAll(rankings);
+            saveInBatch(rankings);
 
             log.info("[역대] 인기 도서 랭킹 저장 완료 - 총 {}건", rankings.size());
         } catch (Exception e) {
             log.error("[역대] 인기 도서 랭킹 계산 중 오류 발생", e);
             throw e;
+        }
+    }
+
+    private List<PopularBookRanking> createRankings(List<BookScoreDto> bookScores, RankingPeriod period) {
+        return bookScores.stream()
+            .map(dto -> {
+                Book bookRef = em.find(Book.class, dto.bookId());
+                if (bookRef == null) {
+                    log.warn("Book not found: {}", dto.bookId());
+                    return null;
+                }
+                return PopularBookRanking.builder()
+                    .book(bookRef)
+                    .title(dto.title())
+                    .author(dto.author())
+                    .thumbnailUrl(dto.thumbnailUrl())
+                    .score(dto.calculateScore())
+                    .period(period)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            })
+            .filter(Objects::nonNull)
+            .toList();
+    }
+
+    private void saveInBatch(List<PopularBookRanking> rankings) {
+        for (int i = 0; i < rankings.size(); i += batchSize) {
+            int end = Math.min(i + batchSize, rankings.size());
+            List<PopularBookRanking> batch = rankings.subList(i, end);
+            rankingRepository.saveAll(batch);
+            em.flush();
+            em.clear();
         }
     }
 }
