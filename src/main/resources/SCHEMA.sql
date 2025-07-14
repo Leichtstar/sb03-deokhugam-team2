@@ -39,9 +39,11 @@ CREATE TABLE books
 CREATE TABLE users
 (
     id         uuid                     PRIMARY KEY,
-    email      varchar(255) UNIQUE      NOT NULL,
-    nickname   varchar(50)              NOT NULL,
-    password   varchar(50)              NOT NULL,
+    email      varchar(100) UNIQUE      NOT NULL,
+    nickname   varchar(20) UNIQUE       NOT NULL,
+    password   varchar(20)              NOT NULL,
+    created_at TIMESTAMPZ               NOT NULL,
+    updated_at TIMESTAMPZ,
     is_deleted boolean                  NOT NULL
 );
 
@@ -105,7 +107,7 @@ CREATE TYPE ranking_period AS ENUM ('DAILY', 'WEEKLY', 'MONTHLY', 'ALL_TIME');
 -- 알림 테이블 (ON DELETE CASCADE)
 CREATE TABLE notifications (
     id UUID                             PRIMARY KEY,
-    content VARCHAR(255)                NOT NULL,
+    content VARCHAR(300)                NOT NULL,
     confirmed BOOLEAN                   NOT NULL,
     created_at TIMESTAMPTZ              NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ              NOT NULL DEFAULT now(),

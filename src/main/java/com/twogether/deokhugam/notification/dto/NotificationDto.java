@@ -1,4 +1,4 @@
-package com.twogether.deokhugam.notifications.dto;
+package com.twogether.deokhugam.notification.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;

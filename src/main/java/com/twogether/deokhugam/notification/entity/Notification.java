@@ -1,9 +1,10 @@
-package com.twogether.deokhugam.notifications.entity;
+package com.twogether.deokhugam.notification.entity;
 
+import com.twogether.deokhugam.review.entity.Review;
+import com.twogether.deokhugam.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -27,7 +28,7 @@ public class Notification {
     @Id
     private UUID id;
 
-    @Column(nullable = false, length = 255)
+    @Column(name = "content", length = 300, nullable = false)
     private String content;
 
     @Column(nullable = false)
@@ -39,10 +40,11 @@ public class Notification {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    // 추후 수정
-    @Column(name = "review_id", nullable = false)
-    private UUID reviewId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "review_id", nullable = false)
+    private Review review;
 
-    @Column(name = "user_id", nullable = false)
-    private UUID userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 }
