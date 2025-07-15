@@ -4,6 +4,7 @@ import com.twogether.deokhugam.user.dto.UserDto;
 import com.twogether.deokhugam.user.dto.UserLoginRequest;
 import com.twogether.deokhugam.user.dto.UserRegisterRequest;
 import com.twogether.deokhugam.user.dto.UserUpdateRequest;
+import com.twogether.deokhugam.user.exception.UserAccessDeniedException;
 import com.twogether.deokhugam.user.service.UserService;
 import jakarta.validation.Valid;
 import java.util.Optional;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -74,9 +76,31 @@ public class UserController {
     @PatchMapping(path = "/{userId}")
     public ResponseEntity<UserDto> update(
         @PathVariable("userId") UUID userId,
-        @RequestBody @Valid UserUpdateRequest userUpdateRequest
+        @RequestBody @Valid UserUpdateRequest userUpdateRequest,
+        @RequestHeader(value = "Deokhugam-Request-User-ID", required = false) String requestUserIdHeader
     ) {
-        log.info("사용자 수정 요청: id={}, request={}", userId, userUpdateRequest);
+        log.info("사용자 수정 요청: id={}, request={}, requestUserId={}", userId, userUpdateRequest, requestUserIdHeader);
+
+        // 헤더 존재 여부 검증
+        if (requestUserIdHeader == null || requestUserIdHeader.trim().isEmpty()) {
+            log.warn("사용자 수정 요청에서 필수 헤더 누락: userId={}", userId);
+            throw UserAccessDeniedException.missingUserIdHeader();
+        }
+
+        // 헤더 값 UUID 형식 검증
+        UUID requestUserId;
+        try {
+            requestUserId = UUID.fromString(requestUserIdHeader.trim());
+        } catch (IllegalArgumentException e) {
+            log.warn("잘못된 사용자 ID 형식: userId={}, headerValue={}", userId, requestUserIdHeader);
+            throw UserAccessDeniedException.invalidUserIdFormat(requestUserIdHeader);
+        }
+
+        // 요청자와 수정 대상이 동일한 사용자인지 검증
+        if (!requestUserId.equals(userId)) {
+            log.warn("사용자 수정 권한 없음: requestUserId={}, targetUserId={}", requestUserId, userId);
+            throw UserAccessDeniedException.userIdMismatch(requestUserId, userId);
+        }
 
         UserDto updatedUser = userService.update(userId, userUpdateRequest);
 
