@@ -2,7 +2,9 @@ package com.twogether.deokhugam.dashboard.dto.request;
 
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +14,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Setter
 public class PopularRankingSearchRequest {
 
+    @NotNull
     @Schema(
         description = "랭킹 기간 (DAILY, WEEKLY, MONTHLY, ALL_TIME)",
         example = "DAILY",
@@ -19,6 +22,7 @@ public class PopularRankingSearchRequest {
     )
     private RankingPeriod period = RankingPeriod.DAILY;
 
+    @NotNull
     @Schema(
         description = "정렬 방향 (ASC 또는 DESC)",
         example = "ASC",
@@ -44,6 +48,8 @@ public class PopularRankingSearchRequest {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime after;
 
+    @Min(1)
+    @Max(50)
     @Schema(
         description = "페이지 크기",
         example = "50",
