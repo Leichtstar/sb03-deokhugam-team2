@@ -15,4 +15,12 @@ public class CursorPageResponse<T> {
     private int size;
     private long totalElements;
     private boolean hasNext;
+
+    public CursorPageResponse(List<T> content, String nextCursor, LocalDateTime nextAfter, int size, boolean hasNext) {
+        this.content = content;
+        this.nextCursor = nextCursor;
+        this.nextAfter = nextAfter;
+        this.size = size;
+        this.hasNext = hasNext;
+    }
 }

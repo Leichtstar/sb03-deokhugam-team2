@@ -29,6 +29,14 @@ public class PopularRankingSearchRequest {
     @Schema(description = "정렬 기준 커서", example = "10")
     private String cursor;
 
+    public Integer parseCursor() {
+        try {
+            return (cursor == null || cursor.isBlank()) ? null : Integer.parseInt(cursor);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
     @Schema(
         description = "보조 커서(createdAt)",
         example = "2025-07-15T00:00:00"
