@@ -1,4 +1,4 @@
-package com.twogether.deokhugam.dashboard.dto;
+package com.twogether.deokhugam.dashboard.batch.model;
 
 import java.util.UUID;
 
