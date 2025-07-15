@@ -3,6 +3,7 @@ package com.twogether.deokhugam.user.service;
 import com.twogether.deokhugam.user.dto.UserDto;
 import com.twogether.deokhugam.user.dto.UserLoginRequest;
 import com.twogether.deokhugam.user.dto.UserRegisterRequest;
+import com.twogether.deokhugam.user.dto.UserUpdateRequest;
 import com.twogether.deokhugam.user.entity.User;
 import com.twogether.deokhugam.user.exception.EmailAlreadyExistsException;
 import com.twogether.deokhugam.user.exception.InvalidCredentialsException;
@@ -10,6 +11,7 @@ import com.twogether.deokhugam.user.exception.NicknameAlreadyExistsException;
 import com.twogether.deokhugam.user.exception.UserNotFoundException;
 import com.twogether.deokhugam.user.mapper.UserMapper;
 import com.twogether.deokhugam.user.repository.UserRepository;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -75,5 +77,29 @@ public class BasicUserService implements UserService {
             .orElseThrow(() -> UserNotFoundException.withId(userId));
         log.info("사용자 조회 완료: id={}", userId);
         return userDto;
+    }
+
+    @Transactional
+    @Override
+    public UserDto update(UUID userId, UserUpdateRequest userUpdateRequest) {
+        log.debug("사용자 수정 시작: id={}, request={}", userId, userUpdateRequest);
+
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> {
+                UserNotFoundException exception = UserNotFoundException.withId(userId);
+                return exception;
+            });
+
+        String newNickname = userUpdateRequest.nickname();
+
+        if (userRepository.existsByNickname(newNickname)) {
+            throw NicknameAlreadyExistsException.withNickname(newNickname);
+        }
+
+        user.update(newNickname);
+
+        log.info("사용자 수정 완료: id={}", userId);
+
+        return userMapper.toDto(user);
     }
 }
