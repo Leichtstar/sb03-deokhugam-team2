@@ -42,8 +42,8 @@ CREATE TABLE users
     email      varchar(100) UNIQUE      NOT NULL,
     nickname   varchar(20) UNIQUE       NOT NULL,
     password   varchar(20)              NOT NULL,
-    created_at TIMESTAMPZ               NOT NULL,
-    updated_at TIMESTAMPZ,
+    created_at TIMESTAMPTZ               NOT NULL,
+    updated_at TIMESTAMPTZ,
     is_deleted boolean                  NOT NULL
 );
 
