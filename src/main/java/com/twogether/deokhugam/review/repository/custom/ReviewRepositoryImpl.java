@@ -1,6 +1,6 @@
 package com.twogether.deokhugam.review.repository.custom;
 
-import com.twogether.deokhugam.dashboard.dto.BookScoreDto;
+import com.twogether.deokhugam.dashboard.batch.model.BookScoreDto;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.time.LocalDateTime;
