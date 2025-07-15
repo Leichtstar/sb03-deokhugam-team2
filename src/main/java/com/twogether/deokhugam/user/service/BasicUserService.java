@@ -7,8 +7,10 @@ import com.twogether.deokhugam.user.entity.User;
 import com.twogether.deokhugam.user.exception.EmailAlreadyExistsException;
 import com.twogether.deokhugam.user.exception.InvalidCredentialsException;
 import com.twogether.deokhugam.user.exception.NicknameAlreadyExistsException;
+import com.twogether.deokhugam.user.exception.UserNotFoundException;
 import com.twogether.deokhugam.user.mapper.UserMapper;
 import com.twogether.deokhugam.user.repository.UserRepository;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -63,5 +65,15 @@ public class BasicUserService implements UserService {
 
         log.info("로그인 성공: userId={}, email={}", user.getId(), email);
         return userMapper.toDto(user);
+    }
+
+    @Override
+    public UserDto find(UUID userId) {
+        log.debug("사용자 조회 시작: id={}", userId);
+        UserDto userDto = userRepository.findById(userId)
+            .map(userMapper::toDto)
+            .orElseThrow(() -> UserNotFoundException.withId(userId));
+        log.info("사용자 조회 완료: id={}", userId);
+        return userDto;
     }
 }
