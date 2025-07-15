@@ -1,5 +1,7 @@
 package com.twogether.deokhugam.comments.entity;
 
+import com.twogether.deokhugam.review.entity.Review;
+import com.twogether.deokhugam.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -22,13 +24,13 @@ public class Comment {
     @Column(columnDefinition = "uuid")
     private UUID id;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id", nullable = false)
-//    private User user;
-//
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "review_id", nullable = false)
-//    private Review review;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "review_id", nullable = false)
+    private Review review;
 
     @Column(length = 200, nullable = false)
     private String content;
@@ -46,12 +48,12 @@ public class Comment {
 
     protected Comment() {}
 
-//    public Comment(User user, Review review, String content) {
-//        this.user = user;
-//        this.review = review;
-//        this.content = content;
-//        this.isDeleted = false;
-//    }
+    public Comment(User user, Review review, String content) {
+        this.user = user;
+        this.review = review;
+        this.content = content;
+        this.isDeleted = false;
+    }
 
     public void editContent(String newContent) {
         this.content = newContent;
@@ -64,8 +66,8 @@ public class Comment {
     }
 
     public UUID getId() { return id; }
-//    public User getUser() { return user; }
-//    public Review getReview() { return review; }
+    public User getUser() { return user; }
+    public Review getReview() { return review; }
     public String getContent() { return content; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }

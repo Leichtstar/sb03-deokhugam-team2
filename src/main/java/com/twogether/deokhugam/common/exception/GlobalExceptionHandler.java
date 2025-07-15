@@ -65,30 +65,28 @@ public class GlobalExceptionHandler {
 
     Map<String, Object> details = new HashMap<>();
 
-    // 필드별 오류 메시지 수집
-    Map<String, Object> fieldErrors = e.getBindingResult().getFieldErrors().stream()
-            .collect(Collectors.toMap(
-                    FieldError::getField,
-                    error -> error.getDefaultMessage() != null ?
-                            error.getDefaultMessage() : "유효성 검증 실패",  // null일 때 기본값
-                    (existing, replacement) -> existing
-            ));
+    // 각 필드별 오류를 개별적으로 details에 추가
+    // 키는 필드명, 값은 오류 메시지만
+    e.getBindingResult().getFieldErrors().forEach(error -> {
+      String fieldName = error.getField(); // 필드명 (예: "password")
+      String errorMessage = error.getDefaultMessage() != null ?
+          error.getDefaultMessage() : "유효성 검증 실패"; // 오류 메시지만
+      details.put(fieldName, errorMessage);
+    });
 
     // 글로벌 오류 메시지 수집
     List<String> globalErrors = e.getBindingResult().getGlobalErrors().stream()
             .map(DefaultMessageSourceResolvable::getDefaultMessage)
             .toList();
 
-    details.put("fieldErrors", fieldErrors);
-
     if (!globalErrors.isEmpty()) {
-      details.put("globalErrors", globalErrors);
+      details.put("globalErrors", String.join(", ", globalErrors));
     }
 
     ErrorResponse errorResponse = ErrorResponse.builder()
             .timestamp(Instant.now())
-            .code("VALIDATION_FAILED")
-            .message("입력값 검증에 실패했습니다.")
+            .code("INVALID_INPUT_VALUE")
+            .message("잘못된 입력값입니다.")
             .details(details)
             .exceptionType("MethodArgumentNotValidException")
             .status(400)

@@ -107,7 +107,7 @@ CREATE TYPE ranking_period AS ENUM ('DAILY', 'WEEKLY', 'MONTHLY', 'ALL_TIME');
 -- 알림 테이블 (ON DELETE CASCADE)
 CREATE TABLE notifications (
     id UUID                             PRIMARY KEY,
-    content VARCHAR(255)                NOT NULL,
+    content VARCHAR(300)                NOT NULL,
     confirmed BOOLEAN                   NOT NULL,
     created_at TIMESTAMPTZ              NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ              NOT NULL DEFAULT now(),
