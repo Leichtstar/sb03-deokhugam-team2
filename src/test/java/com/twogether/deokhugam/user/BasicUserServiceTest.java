@@ -145,4 +145,29 @@ public class BasicUserServiceTest {
         assertThatThrownBy(() -> userService.login(loginRequest))
             .isInstanceOf(InvalidCredentialsException.class); // InvalidCredentialsException 발생해야 함
     }
+
+    @Test
+    @DisplayName("사용자 조회 성공")
+    void findUser_Success() {
+        // given
+        given(userRepository.findById(eq(userId))).willReturn(Optional.of(user));
+        given(userMapper.toDto(any(User.class))).willReturn(userDto);
+
+        // when
+        UserDto result = userService.find(userId);
+
+        // then
+        assertThat(result).isEqualTo(userDto);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 사용자 조회 시 실패")
+    void findUser_WithNonExistentId_ThrowsException() {
+        // given
+        given(userRepository.findById(eq(userId))).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> userService.find(userId))
+            .isInstanceOf(UserNotFoundException.class);
+    }
 }
