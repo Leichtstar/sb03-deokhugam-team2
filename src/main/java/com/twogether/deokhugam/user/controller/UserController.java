@@ -143,4 +143,39 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @DeleteMapping(path = "/{userId}/hard")
+    public ResponseEntity<Void> hardDelete(
+        @PathVariable("userId") UUID userId,
+        @RequestHeader(value = "Deokhugam-Request-User-ID", required = false) String requestUserIdHeader
+    ) {
+        log.info("사용자 물리 삭제 요청: id={}, requestUserId={}", userId, requestUserIdHeader);
+
+        // 헤더 존재 여부 검증
+        if (requestUserIdHeader == null || requestUserIdHeader.trim().isEmpty()) {
+            log.warn("사용자 물리 삭제 요청에서 필수 헤더 누락: userId={}", userId);
+            throw UserAccessDeniedException.missingUserIdHeader();
+        }
+
+        // 헤더 값 UUID 형식 검증
+        UUID requestUserId;
+        try {
+            requestUserId = UUID.fromString(requestUserIdHeader.trim());
+        } catch (IllegalArgumentException e) {
+            log.warn("잘못된 사용자 ID 형식: userId={}, headerValue={}", userId, requestUserIdHeader);
+            throw UserAccessDeniedException.invalidUserIdFormat(requestUserIdHeader);
+        }
+
+        // 요청자와 삭제 대상이 동일한 사용자인지 검증
+        if (!requestUserId.equals(userId)) {
+            log.warn("사용자 물리 삭제 권한 없음: requestUserId={}, targetUserId={}", requestUserId, userId);
+            throw UserAccessDeniedException.userIdMismatch(requestUserId, userId);
+        }
+
+        userService.hardDelete(userId);
+
+        log.debug("사용자 물리 삭제 응답: userId={}", userId);
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }

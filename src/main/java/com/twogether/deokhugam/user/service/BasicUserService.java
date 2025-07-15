@@ -115,4 +115,17 @@ public class BasicUserService implements UserService {
 
         log.info("사용자 논리 삭제 완료: id={}", userId);
     }
+
+    @Transactional
+    @Override
+    public void hardDelete(UUID userId) {
+        log.debug("사용자 물리 삭제 시작: id={}", userId);
+
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> UserNotFoundException.withId(userId));
+
+        userRepository.delete(user);
+
+        log.info("사용자 물리 삭제 완료: id={}", userId);
+    }
 }
