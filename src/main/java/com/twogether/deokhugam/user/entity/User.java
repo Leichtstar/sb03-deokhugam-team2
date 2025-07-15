@@ -54,4 +54,8 @@ public class User {
             this.nickname = newNickname;
         }
     }
+
+    public void softDelete() {
+        this.isDeleted = true;
+    }
 }

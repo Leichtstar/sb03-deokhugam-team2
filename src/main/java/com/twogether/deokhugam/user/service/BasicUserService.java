@@ -102,4 +102,17 @@ public class BasicUserService implements UserService {
 
         return userMapper.toDto(user);
     }
+
+    @Transactional
+    @Override
+    public void softDelete(UUID userId) {
+        log.debug("사용자 논리 삭제 시작: id={}", userId);
+
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> UserNotFoundException.withId(userId));
+
+        user.softDelete(); // isDeleted = true로 설정
+
+        log.info("사용자 논리 삭제 완료: id={}", userId);
+    }
 }

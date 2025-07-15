@@ -14,4 +14,6 @@ public interface UserService {
     UserDto find(UUID userId);
 
     UserDto update(UUID userId, UserUpdateRequest userUpdateRequest);
+
+    void softDelete(UUID userId);
 }
