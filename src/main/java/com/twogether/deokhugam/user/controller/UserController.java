@@ -1,6 +1,7 @@
 package com.twogether.deokhugam.user.controller;
 
 import com.twogether.deokhugam.user.dto.UserDto;
+import com.twogether.deokhugam.user.dto.UserLoginRequest;
 import com.twogether.deokhugam.user.dto.UserRegisterRequest;
 import com.twogether.deokhugam.user.service.UserService;
 import jakarta.validation.Valid;
@@ -32,5 +33,18 @@ public class UserController {
         log.debug("사용자 생성 응답: {}", createdUser);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+    }
+
+    @PostMapping(path = "/login")
+    public ResponseEntity<UserDto> login(
+        @RequestBody @Valid UserLoginRequest userLoginRequest
+    ) {
+        log.info("로그인 요청: email={}", userLoginRequest.email());
+
+        UserDto user = userService.login(userLoginRequest);
+
+        log.debug("로그인 응답: {}", user);
+
+        return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 }
