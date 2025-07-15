@@ -55,6 +55,5 @@ public class PopularRankingSearchRequest {
         example = "50",
         defaultValue = "50"
     )
-    @Min(1)
     private int limit = 50;
 }

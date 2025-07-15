@@ -48,7 +48,11 @@ public class DashboardServiceImpl implements DashboardService {
         }
 
         // direction 필드 Enum 체크 (대소문자 구분 없이 ASC, DESC만 허용)
-        String direction = request.getDirection().toUpperCase(Locale.ROOT);
+        String direction = request.getDirection();
+        if (direction == null) {
+            throw new DeokhugamException(ErrorCode.INVALID_DIRECTION);
+        }
+        direction = direction.toUpperCase(Locale.ROOT);
         if (!direction.equals("ASC") && !direction.equals("DESC")) {
             throw new DeokhugamException(ErrorCode.INVALID_DIRECTION);
         }

@@ -22,5 +22,6 @@ public class CursorPageResponse<T> {
         this.nextAfter = nextAfter;
         this.size = size;
         this.hasNext = hasNext;
+        this.totalElements = content != null ? content.size() : 0;
     }
 }
