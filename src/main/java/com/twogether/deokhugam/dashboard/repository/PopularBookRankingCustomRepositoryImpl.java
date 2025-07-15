@@ -40,7 +40,7 @@ public class PopularBookRankingCustomRepositoryImpl implements PopularBookRankin
                 r.createdAt
             ))
             .from(r)
-            .join(r.book, b).fetchJoin()
+            .join(r.book, b)
             .where(
                 r.period.eq(request.getPeriod()),
                 ltCursor(request.parseCursor(), request.getAfter(), request.getDirection())
