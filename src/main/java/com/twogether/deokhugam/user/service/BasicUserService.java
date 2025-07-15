@@ -3,7 +3,8 @@ package com.twogether.deokhugam.user.service;
 import com.twogether.deokhugam.user.dto.UserDto;
 import com.twogether.deokhugam.user.dto.UserRegisterRequest;
 import com.twogether.deokhugam.user.entity.User;
-import com.twogether.deokhugam.user.exception.UserAlreadyExistsException;
+import com.twogether.deokhugam.user.exception.EmailAlreadyExistsException;
+import com.twogether.deokhugam.user.exception.NicknameAlreadyExistsException;
 import com.twogether.deokhugam.user.mapper.UserMapper;
 import com.twogether.deokhugam.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -29,10 +30,10 @@ public class BasicUserService implements UserService {
         String password = userRegisterRequest.password();
 
         if (userRepository.existsByEmail(email)) {
-            throw UserAlreadyExistsException.withEmail(email);
+            throw EmailAlreadyExistsException.withEmail(email);
         }
         if (userRepository.existsByNickname(nickname)) {
-            throw UserAlreadyExistsException.withNickname(nickname);
+            throw NicknameAlreadyExistsException.withNickname(nickname);
         }
 
         User user = new User(email, nickname, password);

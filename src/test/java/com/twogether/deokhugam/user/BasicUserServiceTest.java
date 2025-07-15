@@ -10,12 +10,12 @@ import static org.mockito.Mockito.verify;
 import com.twogether.deokhugam.user.dto.UserDto;
 import com.twogether.deokhugam.user.dto.UserRegisterRequest;
 import com.twogether.deokhugam.user.entity.User;
-import com.twogether.deokhugam.user.exception.UserAlreadyExistsException;
+import com.twogether.deokhugam.user.exception.EmailAlreadyExistsException;
+import com.twogether.deokhugam.user.exception.NicknameAlreadyExistsException;
 import com.twogether.deokhugam.user.mapper.UserMapper;
 import com.twogether.deokhugam.user.repository.UserRepository;
 import com.twogether.deokhugam.user.service.BasicUserService;
 import java.time.Instant;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -83,12 +83,12 @@ public class BasicUserServiceTest {
 
         // when & then
         assertThatThrownBy(() -> userService.create(request))
-            .isInstanceOf(UserAlreadyExistsException.class);
+            .isInstanceOf(EmailAlreadyExistsException.class);
     }
 
     @Test
     @DisplayName("이미 존재하는 닉네임으로 사용자 생성 시도 시 실패")
-    void createUser_WithExistingUsername_ThrowsException() {
+    void createUser_WithExistingNickname_ThrowsException() {
         // given
         UserRegisterRequest request = new UserRegisterRequest(email, nickname, password);
         given(userRepository.existsByEmail(eq(email))).willReturn(false);
@@ -96,6 +96,6 @@ public class BasicUserServiceTest {
 
         // when & then
         assertThatThrownBy(() -> userService.create(request))
-            .isInstanceOf(UserAlreadyExistsException.class);
+            .isInstanceOf(NicknameAlreadyExistsException.class);
     }
 }
