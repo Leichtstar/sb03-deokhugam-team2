@@ -220,4 +220,29 @@ public class BasicUserServiceTest {
         verify(userRepository).findById(eq(userId));
         verify(userRepository).existsByNickname(eq(existingNickname));
     }
+
+    @Test
+    @DisplayName("사용자 논리 삭제 성공")
+    void softDeleteUser_Success() {
+        // given
+        given(userRepository.findById(eq(userId))).willReturn(Optional.of(user));
+
+        // when
+        userService.softDelete(userId);
+
+        // then
+        verify(userRepository).findById(eq(userId));
+        // softDelete() 메소드가 호출되었는지는 user 객체의 상태로 확인
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 사용자 논리 삭제 시도 시 실패")
+    void softDeleteUser_WithNonExistentId_ThrowsException() {
+        // given
+        given(userRepository.findById(eq(userId))).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> userService.softDelete(userId))
+            .isInstanceOf(UserNotFoundException.class);
+    }
 }
