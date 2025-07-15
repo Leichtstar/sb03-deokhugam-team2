@@ -5,40 +5,40 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Schema(description = "Popular Book Response DTO")
+@Schema(description = "인기 도서 응답 DTO")
 public record PopularBookDto(
 
-    @Schema(description = "Ranking ID")
+    @Schema(description = "인기 도서 랭킹 ID")
     UUID id,
 
-    @Schema(description = "Book ID")
+    @Schema(description = "도서 ID")
     UUID bookId,
 
-    @Schema(description = "Book title")
+    @Schema(description = "도서 제목")
     String title,
 
-    @Schema(description = "Author name")
+    @Schema(description = "저자명")
     String author,
 
-    @Schema(description = "Book thumbnail URL")
+    @Schema(description = "도서 썸네일 이미지 URL")
     String thumbnailUrl,
 
-    @Schema(description = "Ranking period (DAILY, WEEKLY, MONTHLY, ALL_TIME)")
+    @Schema(description = "랭킹 기간 (DAILY, WEEKLY, MONTHLY, ALL_TIME)")
     RankingPeriod period,
 
-    @Schema(description = "Book rank in the list")
+    @Schema(description = "랭킹 순위")
     int rank,
 
-    @Schema(description = "Computed popularity score")
+    @Schema(description = "인기 점수")
     double score,
 
-    @Schema(description = "Number of reviews for this book")
+    @Schema(description = "리뷰 수")
     long reviewCount,
 
-    @Schema(description = "Average review rating")
+    @Schema(description = "평점")
     double rating,
 
-    @Schema(description = "Timestamp when this ranking was recorded")
+    @Schema(description = "랭킹 생성 시각")
     LocalDateTime createdAt
 
 ) {}
