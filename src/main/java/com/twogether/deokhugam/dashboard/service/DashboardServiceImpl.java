@@ -22,6 +22,7 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public CursorPageResponse<PopularBookDto> getPopularBooks(PopularRankingSearchRequest request) {
+        validateRequest(request);
         Pageable pageable = PageRequest.of(0, request.getLimit());
 
         List<PopularBookDto> content = popularBookRankingRepository
