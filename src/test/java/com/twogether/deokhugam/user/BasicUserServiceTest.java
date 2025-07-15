@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import com.twogether.deokhugam.user.dto.UserDto;
 import com.twogether.deokhugam.user.dto.UserLoginRequest;
 import com.twogether.deokhugam.user.dto.UserRegisterRequest;
+import com.twogether.deokhugam.user.dto.UserUpdateRequest;
 import com.twogether.deokhugam.user.entity.User;
 import com.twogether.deokhugam.user.exception.EmailAlreadyExistsException;
 import com.twogether.deokhugam.user.exception.InvalidCredentialsException;
@@ -169,5 +170,54 @@ public class BasicUserServiceTest {
         // when & then
         assertThatThrownBy(() -> userService.find(userId))
             .isInstanceOf(UserNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("사용자 수정 성공")
+    void updateUser_Success() {
+        // given
+        String newNickname = "newNickname";
+        UserUpdateRequest request = new UserUpdateRequest(newNickname);
+
+        given(userRepository.findById(eq(userId))).willReturn(Optional.of(user));
+        given(userRepository.existsByNickname(eq(newNickname))).willReturn(false);
+        given(userMapper.toDto(any(User.class))).willReturn(userDto);
+
+        // when
+        UserDto result = userService.update(userId, request);
+
+        // then
+        assertThat(result).isEqualTo(userDto);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 사용자 수정 시도 시 실패")
+    void updateUser_WithNonExistentId_ThrowsException() {
+        // given
+        UserUpdateRequest request = new UserUpdateRequest("newNickname");
+        given(userRepository.findById(eq(userId))).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> userService.update(userId, request))
+            .isInstanceOf(UserNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("사용자 수정 시 이미 존재하는 닉네임으로 변경 시도하면 실패")
+    void updateUser_WithExistingNickname_ThrowsException() {
+        // given
+        String existingNickname = "existingUser";
+        UserUpdateRequest updateRequest = new UserUpdateRequest(existingNickname);
+
+        given(userRepository.findById(eq(userId))).willReturn(Optional.of(user));
+        given(userRepository.existsByNickname(eq(existingNickname))).willReturn(true);
+
+        // when & then
+        assertThatThrownBy(() -> userService.update(userId, updateRequest))
+            .isInstanceOf(NicknameAlreadyExistsException.class);
+
+        // verify 호출 검증
+        verify(userRepository).findById(eq(userId));
+        verify(userRepository).existsByNickname(eq(existingNickname));
     }
 }
