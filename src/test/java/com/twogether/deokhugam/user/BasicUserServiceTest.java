@@ -245,4 +245,29 @@ public class BasicUserServiceTest {
         assertThatThrownBy(() -> userService.softDelete(userId))
             .isInstanceOf(UserNotFoundException.class);
     }
+
+    @Test
+    @DisplayName("사용자 물리 삭제 성공")
+    void hardDeleteUser_Success() {
+        // given
+        given(userRepository.findById(eq(userId))).willReturn(Optional.of(user));
+
+        // when
+        userService.hardDelete(userId);
+
+        // then
+        verify(userRepository).findById(eq(userId));
+        verify(userRepository).delete(eq(user));
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 사용자 물리 삭제 시도 시 실패")
+    void hardDeleteUser_WithNonExistentId_ThrowsException() {
+        // given
+        given(userRepository.findById(eq(userId))).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> userService.hardDelete(userId))
+            .isInstanceOf(UserNotFoundException.class);
+    }
 }
