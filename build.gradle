@@ -44,7 +44,6 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
 
-    annotationProcessor 'com.querydsl:querydsl-apt'
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
@@ -55,6 +54,12 @@ dependencies {
     testImplementation 'org.springframework:spring-test'
     testImplementation 'org.springframework:spring-web'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    implementation "com.querydsl:querydsl-jpa:5.0.0:jakarta"
+    annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api:3.1.0"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api:2.1.1"
+
 }
 
 tasks.named('test') {
@@ -140,4 +145,18 @@ jacocoTestCoverageVerification {
             }
         }
     }
+}
+
+def querydslDir = layout.buildDirectory.dir("generated/querydsl").get().asFile
+
+sourceSets {
+    main.java.srcDirs += [ querydslDir ]
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.generatedSourceOutputDirectory.set(querydslDir)
+}
+
+clean.doLast {
+    file(querydslDir).deleteDir()
 }
