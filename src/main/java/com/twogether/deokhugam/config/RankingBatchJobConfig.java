@@ -11,34 +11,34 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @EnableBatchProcessing
 @RequiredArgsConstructor
 public class RankingBatchJobConfig {
 
-    private final JobBuilderFactory jobBuilderFactory;
-    private final StepBuilderFactory stepBuilderFactory;
     private final EntityManager em;
 
     @Bean
-    public Job popularBookRankingJob(Step popularBookRankingStep) {
-        return jobBuilderFactory.get("popularBookRankingJob")
-            .incrementer(new RunIdIncrementer())
+    public Job popularBookRankingJob(JobRepository jobRepository, Step popularBookRankingStep) {
+        return new JobBuilder("popularBookRankingJob", jobRepository)
             .start(popularBookRankingStep)
             .build();
     }
 
     @Bean
-    public Step popularBookRankingStep() {
-        return stepBuilderFactory.get("popularBookRankingStep")
-            .<BookScoreDto, PopularBookRanking>chunk(100)
+    public Step popularBookRankingStep(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
+        return new StepBuilder("popularBookRankingStep", jobRepository)
+            .<BookScoreDto, PopularBookRanking>chunk(100, transactionManager)
             .reader(bookScoreReader())
             .processor(bookScoreProcessor())
             .writer(bookScoreWriter())
@@ -47,7 +47,6 @@ public class RankingBatchJobConfig {
 
     @Bean
     public ItemReader<BookScoreDto> bookScoreReader() {
-
         return new JpaBookScoreReader(em, LocalDateTime.now().minusDays(1), LocalDateTime.now());
     }
 
