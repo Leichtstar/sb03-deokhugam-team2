@@ -7,6 +7,7 @@ import jakarta.persistence.TypedQuery;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import org.springframework.batch.item.support.IteratorItemReader;
 
@@ -36,13 +37,14 @@ public class JpaBookScoreReader extends IteratorItemReader<BookScoreDto> {
         LocalDateTime start = period.getStartTime(now);
         LocalDateTime end = period.getEndTime(now);
 
-        ZoneId zone = ZoneId.systemDefault();
+        ZoneId zone = ZoneOffset.UTC;
         Instant startInstant = start.atZone(zone).toInstant();
         Instant endInstant = end.atZone(zone).toInstant();
 
         TypedQuery<BookScoreDto> query = em.createQuery(jpql, BookScoreDto.class);
         query.setParameter("start", startInstant);
         query.setParameter("end", endInstant);
+        query.setMaxResults(1000);
 
         return query.getResultList();
     }

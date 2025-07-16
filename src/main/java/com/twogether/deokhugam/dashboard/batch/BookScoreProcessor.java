@@ -14,6 +14,12 @@ public class BookScoreProcessor implements ItemProcessor<BookScoreDto, PopularBo
     private final RankingPeriod period;
 
     public BookScoreProcessor(EntityManager em, RankingPeriod period) {
+        if (em == null) {
+            throw new IllegalArgumentException("EntityManager는 null일 수 없습니다.");
+        }
+        if (period == null) {
+            throw new IllegalArgumentException("RankingPeriod는 null일 수 없습니다.");
+        }
         this.em = em;
         this.period = period;
     }

@@ -2,6 +2,7 @@ package com.twogether.deokhugam.config;
 
 import com.twogether.deokhugam.dashboard.batch.BookScoreProcessor;
 import com.twogether.deokhugam.dashboard.batch.JpaBookScoreReader;
+import com.twogether.deokhugam.dashboard.batch.PopularBookRankingWriter;
 import com.twogether.deokhugam.dashboard.batch.model.BookScoreDto;
 import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
@@ -26,6 +27,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class RankingBatchJobConfig {
 
     private final EntityManager em;
+    private final PopularBookRankingWriter writer;
 
     @Bean
     public Job popularBookRankingJob(JobRepository jobRepository,
@@ -49,15 +51,6 @@ public class RankingBatchJobConfig {
 
         ItemReader<BookScoreDto> reader = new JpaBookScoreReader(em, period);
         ItemProcessor<BookScoreDto, PopularBookRanking> processor = new BookScoreProcessor(em, period);
-        ItemWriter<PopularBookRanking> writer = items -> {
-            int rank = 1;
-            for (PopularBookRanking item : items) {
-                item.assignRank(rank++);
-                em.persist(item);
-            }
-            em.flush();
-            em.clear();
-        };
 
         return new StepBuilder("popularBookStep_" + period.name(), jobRepository)
             .<BookScoreDto, PopularBookRanking>chunk(100, transactionManager)
