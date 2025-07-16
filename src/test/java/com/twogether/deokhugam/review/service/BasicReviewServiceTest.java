@@ -14,6 +14,7 @@ import com.twogether.deokhugam.book.repository.BookRepository;
 import com.twogether.deokhugam.review.dto.ReviewDto;
 import com.twogether.deokhugam.review.dto.ReviewLikeDto;
 import com.twogether.deokhugam.review.dto.request.ReviewCreateRequest;
+import com.twogether.deokhugam.review.dto.request.ReviewSearchRequest;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.review.entity.ReviewLike;
 import com.twogether.deokhugam.review.exception.ReviewExistException;
@@ -240,20 +241,28 @@ public class BasicReviewServiceTest {
 
             // 테스트용 검색어
             String keyword = "더쿠감";
+            ReviewSearchRequest request = new ReviewSearchRequest(
+                    UUID.randomUUID(),
+                    UUID.randomUUID(),
+                    "더쿠감",
+                    null, null, null, null,
+                    50,
+                    UUID.randomUUID()
+            );
 
             Review expectedReview1 = mock(Review.class);
             Review expectedReview2 = mock(Review.class);
             List<Review> expectedResult = List.of(expectedReview1, expectedReview2);
 
-            when(reviewRepository.findByFilter(keyword)).thenReturn(expectedResult);
+            when(reviewRepository.findByFilter(request)).thenReturn(expectedResult);
 
             // When
-            List<Review> result = basicReviewService.findReviews(keyword);
+            List<Review> result = basicReviewService.findReviews(request);
 
             // Then
             assertEquals(2, result.size());
             assertEquals(expectedResult, result);
-            verify(reviewRepository).findByFilter(keyword);
+            verify(reviewRepository).findByFilter(request);
         }
     }
 
