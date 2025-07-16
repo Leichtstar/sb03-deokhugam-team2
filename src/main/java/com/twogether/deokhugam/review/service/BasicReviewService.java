@@ -2,6 +2,7 @@ package com.twogether.deokhugam.review.service;
 
 import com.twogether.deokhugam.book.entity.Book;
 import com.twogether.deokhugam.book.repository.BookRepository;
+import com.twogether.deokhugam.common.dto.CursorPageResponseDto;
 import com.twogether.deokhugam.review.dto.ReviewDto;
 import com.twogether.deokhugam.review.dto.ReviewLikeDto;
 import com.twogether.deokhugam.review.dto.request.ReviewCreateRequest;
@@ -18,10 +19,15 @@ import com.twogether.deokhugam.review.repository.ReviewRepository;
 import com.twogether.deokhugam.user.entity.User;
 import com.twogether.deokhugam.user.repository.UserRepository;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -104,8 +110,44 @@ public class BasicReviewService implements ReviewService{
     // 리뷰 목록 조회
     @Override
     @Transactional(readOnly = true)
-    public List<Review> findReviews(ReviewSearchRequest keyword) {
-        return reviewRepository.findByFilter(keyword);
+    public CursorPageResponseDto<ReviewDto> findReviews(ReviewSearchRequest request) {
+        // Pageable 생성
+        Pageable pageable = PageRequest.of(0, request.limit());
+
+        // Slice 메서드 호출
+        Slice<Review> slice = reviewRepository.findReviewsWithCursor(request, pageable);
+
+        // 좋아요 정보 조회
+        Map<UUID, Boolean> likeByMeMap = getLikeByMeMap(slice.getContent(), request.requestUserId());
+
+        // DTO 변환
+        List<ReviewDto> reviewDtos = slice.getContent().stream()
+                .map(review -> {
+                            boolean likeByMe = likeByMeMap.getOrDefault(review.getId(), false);
+                            return reviewMapper.toDto(review, likeByMe);
+                        })
+                .toList();
+
+        // totalElement 구하기
+        long totalElement = reviewRepository.totalElementCount(request);
+
+        // 다음 커서 생성
+        String nextCursor = slice.hasNext() ? generateNextCursor(slice.getContent(), request.orderBy()) : null;
+
+        // after 생성
+        String after = slice.hasNext() ? generateAfter(slice.getContent()) : null;
+
+        // 반환값 생성
+        CursorPageResponseDto<ReviewDto> responseDtoTest = new CursorPageResponseDto<>(
+                reviewDtos,
+                nextCursor,
+                after,
+                request.limit(),
+                totalElement,
+                slice.hasNext()
+        );
+
+        return responseDtoTest;
     }
 
     // 리뷰 좋아요 기능
@@ -160,5 +202,51 @@ public class BasicReviewService implements ReviewService{
 
             return reviewLikeMapper.toDto(reviewLike);
         }
+    }
+
+    // likeByMe 일괄 조회 메서드
+    private Map<UUID, Boolean> getLikeByMeMap(List<Review> reviews, UUID requestUserId){
+        if (reviews.isEmpty() || requestUserId == null){
+            return Map.of();
+        }
+
+        // 조회된 리뷰의 Id 목록
+        List<UUID> reviewIds = reviews.stream()
+                .map(Review::getId)
+                .toList();
+
+        // 리뷰 Id 목록과 요청자 Id를 이용해서 ReviewLike 목록 구하기
+        List<ReviewLike> reviewLikes = reviewLikeRepository.findByUserIdAndReviewIdIn(requestUserId, reviewIds);
+
+        // 조회 편하게 Map으로 만들기 (비정상적인 상황 (중복 키 발생)에 대비해 중복 키 처리 함수 마지막에 추가)
+        return reviewLikes.stream()
+                .collect(Collectors.toMap(
+                        reviewLike -> reviewLike.getReviewLikePK().getReviewId(),
+                        ReviewLike::isLiked,
+                        (existing, replacement) -> replacement
+                ));
+    }
+
+    // 커서 생성
+    private String generateNextCursor(List<Review> reviews, String orderBy){
+        if (reviews.isEmpty()) return null;
+
+        Review lastReview = reviews.get(reviews.size() - 1);
+
+        if ("rating".equalsIgnoreCase(orderBy)){
+
+            return String.valueOf(lastReview.getRating());
+        }
+        else{
+            return lastReview.getCreatedAt().toString();
+        }
+    }
+
+    // afterAt 생성
+    private String generateAfter(List<Review> reviews){
+        if (reviews.isEmpty()) return null;
+
+        Review lastReview = reviews.get(reviews.size() - 1);
+        return lastReview.getCreatedAt().toString();
     }
 }
