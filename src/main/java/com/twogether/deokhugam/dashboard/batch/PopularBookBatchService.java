@@ -12,8 +12,10 @@ import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -40,7 +42,10 @@ public class PopularBookBatchService {
 
     @Transactional
     public void calculateAndSaveRanking(RankingPeriod period, LocalDateTime start, LocalDateTime end) {
-        log.info("[{}] 인기 도서 랭킹 계산 시작 - 기간: {} ~ {}", period.name(), start, end);
+        String batchId = UUID.randomUUID().toString();
+        MDC.put("batchId", batchId);
+
+        log.info("[{}][batchId:{}] 인기 도서 랭킹 계산 시작 - 기간: {} ~ {}", period.name(), batchId, start, end);
 
         try {
             rankingRepository.deleteByPeriod(period);
@@ -48,16 +53,21 @@ public class PopularBookBatchService {
             List<PopularBookRanking> rankings = createRankings(bookScores, period);
             saveInBatch(rankings);
 
-            log.info("[{}] 인기 도서 랭킹 저장 완료 - 총 {}건", period.name(), rankings.size());
+            log.info("[{}][batchId:{}] 인기 도서 랭킹 저장 완료 - 총 {}건", period.name(), batchId, rankings.size());
         } catch (Exception e) {
-            log.error("[{}] 인기 도서 랭킹 계산 중 오류 발생", period.name(), e);
+            log.error("[{}][batchId:{}] 인기 도서 랭킹 계산 중 오류 발생", period.name(), batchId, e);
             throw e;
+        } finally {
+            MDC.remove("batchId"); // or MDC.clear()
         }
     }
 
     @Transactional
     public void calculateAndSaveAllTimeRanking() {
-        log.info("[역대] 인기 도서 랭킹 계산 시작");
+        String batchId = UUID.randomUUID().toString();
+        MDC.put("batchId", batchId);
+
+        log.info("[ALL_TIME][batchId:{}] 인기 도서 랭킹 계산 시작", batchId);
 
         try {
             rankingRepository.deleteByPeriod(RankingPeriod.ALL_TIME);
@@ -67,10 +77,12 @@ public class PopularBookBatchService {
 
             saveInBatch(rankings);
 
-            log.info("[역대] 인기 도서 랭킹 저장 완료 - 총 {}건", rankings.size());
+            log.info("[ALL_TIME][batchId:{}] 인기 도서 랭킹 저장 완료 - 총 {}건", batchId, rankings.size());
         } catch (Exception e) {
-            log.error("[역대] 인기 도서 랭킹 계산 중 오류 발생", e);
+            log.error("[ALL_TIME][batchId:{}] 인기 도서 랭킹 계산 중 오류 발생", batchId, e);
             throw e;
+        } finally {
+            MDC.remove("batchId");
         }
     }
 
