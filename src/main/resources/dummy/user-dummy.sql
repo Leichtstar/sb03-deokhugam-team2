@@ -1,10 +1,11 @@
--- user_dummy.sql (with valid passwords)
+
 
 INSERT INTO users (
     id,
     email,
     nickname,
     password,
+    created_at,
     is_deleted
 ) VALUES
     (
@@ -12,6 +13,7 @@ INSERT INTO users (
      'kimjiwoo@example.com',
      '김지우',
      'Jiwoo!123',
+     NOW(),
      false
     ),
     (
@@ -19,6 +21,7 @@ INSERT INTO users (
      'leeminseo@example.com',
      '이민서',
      'Minseo#456',
+     NOW(),
      false
     ),
     (
@@ -26,6 +29,7 @@ INSERT INTO users (
      'parkjisoo@example.com',
      '박지수',
      'Jisoo@789',
+     NOW(),
      false
     ),
     (
@@ -33,6 +37,7 @@ INSERT INTO users (
      'choihyun@example.com',
      '최현우',
      'Hyunwoo$12',
+     NOW(),
      false
     ),
     (
@@ -40,6 +45,7 @@ INSERT INTO users (
      'jungara@example.com',
      '정아라',
      'Ara%2023ok',
+     NOW(),
      false
     ),
     (
@@ -47,6 +53,7 @@ INSERT INTO users (
      'hwangmin@example.com',
      '황민준',
      'Min&1994go',
+     NOW(),
      false
     ),
     (
@@ -54,6 +61,7 @@ INSERT INTO users (
      'yoonseo@example.com',
      '윤서연',
      'Seo1234#ok',
+     NOW(),
      false
     ),
     (
@@ -61,5 +69,6 @@ INSERT INTO users (
      'kangdoyeon@example.com',
      '강도연',
      'Doyeon@77!',
+     NOW(),
      false
     );
