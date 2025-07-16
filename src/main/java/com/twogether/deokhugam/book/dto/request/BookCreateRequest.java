@@ -7,22 +7,22 @@ import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
 public record BookCreateRequest(
-    @NotBlank @Size(max = 100)
+    @NotBlank(message = "제목은 필수 입력 사항입니다.") @Size(max = 255)
     String title,
 
-    @NotBlank @Size(max = 50)
+    @NotBlank(message = "저자는 필수 입력 사항입니다.") @Size(max = 100)
     String author,
 
-    @NotBlank
+    @NotBlank(message = "설명은 필수 입력 사항입니다.")
     String description,
 
-    @NotBlank @Size(max = 50)
+    @NotBlank(message = "출판사는 필수 입력 사항입니다.") @Size(max = 100)
     String publisher,
 
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     LocalDate publishedDate,
 
-    @Size(max = 13)
+    @Size(max = 13, message = "유효한 ISBN 형식이 아닙니다.")
     String isbn // optional
 ) {}

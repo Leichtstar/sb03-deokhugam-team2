@@ -3,6 +3,8 @@ package com.twogether.deokhugam.apiclient;
 import com.twogether.deokhugam.apiclient.dto.NaverBookItem;
 import com.twogether.deokhugam.apiclient.dto.NaverBookSearchResponse;
 import com.twogether.deokhugam.book.dto.NaverBookDto;
+import com.twogether.deokhugam.book.exception.NaverBookException;
+import com.twogether.deokhugam.common.exception.ErrorCode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
@@ -23,18 +25,18 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class NaverBookClientImpl implements NaverBookClient {
 
-    //  @Value("${naver.api.client-id}")  보안값으로 개발중 생략
-    private String clientId = "id";
+    @Value("${naver.api.client-id}")
+    private String clientId;
 
-    //  @Value("${naver.api.client-secret}")  보안값으로 개발중 생략
-    private String clientSecret = "secret";
+    @Value("${naver.api.client-secret}")
+    private String clientSecret;
 
     private final RestTemplateBuilder restTemplateBuilder;
 
     @Override
     public NaverBookDto fetchInfoByIsbn(String isbn) {
         if(isbn == null || isbn.isEmpty()){
-            throw new IllegalArgumentException("Isbn cannot be null or empty");
+            throw new NaverBookException(ErrorCode.INVALID_ISBN);
         }
         String url = "https://openapi.naver.com/v1/search/book.json?query=" + isbn;
 
@@ -73,8 +75,7 @@ public class NaverBookClientImpl implements NaverBookClient {
                     downloadImageAsBase64(item.image())
                 );
             } catch (Exception e) {
-              log.error("NaverApi 호출 실패: ISBN={}, 오류={}", isbn, e.getMessage());
-              return null;
+                throw new NaverBookException(ErrorCode.NAVER_API_CONNECTION_FAILED);
             }
     }
     private String downloadImageAsBase64(String imageUrl) {
@@ -86,7 +87,7 @@ public class NaverBookClientImpl implements NaverBookClient {
                 return Base64.getEncoder().encodeToString(response.getBody());
             }
         } catch (Exception e) {
-            log.warn("이미지 다운로드 실패: URL={}, 오류={}",imageUrl,e.getMessage());
+            throw new NaverBookException(ErrorCode.NAVER_API_THUMBNAIL_NOT_FOUND);
         }
 
       return null;
