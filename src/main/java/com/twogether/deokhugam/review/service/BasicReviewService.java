@@ -16,13 +16,13 @@ import com.twogether.deokhugam.review.mapper.ReviewLikeMapper;
 import com.twogether.deokhugam.review.mapper.ReviewMapper;
 import com.twogether.deokhugam.review.repository.ReviewLikeRepository;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
+import com.twogether.deokhugam.review.service.util.ReviewCursorHelper;
 import com.twogether.deokhugam.user.entity.User;
 import com.twogether.deokhugam.user.repository.UserRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -42,6 +42,7 @@ public class BasicReviewService implements ReviewService{
     private final ReviewLikeRepository reviewLikeRepository;
     private final ReviewMapper reviewMapper;
     private final ReviewLikeMapper reviewLikeMapper;
+    private final ReviewCursorHelper reviewCursorHelper;
 
     // 리뷰 생성
     @Override
@@ -118,7 +119,7 @@ public class BasicReviewService implements ReviewService{
         Slice<Review> slice = reviewRepository.findReviewsWithCursor(request, pageable);
 
         // 좋아요 정보 조회
-        Map<UUID, Boolean> likeByMeMap = getLikeByMeMap(slice.getContent(), request.requestUserId());
+        Map<UUID, Boolean> likeByMeMap = reviewCursorHelper.getLikeByMeMap(slice.getContent(), request.requestUserId());
 
         // DTO 변환
         List<ReviewDto> reviewDtos = slice.getContent().stream()
@@ -132,10 +133,10 @@ public class BasicReviewService implements ReviewService{
         long totalElement = reviewRepository.totalElementCount(request);
 
         // 다음 커서 생성
-        String nextCursor = slice.hasNext() ? generateNextCursor(slice.getContent(), request.orderBy()) : null;
+        String nextCursor = slice.hasNext() ? reviewCursorHelper.generateNextCursor(slice.getContent(), request.orderBy()) : null;
 
         // after 생성
-        String after = slice.hasNext() ? generateAfter(slice.getContent()) : null;
+        String after = slice.hasNext() ? reviewCursorHelper.generateAfter(slice.getContent()) : null;
 
         // 반환값 생성
         CursorPageResponseDto<ReviewDto> responseDtoTest = new CursorPageResponseDto<>(
@@ -202,51 +203,5 @@ public class BasicReviewService implements ReviewService{
 
             return reviewLikeMapper.toDto(reviewLike);
         }
-    }
-
-    // likeByMe 일괄 조회 메서드
-    private Map<UUID, Boolean> getLikeByMeMap(List<Review> reviews, UUID requestUserId){
-        if (reviews.isEmpty() || requestUserId == null){
-            return Map.of();
-        }
-
-        // 조회된 리뷰의 Id 목록
-        List<UUID> reviewIds = reviews.stream()
-                .map(Review::getId)
-                .toList();
-
-        // 리뷰 Id 목록과 요청자 Id를 이용해서 ReviewLike 목록 구하기
-        List<ReviewLike> reviewLikes = reviewLikeRepository.findByUserIdAndReviewIdIn(requestUserId, reviewIds);
-
-        // 조회 편하게 Map으로 만들기 (비정상적인 상황 (중복 키 발생)에 대비해 중복 키 처리 함수 마지막에 추가)
-        return reviewLikes.stream()
-                .collect(Collectors.toMap(
-                        reviewLike -> reviewLike.getReviewLikePK().getReviewId(),
-                        ReviewLike::isLiked,
-                        (existing, replacement) -> replacement
-                ));
-    }
-
-    // 커서 생성
-    private String generateNextCursor(List<Review> reviews, String orderBy){
-        if (reviews.isEmpty()) return null;
-
-        Review lastReview = reviews.get(reviews.size() - 1);
-
-        if ("rating".equalsIgnoreCase(orderBy)){
-
-            return String.valueOf(lastReview.getRating());
-        }
-        else{
-            return lastReview.getCreatedAt().toString();
-        }
-    }
-
-    // afterAt 생성
-    private String generateAfter(List<Review> reviews){
-        if (reviews.isEmpty()) return null;
-
-        Review lastReview = reviews.get(reviews.size() - 1);
-        return lastReview.getCreatedAt().toString();
     }
 }
