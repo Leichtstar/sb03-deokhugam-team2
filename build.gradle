@@ -39,10 +39,14 @@ dependencies {
     implementation 'software.amazon.awssdk:s3:2.31.7' // AWS SDK v2
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
+
+    // QueryDSL 추가 (Jakarta 기반)
+    implementation "com.querydsl:querydsl-jpa:5.0.0:jakarta"
+    annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api:3.1.0"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api:2.1.1"
 
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
@@ -54,11 +58,21 @@ dependencies {
     testImplementation 'org.springframework:spring-test'
     testImplementation 'org.springframework:spring-web'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
 
-    implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
-    annotationProcessor 'com.querydsl:querydsl-apt:5.1.0:jakarta'
-    annotationProcessor 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+// QueryDSL Q타입 생성 디렉토리 설정
+def querydslDir = "$buildDir/generated/querydsl"
 
+sourceSets {
+    main {
+        java {
+            srcDirs += querydslDir
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.annotationProcessorGeneratedSourcesDirectory = file(querydslDir)
 }
 
 tasks.named('test') {
@@ -143,14 +157,5 @@ jacocoTestCoverageVerification {
                 minimum = 0.80  // 80% 이상 커버리지 요구
             }
         }
-    }
-}
-
-jacocoTestReport {
-    dependsOn test
-    reports {
-        xml.required = false
-        csv.required = false
-        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
     }
 }

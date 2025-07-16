@@ -1,22 +1,17 @@
 package com.twogether.deokhugam.dashboard.batch;
 
 import com.twogether.deokhugam.book.entity.Book;
-import com.twogether.deokhugam.dashboard.dto.BookScoreDto;
+import com.twogether.deokhugam.dashboard.batch.model.BookScoreDto;
 import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PopularBookRankingRepository;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
-import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

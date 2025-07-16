@@ -1,6 +1,6 @@
 package com.twogether.deokhugam.review.repository.custom;
 
-import com.twogether.deokhugam.dashboard.dto.BookScoreDto;
+import com.twogether.deokhugam.dashboard.batch.model.BookScoreDto;
 import java.time.LocalDateTime;
 import java.util.List;
 
