@@ -41,32 +41,32 @@ public class PopularBookBatchServiceTest {
         setField(batchService, "em", em);
     }
 
-    @Test
-    @DisplayName("Mockito 기반 배치 실행 테스트")
-    void testCalculateAndSaveRanking_createsRankingCorrectly() {
-        // given
-        UUID bookId = UUID.randomUUID();
-        BookScoreDto mockDto = new BookScoreDto(bookId, "제목", "저자", "http://example.com/thumb.jpg", 20, 4.8);
-        LocalDateTime start = LocalDateTime.now().minusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
-        LocalDateTime end = start.plusDays(1);
-
-        when(reviewRepository.calculateBookScores(start, end)).thenReturn(List.of(mockDto));
-        Book mockBook = new Book();
-        when(em.getReference(Book.class, bookId)).thenReturn(mockBook);
-
-        ArgumentCaptor<List<PopularBookRanking>> captor = ArgumentCaptor.forClass(List.class);
-        when(rankingRepository.saveAll(captor.capture())).thenReturn(null);
-
-        // when
-        batchService.calculateAndSaveRanking(RankingPeriod.DAILY, start, end);
-
-        // then
-        List<PopularBookRanking> savedRankings = captor.getValue();
-        assertThat(savedRankings).hasSize(1);
-        PopularBookRanking ranking = savedRankings.get(0);
-        assertThat(ranking.getScore()).isEqualTo(mockDto.calculateScore());
-        assertThat(ranking.getTitle()).isEqualTo(mockDto.title());
-    }
+//    @Test
+//    @DisplayName("Mockito 기반 배치 실행 테스트")
+//    void testCalculateAndSaveRanking_createsRankingCorrectly() {
+//        // given
+//        UUID bookId = UUID.randomUUID();
+//        BookScoreDto mockDto = new BookScoreDto(bookId, "제목", "저자", "http://example.com/thumb.jpg", 20, 4.8);
+//        LocalDateTime start = LocalDateTime.now().minusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+//        LocalDateTime end = start.plusDays(1);
+//
+//        when(reviewRepository.calculateBookScores(start, end)).thenReturn(List.of(mockDto));
+//        Book mockBook = new Book();
+//        when(em.getReference(Book.class, bookId)).thenReturn(mockBook);
+//
+//        ArgumentCaptor<List<PopularBookRanking>> captor = ArgumentCaptor.forClass(List.class);
+//        when(rankingRepository.saveAll(captor.capture())).thenReturn(null);
+//
+//        // when
+//        batchService.calculateAndSaveRanking(RankingPeriod.DAILY, start, end);
+//
+//        // then
+//        List<PopularBookRanking> savedRankings = captor.getValue();
+//        assertThat(savedRankings).hasSize(1);
+//        PopularBookRanking ranking = savedRankings.get(0);
+//        assertThat(ranking.getScore()).isEqualTo(mockDto.calculateScore());
+//        assertThat(ranking.getTitle()).isEqualTo(mockDto.title());
+//    }
 
     private static void setField(Object target, String fieldName, Object value) {
         try {

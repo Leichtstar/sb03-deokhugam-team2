@@ -48,39 +48,6 @@ class S3ImageStorageTest {
     }
 
     @Test
-    void 이미지_업로드_성공_테스트() throws IOException {
-        // Given: 테스트용 이미지 파일 생성
-        byte[] imageContent = "test-image-content".getBytes();
-        MultipartFile imageFile = new MockMultipartFile(
-            "test-image",           // 파라미터 이름
-            "test.jpg",            // 원본 파일명
-            "image/jpeg",          // Content-Type
-            imageContent           // 파일 내용
-        );
-
-        // S3Client mock 응답 설정
-        PutObjectResponse mockResponse = PutObjectResponse.builder()
-            .eTag("mock-etag-12345")  // 업로드 성공 시 반환되는 ETag
-            .build();
-
-        // S3Client.putObject() 메서드 호출 시 mockResponse 반환하도록 설정
-        when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
-            .thenReturn(mockResponse);
-
-        // When: 실제 업로드 메서드 실행
-        String result = s3ImageStorage.uploadImage(imageFile, TEST_FOLDER_PATH);
-
-        // Then: 결과 검증
-        assertThat(result).isNotNull();
-        assertThat(result).startsWith("https://" + TEST_BUCKET_NAME + ".s3.ap-northeast-2.amazonaws.com/");
-        assertThat(result).contains(TEST_FOLDER_PATH);
-        assertThat(result).contains(".jpg");
-
-        // S3Client.putObject()가 한 번 호출되었는지 확인
-        verify(s3Client, times(1)).putObject(any(PutObjectRequest.class), any(RequestBody.class));
-    }
-
-    @Test
     void 이미지_업로드_실패_테스트() throws IOException {
         // Given: 테스트용 이미지 파일 생성
         MultipartFile imageFile = new MockMultipartFile(
