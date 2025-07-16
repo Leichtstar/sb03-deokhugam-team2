@@ -119,8 +119,8 @@ def excludeClasses = [
         '**/controller/**',                       // controller 패키지
 
         // === 레포지토리 ===
-        '**/*Controller.class',                   // Repository들
-        '**/controller/**',                       // repository 패키지
+        '**/*Repository.class',                   // Repository들
+        '**/repository/**',                       // repository 패키지
 
         // === Batch 관련 ===
         '**/batch/**',                           // Spring Batch 관련
