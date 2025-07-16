@@ -16,6 +16,10 @@ public enum ErrorCode {
     REVIEW_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 작성한 리뷰가 있습니다."),
     INVALID_RATING(HttpStatus.BAD_REQUEST, "리뷰 평점은 1점 이상 5점 이하이어야 합니다."),
 
+    // Batch 관련 에러 코드
+    RANKING_DATA_EMPTY(HttpStatus.NOT_FOUND, "해당 기간의 리뷰 데이터가 존재하지 않습니다."),
+    RANKING_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "인기 도서 랭킹 저장 중 오류가 발생했습니다."),
+
     // Dashboard 관련 에러 코드
     INVALID_RANKING_PERIOD(HttpStatus.BAD_REQUEST, "지원하지 않는 랭킹 기간입니다."),
     INVALID_DIRECTION(HttpStatus.BAD_REQUEST, "정렬 방향은 ASC 또는 DESC만 가능합니다.");
