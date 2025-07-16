@@ -1,7 +1,10 @@
 package com.twogether.deokhugam.review.service;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -11,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 import com.twogether.deokhugam.book.entity.Book;
 import com.twogether.deokhugam.book.repository.BookRepository;
+import com.twogether.deokhugam.common.dto.CursorPageResponseDto;
 import com.twogether.deokhugam.review.dto.ReviewDto;
 import com.twogether.deokhugam.review.dto.ReviewLikeDto;
 import com.twogether.deokhugam.review.dto.request.ReviewCreateRequest;
@@ -37,6 +41,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Review 단위 테스트")
@@ -236,11 +244,10 @@ public class BasicReviewServiceTest {
         }
 
         @Test
-        @DisplayName("RED: 문자열로 리뷰 목록을 검색하면 조건에 맞는 목록이 조회되어야 한다.")
+        @DisplayName("리뷰 목록을 검색하면 조건에 맞는 목록이 조회되어야 한다.")
         void shouldReturnReviewList_whenGivenValidFilter(){
 
-            // 테스트용 검색어
-            String keyword = "더쿠감";
+            // 테스트용
             ReviewSearchRequest request = new ReviewSearchRequest(
                     UUID.randomUUID(),
                     UUID.randomUUID(),
@@ -254,15 +261,47 @@ public class BasicReviewServiceTest {
             Review expectedReview2 = mock(Review.class);
             List<Review> expectedResult = List.of(expectedReview1, expectedReview2);
 
-            when(reviewRepository.findByFilter(request)).thenReturn(expectedResult);
+            // 좋아요 Map 용
+            UUID reviewId1 = UUID.randomUUID();
+            UUID reviewId2 = UUID.randomUUID();
+            when(expectedReview1.getId()).thenReturn(reviewId1);
+            when(expectedReview2.getId()).thenReturn(reviewId2);
+
+            Pageable pageable = PageRequest.of(0, 50);
+            Slice<Review> mockSlice = new SliceImpl<>(expectedResult, pageable, false);
+
+            when(reviewRepository.findReviewsWithCursor(request, pageable)).thenReturn(mockSlice);
+            when(reviewRepository.totalElementCount(request)).thenReturn(10L);
+
+            // 좋아요 없음
+            when(reviewLikeRepository.findByUserIdAndReviewIdIn(request.requestUserId(), List.of(reviewId1, reviewId2))).thenReturn(List.of());
+
+            // List<ReviewDto> 생성 부분
+            ReviewDto reviewDto1 = mock(ReviewDto.class);
+            ReviewDto reviewDto2 = mock(ReviewDto.class);
+            when(reviewMapper.toDto(expectedReview1, false)).thenReturn(reviewDto1);
+            when(reviewMapper.toDto(expectedReview2, false)).thenReturn(reviewDto2);
 
             // When
-            List<Review> result = basicReviewService.findReviews(request);
+            CursorPageResponseDto<ReviewDto> responseDto = basicReviewService.findReviews(request);
 
             // Then
-            assertEquals(2, result.size());
-            assertEquals(expectedResult, result);
-            verify(reviewRepository).findByFilter(request);
+            assertAll(
+                    () -> assertEquals(2, responseDto.content().size()),
+                    () -> assertEquals(50, responseDto.size()),
+                    () -> assertEquals(10, responseDto.totalElement()),
+                    () -> assertNull(responseDto.nextCursor()),
+                    () -> assertNull(responseDto.nextAfter()),
+                    () -> assertFalse(responseDto.hasNext())
+            );
+
+            // 호출 검증
+            verify(reviewRepository).findReviewsWithCursor(request, pageable);
+            verify(reviewRepository).totalElementCount(request);
+            verify(reviewLikeRepository).findByUserIdAndReviewIdIn(request.requestUserId(), List.of(reviewId1, reviewId2));
+
+            verify(reviewMapper).toDto(expectedReview1, false);
+            verify(reviewMapper).toDto(expectedReview2, false);
         }
     }
 
