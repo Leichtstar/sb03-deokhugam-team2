@@ -16,6 +16,7 @@ import jakarta.validation.Validator;
 
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -132,20 +133,21 @@ class CommentServiceTest {
         assertThat(comment.getIsDeleted()).isTrue();
     }
 
-//    @Test
-//    @DisplayName("정상적으로 댓글 등록에 성공한다")
-//    void createComment_success() {
-//        // given
-//        Comment mockComment = new Comment(mock(User.class), mock(Review.class), "테스트 댓글입니다.");
-//        when(commentMapper.toEntity(any(CommentCreateRequest.class))).thenReturn(mockComment);
-//        when(commentRepository.save(any(Comment.class))).thenReturn(mockComment);
-//
-//        // when
-//        commentService.createComment(commentCreateRequest);
-//
-//        // then
-//        verify(commentMapper, times(1)).toEntity(any(CommentCreateRequest.class));
-//        verify(commentRepository, times(1)).save(any(Comment.class));
-//        // 필요하면 반환값까지 assertThat 등으로 검증
-//    }
+    @Test
+    @Disabled
+    @DisplayName("정상적으로 댓글 등록에 성공한다")
+    void createComment_success() {
+        // given
+        Comment mockComment = new Comment(mock(User.class), mock(Review.class), "테스트 댓글입니다.");
+        when(commentMapper.toEntity(any(CommentCreateRequest.class))).thenReturn(mockComment);
+        when(commentRepository.save(any(Comment.class))).thenReturn(mockComment);
+
+        // when
+        commentService.createComment(commentCreateRequest);
+
+        // then
+        verify(commentMapper, times(1)).toEntity(any(CommentCreateRequest.class));
+        verify(commentRepository, times(1)).save(any(Comment.class));
+        // 필요하면 반환값까지 assertThat 등으로 검증
+    }
 }
