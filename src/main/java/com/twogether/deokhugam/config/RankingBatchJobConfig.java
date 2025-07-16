@@ -31,47 +31,27 @@ public class RankingBatchJobConfig {
 
     @Bean
     public Job popularBookRankingJob(JobRepository jobRepository,
-        Step popularBookDailyStep,
-        Step popularBookWeeklyStep,
-        Step popularBookMonthlyStep,
-        Step popularBookAllTimeStep) {
+        PlatformTransactionManager transactionManager,
+        @Value("#{jobParameters['period']}") String periodKey) {
+
+        RankingPeriod period = RankingPeriod.valueOf(periodKey.toUpperCase());
+        LocalDateTime now = LocalDateTime.now();
+
+        LocalDateTime start = switch (period) {
+            case DAILY -> now.minusDays(1);
+            case WEEKLY -> now.minusWeeks(1);
+            case MONTHLY -> now.minusMonths(1);
+            case ALL_TIME -> null;
+        };
+
+        LocalDateTime end = period == RankingPeriod.ALL_TIME ? null : now;
+
+        Step step = createStep(jobRepository, transactionManager,
+            "popularBookStep_" + period.name(), period, start, end);
+
         return new JobBuilder("popularBookRankingJob", jobRepository)
-            .start(popularBookDailyStep)
-            .next(popularBookWeeklyStep)
-            .next(popularBookMonthlyStep)
-            .next(popularBookAllTimeStep)
+            .start(step)
             .build();
-    }
-
-    @Bean
-    public Step popularBookDailyStep(JobRepository jobRepository,
-        PlatformTransactionManager transactionManager) {
-        LocalDateTime now = LocalDateTime.now();
-        return createStep(jobRepository, transactionManager, "popularBookDailyStep",
-            RankingPeriod.DAILY, now.minusDays(1), now);
-    }
-
-    @Bean
-    public Step popularBookWeeklyStep(JobRepository jobRepository,
-        PlatformTransactionManager transactionManager) {
-        LocalDateTime now = LocalDateTime.now();
-        return createStep(jobRepository, transactionManager, "popularBookWeeklyStep",
-            RankingPeriod.WEEKLY, now.minusWeeks(1), now);
-    }
-
-    @Bean
-    public Step popularBookMonthlyStep(JobRepository jobRepository,
-        PlatformTransactionManager transactionManager) {
-        LocalDateTime now = LocalDateTime.now();
-        return createStep(jobRepository, transactionManager, "popularBookMonthlyStep",
-            RankingPeriod.MONTHLY, now.minusMonths(1), now);
-    }
-
-    @Bean
-    public Step popularBookAllTimeStep(JobRepository jobRepository,
-        PlatformTransactionManager transactionManager) {
-        return createStep(jobRepository, transactionManager, "popularBookAllTimeStep",
-            RankingPeriod.ALL_TIME, null, null);
     }
 
     private Step createStep(JobRepository jobRepository,
