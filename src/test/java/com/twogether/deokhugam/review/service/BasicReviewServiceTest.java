@@ -26,6 +26,7 @@ import com.twogether.deokhugam.review.mapper.ReviewLikeMapper;
 import com.twogether.deokhugam.review.mapper.ReviewMapper;
 import com.twogether.deokhugam.review.repository.ReviewLikeRepository;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
+import com.twogether.deokhugam.review.service.util.ReviewCursorHelper;
 import com.twogether.deokhugam.user.entity.User;
 import com.twogether.deokhugam.user.repository.UserRepository;
 import java.time.LocalDate;
@@ -45,6 +46,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Review 단위 테스트")
@@ -68,6 +70,9 @@ public class BasicReviewServiceTest {
     @Mock
     private ReviewLikeMapper reviewLikeMapper;
 
+    @Mock
+    private ReviewCursorHelper reviewCursorHelper;
+
    @InjectMocks
    private BasicReviewService basicReviewService;
 
@@ -88,6 +93,10 @@ public class BasicReviewServiceTest {
         assertNotNull(bookRepository);
         assertNotNull(reviewMapper);
         assertNotNull(basicReviewService);
+
+        // verify 검증을 위해 ReviewCursorHelper를 진짜 객체로 대체함 (내부에는 mock된 reviewLikeRepository 주입)
+        reviewCursorHelper = new ReviewCursorHelper(reviewLikeRepository);
+        ReflectionTestUtils.setField(basicReviewService, "reviewCursorHelper", reviewCursorHelper);
 
         bookId = UUID.randomUUID();
         userId = UUID.randomUUID();
@@ -309,7 +318,7 @@ public class BasicReviewServiceTest {
     @DisplayName("리뷰 좋아요를 취소할 수 있어야 한다.")
     void shouldUpdate_ReviewLike_Unlike(){
         // Given
-        testReview.updateLikeCount(3L);
+        testReview.updateLikeCount(3L);  // 초기 좋아요 개수
 
         ReviewLike reviewLike = new ReviewLike(
                 testReview,
@@ -369,6 +378,37 @@ public class BasicReviewServiceTest {
         verify(reviewRepository).save(testReview);
     }
 
+    @Test
+    @DisplayName("리뷰에 좋아요 정보가 없는 경우 생성되어야 한다.")
+    void shouldCreate_ReviewLike_whenIsEmpty(){
+        testReview.updateLikeCount(3L);
 
+        when(reviewLikeRepository.findByUserIdAndReviewId(userId, reviewId)).thenReturn(Optional.empty());
+        when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(testReview));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
+
+        ReviewLike reviewLike = new ReviewLike(
+                testReview,
+                testUser,
+                true
+        );
+
+        ReviewLikeDto expectedDto = new ReviewLikeDto(
+                reviewId,
+                userId,
+                true
+        );
+
+        when(reviewLikeMapper.toDto(any(ReviewLike.class))).thenReturn(expectedDto);
+
+        ReviewLikeDto result = basicReviewService.reviewLike(reviewId, userId);
+
+        // Then
+        assertEquals(true, result.liked());
+        assertEquals(4L, testReview.getLikeCount());
+        verify(reviewLikeRepository).save(any(ReviewLike.class));
+        verify(reviewRepository).save(any(Review.class));
+        verify(reviewLikeMapper).toDto(any(ReviewLike.class));
+    }
 
 }
