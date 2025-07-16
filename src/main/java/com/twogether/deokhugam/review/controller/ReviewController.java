@@ -3,9 +3,12 @@ package com.twogether.deokhugam.review.controller;
 import com.twogether.deokhugam.review.dto.ReviewDto;
 import com.twogether.deokhugam.review.dto.ReviewLikeDto;
 import com.twogether.deokhugam.review.dto.request.ReviewCreateRequest;
+import com.twogether.deokhugam.review.dto.request.ReviewSearchRequest;
+import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.review.exception.ReviewNotFoundException;
 import com.twogether.deokhugam.review.service.ReviewService;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -49,6 +53,29 @@ public class ReviewController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(reviewDto);
+    }
+
+    // 리뷰 목록 조회
+    @GetMapping
+    public ResponseEntity<List<Review>> findById(
+            @RequestParam(required = false) UUID userId,
+            @RequestParam(required = false) UUID bookId,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "createdAt") String orderBy,
+            @RequestParam(defaultValue = "DESC") String direction,
+            @RequestParam(required = false) String cursor,
+            @RequestParam(required = false) String after,
+            @RequestParam(defaultValue = "50") int limit,
+            @RequestHeader(value = "Deokhugam-Request-User-ID", required = true) UUID requestUserId
+    ){
+        ReviewSearchRequest request = new ReviewSearchRequest(
+                userId, bookId, keyword, orderBy, direction, cursor, after, limit, requestUserId
+        );
+        List<Review> searchResult = reviewService.findReviews(request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(searchResult);
     }
 
     // 리뷰 좋아요 스위치 요청
