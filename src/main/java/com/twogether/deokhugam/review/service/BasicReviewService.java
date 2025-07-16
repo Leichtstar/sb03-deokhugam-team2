@@ -5,6 +5,7 @@ import com.twogether.deokhugam.book.repository.BookRepository;
 import com.twogether.deokhugam.review.dto.ReviewDto;
 import com.twogether.deokhugam.review.dto.ReviewLikeDto;
 import com.twogether.deokhugam.review.dto.request.ReviewCreateRequest;
+import com.twogether.deokhugam.review.dto.request.ReviewSearchRequest;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.review.entity.ReviewLike;
 import com.twogether.deokhugam.review.exception.ReviewExistException;
@@ -103,7 +104,7 @@ public class BasicReviewService implements ReviewService{
     // 리뷰 목록 조회
     @Override
     @Transactional(readOnly = true)
-    public List<Review> findReviews(String keyword) {
+    public List<Review> findReviews(ReviewSearchRequest keyword) {
         return reviewRepository.findByFilter(keyword);
     }
 
