@@ -142,7 +142,6 @@ class CommentServiceTest {
     }
 
     @Test
-    @Disabled
     @DisplayName("정상적으로 댓글 등록에 성공한다")
     void createComment_success() {
         // given
