@@ -28,6 +28,10 @@ public class PopularBookRankingWriter implements ItemWriter<PopularBookRanking> 
         }
 
         try {
+            for (int i = 0; i < rankingList.size(); i++) {
+                rankingList.get(i).assignRank(i + 1);
+            }
+
             popularBookRankingRepository.saveAll(rankingList);
             log.info("인기 도서 랭킹 {}건 저장 완료", rankingList.size());
         } catch (Exception e) {

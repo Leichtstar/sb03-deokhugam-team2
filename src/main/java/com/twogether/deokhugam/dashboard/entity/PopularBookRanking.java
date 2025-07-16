@@ -81,4 +81,8 @@ public class PopularBookRanking {
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    public void assignRank(int rank) {
+        this.rank = rank;
+    }
 }

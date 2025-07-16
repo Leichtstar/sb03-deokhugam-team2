@@ -8,6 +8,7 @@ import com.twogether.deokhugam.book.entity.Book;
 import com.twogether.deokhugam.dashboard.batch.BookScoreProcessor;
 import com.twogether.deokhugam.dashboard.batch.model.BookScoreDto;
 import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
+import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import jakarta.persistence.EntityManager;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +23,7 @@ class BookScoreProcessorTest {
     @BeforeEach
     void setUp() {
         em = mock(EntityManager.class);
-        processor = new BookScoreProcessor(em, "DAILY");
+        processor = new BookScoreProcessor(em, RankingPeriod.DAILY);
     }
 
     @Test
@@ -51,6 +52,7 @@ class BookScoreProcessorTest {
         assertThat(result.getReviewCount()).isEqualTo(5L);
         assertThat(result.getRating()).isEqualTo(4.0);
         assertThat(result.getScore()).isEqualTo(dto.calculateScore());
+        assertThat(result.getPeriod()).isEqualTo(RankingPeriod.DAILY);
     }
 
     @Test

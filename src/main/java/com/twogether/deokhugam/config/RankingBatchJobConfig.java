@@ -6,12 +6,10 @@ import com.twogether.deokhugam.dashboard.batch.model.BookScoreDto;
 import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import jakarta.persistence.EntityManager;
-import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -31,45 +29,37 @@ public class RankingBatchJobConfig {
 
     @Bean
     public Job popularBookRankingJob(JobRepository jobRepository,
-        PlatformTransactionManager transactionManager,
-        @Value("#{jobParameters['period']}") String periodKey) {
-
-        RankingPeriod period = RankingPeriod.valueOf(periodKey.toUpperCase());
-        LocalDateTime now = LocalDateTime.now();
-
-        LocalDateTime start = switch (period) {
-            case DAILY -> now.minusDays(1);
-            case WEEKLY -> now.minusWeeks(1);
-            case MONTHLY -> now.minusMonths(1);
-            case ALL_TIME -> null;
-        };
-
-        LocalDateTime end = period == RankingPeriod.ALL_TIME ? null : now;
-
-        Step step = createStep(jobRepository, transactionManager,
-            "popularBookStep_" + period.name(), period, start, end);
-
+        PlatformTransactionManager transactionManager) {
         return new JobBuilder("popularBookRankingJob", jobRepository)
-            .start(step)
+            .start(popularBookRankingStep(jobRepository, transactionManager, null))
             .build();
     }
 
-    private Step createStep(JobRepository jobRepository,
+    @Bean
+    @JobScope
+    public Step popularBookRankingStep(JobRepository jobRepository,
         PlatformTransactionManager transactionManager,
-        String stepName,
-        RankingPeriod period,
-        LocalDateTime start,
-        LocalDateTime end) {
+        @Value("#{jobParameters['period']}") String periodKey) {
 
-        ItemReader<BookScoreDto> reader = new JpaBookScoreReader(em, start, end);
-        ItemProcessor<BookScoreDto, PopularBookRanking> processor = new BookScoreProcessor(em, period.name());
+        if (periodKey == null) {
+            throw new IllegalArgumentException("JobParameter 'period' must be provided");
+        }
+
+        RankingPeriod period = RankingPeriod.valueOf(periodKey.toUpperCase());
+
+        ItemReader<BookScoreDto> reader = new JpaBookScoreReader(em, period);
+        ItemProcessor<BookScoreDto, PopularBookRanking> processor = new BookScoreProcessor(em, period);
         ItemWriter<PopularBookRanking> writer = items -> {
-            for (PopularBookRanking ranking : items) em.persist(ranking);
+            int rank = 1;
+            for (PopularBookRanking item : items) {
+                item.assignRank(rank++);
+                em.persist(item);
+            }
             em.flush();
             em.clear();
         };
 
-        return new StepBuilder(stepName, jobRepository)
+        return new StepBuilder("popularBookStep_" + period.name(), jobRepository)
             .<BookScoreDto, PopularBookRanking>chunk(100, transactionManager)
             .reader(reader)
             .processor(processor)

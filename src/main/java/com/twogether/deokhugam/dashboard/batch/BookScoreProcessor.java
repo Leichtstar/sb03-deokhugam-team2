@@ -11,17 +11,15 @@ import org.springframework.batch.item.ItemProcessor;
 public class BookScoreProcessor implements ItemProcessor<BookScoreDto, PopularBookRanking> {
 
     private final EntityManager em;
-    private final String periodKey;
+    private final RankingPeriod period;
 
-    public BookScoreProcessor(EntityManager em, String periodKey) {
+    public BookScoreProcessor(EntityManager em, RankingPeriod period) {
         this.em = em;
-        this.periodKey = periodKey;
+        this.period = period;
     }
 
     @Override
     public PopularBookRanking process(BookScoreDto dto) {
-        RankingPeriod period = RankingPeriod.valueOf(periodKey.toUpperCase());
-
         Book book = em.find(Book.class, dto.bookId());
         if (book == null) return null;
 
