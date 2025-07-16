@@ -1,4 +1,4 @@
-package com.twogether.deokhugam.dashboard.dto;
+package com.twogether.deokhugam.dashboard.dto.response;
 
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import io.swagger.v3.oas.annotations.media.Schema;

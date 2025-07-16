@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-public interface PopularBookRankingRepository extends JpaRepository<PopularBookRanking, UUID> {
+public interface PopularBookRankingRepository extends JpaRepository<PopularBookRanking, UUID>, PopularBookRankingCustomRepository {
 
     @Modifying
     @Transactional

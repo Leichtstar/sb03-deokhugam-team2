@@ -48,4 +48,14 @@ public class User {
         this.nickname = nickname;
         this.password = password;
     }
+
+    public void update(String newNickname) {
+        if (newNickname != null && !newNickname.equals(this.nickname)) {
+            this.nickname = newNickname;
+        }
+    }
+
+    public void softDelete() {
+        this.isDeleted = true;
+    }
 }

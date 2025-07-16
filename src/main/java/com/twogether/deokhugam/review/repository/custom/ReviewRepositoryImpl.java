@@ -5,7 +5,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.twogether.deokhugam.book.entity.QBook;
-import com.twogether.deokhugam.dashboard.dto.BookScoreDto;
+import com.twogether.deokhugam.dashboard.batch.model.BookScoreDto;
 import com.twogether.deokhugam.review.dto.request.ReviewSearchRequest;
 import com.twogether.deokhugam.review.entity.QReview;
 import com.twogether.deokhugam.review.entity.Review;

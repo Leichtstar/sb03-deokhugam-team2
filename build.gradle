@@ -39,10 +39,14 @@ dependencies {
     implementation 'software.amazon.awssdk:s3:2.31.7' // AWS SDK v2
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
+
+    // QueryDSL 추가 (Jakarta 기반)
+    implementation "com.querydsl:querydsl-jpa:5.0.0:jakarta"
+    annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api:3.1.0"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api:2.1.1"
 
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
@@ -54,97 +58,6 @@ dependencies {
     testImplementation 'org.springframework:spring-test'
     testImplementation 'org.springframework:spring-web'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    implementation "com.querydsl:querydsl-jpa:5.0.0:jakarta"
-    annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
-    annotationProcessor "jakarta.persistence:jakarta.persistence-api:3.1.0"
-    annotationProcessor "jakarta.annotation:jakarta.annotation-api:2.1.1"
-
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
-}
-
-test {
-    finalizedBy jacocoTestReport
-}
-
-jacocoTestReport {
-    dependsOn test
-    reports {
-        xml.required = true
-        html.required = true
-    }
-
-    // 커버리지 측정에서 제외할 클래스들 (상세 설정)
-    afterEvaluate {
-        classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: [
-                    // === 메인 클래스 ===
-                    '**/DeokhugamApplication.class',           // Spring Boot 메인 클래스
-
-                    // === 설정 클래스들 ===
-                    '**/config/**',                           // config 패키지 전체
-                    '**/*Config.class',                       // ~Config로 끝나는 모든 클래스
-
-                    // === 엔터티 관련 ===
-                    '**/*Entity.class',                       // JPA Entity 클래스들
-                    '**/entity/**',                           // entity 패키지 전체
-
-                    // === DTO 관련 ===
-                    '**/*Dto.class',                          // DTO 클래스들
-                    '**/*DTO.class',                          // DTO (대문자)
-                    '**/dto/**',                              // dto 패키지 전체
-
-                    // === Request/Response 클래스들 ===
-                    '**/*Request.class',                      // Request 클래스들
-                    '**/*Response.class',                     // Response 클래스들
-                    '**/request/**',                          // request 패키지
-                    '**/response/**',                         // response 패키지
-
-                    // === 예외 관련 ===
-                    '**/*Exception.class',                    // 커스텀 Exception들
-                    '**/exception/**',                        // exception 패키지
-                    '**/common/exception/**',                 // 공통 예외 패키지
-
-                    // === 컨트롤러 (선택사항) ===
-                    '**/*Controller.class',                   // REST Controller들 (통합테스트에서 다룰 예정)
-                    '**/controller/**',                       // controller 패키지
-
-                    // === Batch 관련 ===
-                    '**/batch/**',                           // Spring Batch 관련
-                    '**/*Job.class',                         // Batch Job 클래스들
-                    '**/*Step.class',                        // Batch Step 클래스들
-
-                    // === MapStruct 관련 ===
-                    '**/*Mapper.class',                       // MapStruct 매퍼 인터페이스
-                    '**/*MapperImpl.class',                   // MapStruct 생성 구현체
-
-                    // === Enum 클래스들 ===
-                    '**/*Enum.class',                         // Enum 클래스들 (선택사항)
-
-                    // === 상수 클래스들 ===
-                    '**/*Constants.class',                    // 상수 클래스들
-                    '**/*Constant.class',
-
-                    // === 특정 패키지 전체 제외 ===
-                    '**/generated/**',                        // 자동 생성된 코드
-                    '**/build/**'                            // 빌드 관련 파일들
-            ])
-        }))
-    }
-}
-
-// 테스트 커버리지 최소 기준 설정
-jacocoTestCoverageVerification {
-    violationRules {
-        rule {
-            limit {
-                minimum = 0.80  // 80% 이상 커버리지 요구
-            }
-        }
-    }
 }
 
 def querydslDir = layout.buildDirectory.dir("generated/querydsl").get().asFile
@@ -159,4 +72,98 @@ tasks.withType(JavaCompile).configureEach {
 
 clean.doLast {
     file(querydslDir).deleteDir()
+}
+
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+test {
+    finalizedBy jacocoTestReport
+}
+
+def excludeClasses = [
+        // === 메인 클래스 ===
+        '**/DeokhugamApplication.class',           // Spring Boot 메인 클래스
+
+        // === 설정 클래스들 ===
+        '**/config/**',                           // config 패키지 전체
+        '**/*Config.class',                       // ~Config로 끝나는 모든 클래스
+
+        // === 엔터티 관련 ===
+        '**/*Entity.class',                       // JPA Entity 클래스들
+        '**/entity/**',                           // entity 패키지 전체
+
+        // === DTO 관련 ===
+        '**/*Dto.class',                          // DTO 클래스들
+        '**/*DTO.class',                          // DTO (대문자)
+        '**/dto/**',                              // dto 패키지 전체
+
+        // === Request/Response 클래스들 ===
+        '**/*Request.class',                      // Request 클래스들
+        '**/*Response.class',                     // Response 클래스들
+        '**/request/**',                          // request 패키지
+        '**/response/**',                         // response 패키지
+
+        // === 예외 관련 ===
+        '**/*Exception.class',                    // 커스텀 Exception들
+        '**/exception/**',                        // exception 패키지
+        '**/common/exception/**',                 // 공통 예외 패키지
+
+        // === 컨트롤러 ===
+        '**/*Controller.class',                   // REST Controller들
+        '**/controller/**',                       // controller 패키지
+
+        // === 레포지토리 ===
+        '**/*Repository.class',                   // Repository들
+        '**/repository/**',                       // repository 패키지
+
+        // === Batch 관련 ===
+        '**/batch/**',                           // Spring Batch 관련
+        '**/*Job.class',                         // Batch Job 클래스들
+        '**/*Step.class',                        // Batch Step 클래스들
+
+        // === MapStruct 관련 ===
+        '**/*Mapper.class',                       // MapStruct 매퍼 인터페이스
+        '**/*MapperImpl.class',                   // MapStruct 생성 구현체
+
+        // === Enum 클래스들 ===
+        '**/*Enum.class',                         // Enum 클래스들 (선택사항)
+
+        // === 상수 클래스들 ===
+        '**/*Constants.class',                    // 상수 클래스들
+        '**/*Constant.class',
+
+        // === 특정 패키지 전체 제외 ===
+        '**/generated/**',                        // 자동 생성된 코드
+        '**/build/**'                            // 빌드 관련 파일들
+]
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+// 테스트 커버리지 최소 기준 설정
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.80  // 80% 이상 커버리지 요구
+            }
+        }
+    }
+}
+
+// 커버리지 측정에서 제외할 클래스들 설정
+afterEvaluate {
+    [jacocoTestReport, jacocoTestCoverageVerification].each { task ->
+        task.classDirectories.setFrom(files(task.classDirectories.files.collect {
+            fileTree(dir: it, exclude: excludeClasses)
+        }))
+    }
 }
