@@ -1,11 +1,10 @@
 package com.twogether.deokhugam.book.dto.response;
 
-import com.twogether.deokhugam.book.dto.BookDto;
 import java.time.Instant;
 import java.util.List;
 
-public record CursorPageResponseBookDto(
-    List<BookDto> content,
+public record BookPageResponse<T>(
+    List<T> content,
     String nextCursor,
     Instant nextAfter,
     int size,
