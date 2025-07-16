@@ -31,6 +31,8 @@ public class BookScoreProcessor implements ItemProcessor<BookScoreDto, PopularBo
             .author(dto.author())
             .thumbnailUrl(dto.thumbnailUrl())
             .score(dto.calculateScore())
+            .reviewCount(dto.reviewCount())
+            .rating(dto.averageRating())
             .period(period)
             .createdAt(LocalDateTime.now())
             .build();
