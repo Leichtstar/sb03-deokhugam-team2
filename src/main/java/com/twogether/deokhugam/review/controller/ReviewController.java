@@ -1,14 +1,12 @@
 package com.twogether.deokhugam.review.controller;
 
+import com.twogether.deokhugam.common.dto.CursorPageResponseDto;
 import com.twogether.deokhugam.review.dto.ReviewDto;
 import com.twogether.deokhugam.review.dto.ReviewLikeDto;
 import com.twogether.deokhugam.review.dto.request.ReviewCreateRequest;
 import com.twogether.deokhugam.review.dto.request.ReviewSearchRequest;
-import com.twogether.deokhugam.review.entity.Review;
-import com.twogether.deokhugam.review.exception.ReviewNotFoundException;
 import com.twogether.deokhugam.review.service.ReviewService;
 import jakarta.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -57,7 +55,7 @@ public class ReviewController {
 
     // 리뷰 목록 조회
     @GetMapping
-    public ResponseEntity<List<Review>> findById(
+    public ResponseEntity<CursorPageResponseDto<ReviewDto>> findById(
             @RequestParam(required = false) UUID userId,
             @RequestParam(required = false) UUID bookId,
             @RequestParam(required = false) String keyword,
@@ -71,7 +69,8 @@ public class ReviewController {
         ReviewSearchRequest request = new ReviewSearchRequest(
                 userId, bookId, keyword, orderBy, direction, cursor, after, limit, requestUserId
         );
-        List<Review> searchResult = reviewService.findReviews(request);
+
+        CursorPageResponseDto<ReviewDto> searchResult = reviewService.findReviews(request);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
