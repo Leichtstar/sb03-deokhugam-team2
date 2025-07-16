@@ -21,6 +21,7 @@ public class PopularBookRankingScheduler {
     public void runPopularBookRankingJob() {
         try {
             JobParameters jobParameters = new JobParametersBuilder()
+                .addString("period", "DAILY") // 여기서 WEEKLY 등으로 바꾸면 확장 가능
                 .addLong("timestamp", System.currentTimeMillis())
                 .toJobParameters();
 
