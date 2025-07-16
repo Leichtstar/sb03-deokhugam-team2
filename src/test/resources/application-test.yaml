@@ -15,3 +15,14 @@ spring:
     init:
       mode: always
       schema-locations: classpath:schema-test.sql
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    metrics:
+      access: unrestricted
+  metrics:
+    enable:
+      all: true
