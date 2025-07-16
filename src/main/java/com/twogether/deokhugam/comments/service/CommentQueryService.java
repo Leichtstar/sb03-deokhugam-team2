@@ -4,7 +4,7 @@ import com.twogether.deokhugam.comments.dto.CommentResponse;
 import com.twogether.deokhugam.comments.entity.Comment;
 import com.twogether.deokhugam.comments.mapper.CommentMapper;
 import com.twogether.deokhugam.comments.repository.CommentRepository;
-import com.twogether.deokhugam.common.exception.dto.CursorPageResponse;
+import com.twogether.deokhugam.common.dto.CursorPageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
@@ -71,6 +71,13 @@ public class CommentQueryService {
             nextCursor = Base64.getUrlEncoder().encodeToString(raw.getBytes(StandardCharsets.UTF_8));
         }
 
-        return new CursorPageResponse<>(dtoList, nextCursor);
+        return new CursorPageResponse<>(
+            dtoList,
+            nextCursor,
+            afterAt,
+            pageSize,
+            hasNext
+        );
+
     }
 }

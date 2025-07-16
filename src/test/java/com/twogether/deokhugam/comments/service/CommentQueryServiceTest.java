@@ -4,7 +4,7 @@ import com.twogether.deokhugam.comments.dto.CommentResponse;
 import com.twogether.deokhugam.comments.entity.Comment;
 import com.twogether.deokhugam.comments.mapper.CommentMapper;
 import com.twogether.deokhugam.comments.repository.CommentRepository;
-import com.twogether.deokhugam.common.exception.dto.CursorPageResponse;
+import com.twogether.deokhugam.common.dto.CursorPageResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -71,7 +71,7 @@ class CommentQueryServiceTest {
         CursorPageResponse<CommentResponse> res =
             sut.getComments(reviewId, Sort.Direction.DESC, null, null, 1);
 
-        assertThat(res.content()).hasSize(1);
+        assertThat(res.getContent()).hasSize(1);
     }
 
     @Test
@@ -96,7 +96,7 @@ class CommentQueryServiceTest {
         CursorPageResponse<CommentResponse> res =
             sut.getComments(reviewId, Sort.Direction.ASC, cursor, null, null);
 
-        assertThat(res.nextCursor()).isNull();
+        assertThat(res.getNextCursor()).isNull();
     }
 
     @Test
@@ -147,7 +147,7 @@ class CommentQueryServiceTest {
         CursorPageResponse<CommentResponse> res =
             sut.getComments(rid, Sort.Direction.DESC, null, null, 10);
 
-        assertThat(res.nextCursor()).isNull();
+        assertThat(res.getNextCursor()).isNull();
     }
 
     @Test
@@ -198,7 +198,7 @@ class CommentQueryServiceTest {
         CursorPageResponse<CommentResponse> res =
             sut.getComments(rid, Sort.Direction.DESC, null, null, 1);
 
-        assertThat(res.nextCursor()).isNotNull();          // ③ 분기 실행 검증
+        assertThat(res.getNextCursor()).isNotNull();        // ③ 분기 실행 검증
     }
 
 

@@ -3,8 +3,8 @@ package com.twogether.deokhugam.comments.controller;
 import com.twogether.deokhugam.comments.dto.CommentResponse;
 import com.twogether.deokhugam.comments.service.CommentQueryService;
 import com.twogether.deokhugam.comments.service.CommentService;
-import com.twogether.deokhugam.common.exception.dto.CursorPageResponse;
 
+import com.twogether.deokhugam.common.dto.CursorPageResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -34,7 +34,7 @@ class CommentControllerTest {
     void listEndpoint_mapsToServiceAndReturns200() throws Exception {
         UUID rid = UUID.randomUUID();
         CursorPageResponse<CommentResponse> dummy =
-            new CursorPageResponse<>(List.of(), null);
+            new CursorPageResponse<>(List.of(), null, null, 0, false);
         when(queryService.getComments(any(), any(), any(), any(), any()))
             .thenReturn(dummy);
 

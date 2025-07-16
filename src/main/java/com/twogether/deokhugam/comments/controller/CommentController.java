@@ -4,7 +4,11 @@ import com.twogether.deokhugam.comments.dto.CommentCreateRequest;
 import com.twogether.deokhugam.comments.dto.CommentResponse;
 import com.twogether.deokhugam.comments.service.CommentQueryService;
 import com.twogether.deokhugam.comments.service.CommentService;
-import com.twogether.deokhugam.common.exception.dto.CursorPageResponse;
+import com.twogether.deokhugam.common.dto.CursorPageResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -40,16 +44,36 @@ public class CommentController {
     }
 
     @Operation(summary = "댓글 목록 조회", description = "시간 역순 + 커서 페이지네이션")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "댓글 목록 조회 성공",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = CursorPageResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "잘못된 요청 (정렬 방향 오류, 페이징 파라미터 오류, 리뷰 ID 누락)",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = CursorPageResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "리뷰 정보 없음",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = CursorPageResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "500",
+            description = "서버 내부 오류",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = CursorPageResponse.class))
+        )
+    })
     @GetMapping
     public CursorPageResponse<CommentResponse> list(
         @RequestParam UUID reviewId,
         @RequestParam(defaultValue = "DESC") Direction direction,
         @RequestParam(required = false) String cursor,
-        @RequestParam(required = false)
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-        LocalDateTime after,
-        @RequestParam(required = false, defaultValue = "50") Integer limit) {
-
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime after,
+        @RequestParam(required = false, defaultValue = "50") Integer limit
+    ) {
         return queryService.getComments(reviewId, direction, cursor, after, limit);
     }
 }
