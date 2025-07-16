@@ -17,8 +17,12 @@ public interface CommentMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "isDeleted", ignore = true)
+    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "review", ignore = true)
     Comment toEntity(CommentCreateRequest dto);
 
-    @Mapping(target = "userNickname", expression = "java(null)") // 추후 User 연동 시 수정
+    @Mapping(target = "userNickname", source = "user.nickname")
+    @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "reviewId", source = "review.id")
     CommentResponse toResponse(Comment entity);
 }
