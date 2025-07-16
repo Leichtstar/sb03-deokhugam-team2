@@ -1,5 +1,6 @@
 package com.twogether.deokhugam.config;
 
+import com.twogether.deokhugam.dashboard.batch.BookScoreProcessor;
 import com.twogether.deokhugam.dashboard.batch.JpaBookScoreReader;
 import com.twogether.deokhugam.dashboard.batch.model.BookScoreDto;
 import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
