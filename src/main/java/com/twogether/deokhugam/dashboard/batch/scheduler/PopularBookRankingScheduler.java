@@ -1,4 +1,4 @@
-package com.twogether.deokhugam.dashboard.batch;
+package com.twogether.deokhugam.dashboard.batch.scheduler;
 
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import java.util.UUID;

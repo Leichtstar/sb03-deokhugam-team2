@@ -5,7 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.twogether.deokhugam.book.entity.Book;
-import com.twogether.deokhugam.dashboard.batch.BookScoreProcessor;
+import com.twogether.deokhugam.dashboard.batch.processor.BookScoreProcessor;
 import com.twogether.deokhugam.dashboard.batch.model.BookScoreDto;
 import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;

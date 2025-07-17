@@ -1,8 +1,8 @@
 package com.twogether.deokhugam.config;
 
-import com.twogether.deokhugam.dashboard.batch.BookScoreProcessor;
-import com.twogether.deokhugam.dashboard.batch.JpaBookScoreReader;
-import com.twogether.deokhugam.dashboard.batch.PopularBookRankingWriter;
+import com.twogether.deokhugam.dashboard.batch.processor.BookScoreProcessor;
+import com.twogether.deokhugam.dashboard.batch.reader.JpaBookScoreReader;
+import com.twogether.deokhugam.dashboard.batch.writer.PopularBookRankingWriter;
 import com.twogether.deokhugam.dashboard.batch.model.BookScoreDto;
 import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
@@ -16,7 +16,6 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

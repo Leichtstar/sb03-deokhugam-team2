@@ -1,4 +1,4 @@
-package com.twogether.deokhugam.dashboard.batch;
+package com.twogether.deokhugam.dashboard.batch.processor;
 
 import com.twogether.deokhugam.book.entity.Book;
 import com.twogether.deokhugam.dashboard.batch.model.BookScoreDto;

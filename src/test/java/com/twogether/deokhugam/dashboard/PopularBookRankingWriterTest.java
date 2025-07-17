@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verify;
 
 import com.twogether.deokhugam.common.exception.DeokhugamException;
 import com.twogether.deokhugam.common.exception.ErrorCode;
-import com.twogether.deokhugam.dashboard.batch.PopularBookRankingWriter;
+import com.twogether.deokhugam.dashboard.batch.writer.PopularBookRankingWriter;
 import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
 import com.twogether.deokhugam.dashboard.repository.PopularBookRankingRepository;
 import java.util.Collections;
