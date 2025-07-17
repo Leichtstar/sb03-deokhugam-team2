@@ -4,7 +4,6 @@ import com.twogether.deokhugam.dashboard.batch.model.ReviewScoreDto;
 import com.twogether.deokhugam.dashboard.entity.PopularReviewRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import java.time.LocalDateTime;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.item.ItemProcessor;
 
@@ -18,7 +17,6 @@ public class ReviewScoreProcessor implements ItemProcessor<ReviewScoreDto, Popul
         double score = dto.calculateScore();
 
         return PopularReviewRanking.builder()
-            .id(UUID.randomUUID())
             .period(period)
             .reviewId(dto.reviewId())
             .userId(dto.userId())

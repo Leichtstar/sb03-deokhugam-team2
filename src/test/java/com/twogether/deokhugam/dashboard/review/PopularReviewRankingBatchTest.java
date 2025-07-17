@@ -17,6 +17,7 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 
@@ -25,6 +26,7 @@ import org.springframework.test.context.jdbc.Sql;
 @DisplayName("PopularReviewRanking 배치 통합 테스트")
 @TestPropertySource(properties = "spring.profiles.active=test")
 @Sql("/sql/popular_review_ranking_test_data.sql")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class PopularReviewRankingBatchTest {
 
     @Autowired
