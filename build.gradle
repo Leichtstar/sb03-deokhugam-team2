@@ -60,20 +60,20 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-// QueryDSL Q타입 생성 디렉토리 설정
-def querydslDir = "$buildDir/generated/querydsl"
+def querydslDir = layout.buildDirectory.dir("generated/querydsl").get().asFile
 
 sourceSets {
-    main {
-        java {
-            srcDirs += querydslDir
-        }
-    }
+    main.java.srcDirs += [ querydslDir ]
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.annotationProcessorGeneratedSourcesDirectory = file(querydslDir)
+    options.generatedSourceOutputDirectory.set(querydslDir)
 }
+
+clean.doLast {
+    file(querydslDir).deleteDir()
+}
+
 
 tasks.named('test') {
     useJUnitPlatform()
@@ -137,7 +137,10 @@ def excludeClasses = [
 
         // === 특정 패키지 전체 제외 ===
         '**/generated/**',                        // 자동 생성된 코드
-        '**/build/**'                            // 빌드 관련 파일들
+        '**/build/**',                            // 빌드 관련 파일들
+
+        // === Helper 클래스 ===
+        '**/review/service/util/**'
 ]
 
 jacocoTestReport {
