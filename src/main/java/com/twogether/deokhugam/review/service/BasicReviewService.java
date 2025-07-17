@@ -7,11 +7,13 @@ import com.twogether.deokhugam.review.dto.ReviewDto;
 import com.twogether.deokhugam.review.dto.ReviewLikeDto;
 import com.twogether.deokhugam.review.dto.request.ReviewCreateRequest;
 import com.twogether.deokhugam.review.dto.request.ReviewSearchRequest;
+import com.twogether.deokhugam.review.dto.request.ReviewUpdateRequest;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.review.entity.ReviewLike;
 import com.twogether.deokhugam.review.exception.ReviewExistException;
 import com.twogether.deokhugam.review.exception.ReviewLikeNotFoundException;
 import com.twogether.deokhugam.review.exception.ReviewNotFoundException;
+import com.twogether.deokhugam.review.exception.ReviewNotOwnedException;
 import com.twogether.deokhugam.review.mapper.ReviewLikeMapper;
 import com.twogether.deokhugam.review.mapper.ReviewMapper;
 import com.twogether.deokhugam.review.repository.ReviewLikeRepository;
@@ -136,6 +138,28 @@ public class BasicReviewService implements ReviewService{
         );
 
         return responseDtoTest;
+    }
+
+    // 리뷰 수정 (리뷰 내용, 평점)
+    @Override
+    @Transactional
+    public ReviewDto updateReview(UUID reviewId, UUID requestUserId, ReviewUpdateRequest updateRequest) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ReviewNotFoundException(reviewId));
+
+        if (!review.getUser().getId().equals(requestUserId)){
+            throw new ReviewNotOwnedException();
+        }
+        review.updateReview(updateRequest.content(), updateRequest.rating());
+        reviewRepository.save(review);
+
+        log.info("[BasicReviewService]: 리뷰 수정 완료 newContent: {}, newRating: {}", updateRequest.content(), updateRequest.rating());
+
+        boolean likeByMe = reviewLikeRepository.findByUserIdAndReviewId(requestUserId, reviewId)
+                .map(ReviewLike::isLiked)
+                .orElse(false);
+
+        return reviewMapper.toDto(review, likeByMe);
     }
 
     // 리뷰 좋아요 기능
