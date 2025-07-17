@@ -39,4 +39,3 @@ out/
 ### 환경변수 ###
 *.env
 **/application-dev.yaml
-**/application.yaml
