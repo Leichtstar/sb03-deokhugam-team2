@@ -13,13 +13,13 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BookRepository extends JpaRepository<Book, UUID> {
-	Boolean existsByIsbn(String isbn);
+	boolean existsByIsbn(String isbn);
 	@Query("""
     SELECT COUNT(b) FROM Book b
     WHERE b.isDeleted = false
-      AND (:keyword IS NULL OR 
-           LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR 
-           LOWER(b.author) LIKE LOWER(CONCAT('%', :keyword, '%')) OR 
+      AND (:keyword IS NULL OR
+           LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+           LOWER(b.author) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
            LOWER(b.isbn) LIKE LOWER(CONCAT('%', :keyword, '%')))
 """)
 	long countByKeyword(@Param("keyword") String keyword);
@@ -172,9 +172,9 @@ public interface BookRepository extends JpaRepository<Book, UUID> {
 	@Query("""
     SELECT b FROM Book b
     WHERE b.isDeleted = false
-      AND (:keyword IS NULL OR 
-           LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR 
-           LOWER(b.author) LIKE LOWER(CONCAT('%', :keyword, '%')) OR 
+      AND (:keyword IS NULL OR
+           LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+           LOWER(b.author) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
            LOWER(b.isbn) LIKE LOWER(CONCAT('%', :keyword, '%')))
       AND (:after IS NULL OR b.createdAt < :after)
     ORDER BY b.createdAt DESC
@@ -188,9 +188,9 @@ public interface BookRepository extends JpaRepository<Book, UUID> {
 	@Query("""
     SELECT b FROM Book b
     WHERE b.isDeleted = false
-      AND (:keyword IS NULL OR 
-           LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR 
-           LOWER(b.author) LIKE LOWER(CONCAT('%', :keyword, '%')) OR 
+      AND (:keyword IS NULL OR
+           LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+           LOWER(b.author) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
            LOWER(b.isbn) LIKE LOWER(CONCAT('%', :keyword, '%')))
       AND (:after IS NULL OR b.createdAt > :after)
     ORDER BY b.createdAt ASC
