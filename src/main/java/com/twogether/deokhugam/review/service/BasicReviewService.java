@@ -156,16 +156,12 @@ public class BasicReviewService implements ReviewService{
     @Transactional
     public ReviewLikeDto reviewLike(UUID reviewId, UUID userId) {
 
-        ReviewLike reviewLike = reviewLikeRepository.findByUserIdAndReviewId(userId, reviewId)
-                .orElseThrow(
-                        () -> new ReviewLikeNotFoundException());
-
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(
                         () -> new ReviewNotFoundException(reviewId));
 
-        if (reviewLike == null){
-            // 좋아요가 비어있다면
+        // 좋아요가 비어있다면
+        if (reviewLikeRepository.findByUserIdAndReviewId(userId, reviewId).isEmpty()){
             User reviewer = userRepository.findById(userId)
                     .orElseThrow(
                             () -> new NoSuchElementException("사용자를 찾을 수 없습니다. " + userId));
@@ -184,6 +180,10 @@ public class BasicReviewService implements ReviewService{
             return reviewLikeMapper.toDto(newReviewLike);
         }
         else{
+
+            ReviewLike reviewLike = reviewLikeRepository.findByUserIdAndReviewId(userId, reviewId)
+                    .orElseThrow(
+                            () -> new ReviewLikeNotFoundException());
 
             if (reviewLike.isLiked()){
                 // 좋아요 상태가 true 라면
