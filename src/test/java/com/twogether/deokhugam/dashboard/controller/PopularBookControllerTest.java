@@ -1,4 +1,4 @@
-package com.twogether.deokhugam.dashboard;
+package com.twogether.deokhugam.dashboard.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.twogether.deokhugam.common.dto.CursorPageResponse;
 import com.twogether.deokhugam.common.exception.DeokhugamException;
 import com.twogether.deokhugam.common.exception.ErrorCode;
-import com.twogether.deokhugam.dashboard.controller.DashboardController;
 import com.twogether.deokhugam.dashboard.dto.response.PopularBookDto;
 import com.twogether.deokhugam.dashboard.service.DashboardService;
 import java.util.Collections;
@@ -21,7 +20,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(DashboardController.class)
-class DashboardControllerTest {
+class PopularBookControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

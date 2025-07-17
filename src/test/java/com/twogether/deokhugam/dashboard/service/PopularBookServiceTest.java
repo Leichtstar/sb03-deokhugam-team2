@@ -1,4 +1,4 @@
-package com.twogether.deokhugam.dashboard;
+package com.twogether.deokhugam.dashboard.service;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -15,14 +15,12 @@ import com.twogether.deokhugam.common.exception.ErrorCode;
 import com.twogether.deokhugam.dashboard.dto.request.PopularRankingSearchRequest;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PopularBookRankingRepository;
-import com.twogether.deokhugam.dashboard.service.DashboardService;
-import com.twogether.deokhugam.dashboard.service.DashboardServiceImpl;
 import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class DashboardServiceTest {
+class PopularBookServiceTest {
 
     private DashboardService dashboardService;
     private PopularBookRankingRepository repository;
