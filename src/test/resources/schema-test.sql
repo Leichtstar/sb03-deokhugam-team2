@@ -58,7 +58,6 @@ CREATE TABLE reviews (
                          rating REAL NOT NULL,
                          like_count BIGINT,
                          comment_count BIGINT,
-                         liked_by_me BOOLEAN NOT NULL,
                          created_at TIMESTAMP NOT NULL,
                          updated_at TIMESTAMP,
                          is_deleted BOOLEAN NOT NULL
