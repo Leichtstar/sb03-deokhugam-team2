@@ -4,7 +4,6 @@ import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.review.repository.custom.ReviewRepositoryCustom;
 import java.util.UUID;
 
-import com.twogether.deokhugam.review.repository.custom.ReviewRepositoryCustom;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
