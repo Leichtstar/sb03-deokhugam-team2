@@ -4,8 +4,11 @@ import com.twogether.deokhugam.common.dto.CursorPageResponse;
 import com.twogether.deokhugam.dashboard.dto.response.PopularReviewDto;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PopularReviewRankingRepository;
+import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.stereotype.Service;
 
+@Service
 public class PopularReviewService {
 
     private final PopularReviewRankingRepository repository;
@@ -20,9 +23,24 @@ public class PopularReviewService {
         String after,
         int limit
     ) {
-        // 최소 구현: 테스트 통과를 위해 더미 리스트 반환
         List<PopularReviewDto> content = repository.findByPeriodWithCursor(period, cursor, after, limit);
 
-        return new CursorPageResponse<>(content, null, null, limit, content.size(), false);  // 임시 응답
+        boolean hasNext = content.size() == limit;
+        String nextCursor = null;
+        LocalDateTime nextAfter = null;
+
+        if (hasNext) {
+            PopularReviewDto last = content.get(content.size() - 1);
+            nextCursor = last.id().toString();
+            nextAfter = last.createdAt();
+        }
+
+        return new CursorPageResponse<>(
+            content,
+            nextCursor,
+            nextAfter,
+            limit,
+            hasNext
+        );
     }
 }
