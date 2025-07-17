@@ -4,10 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PopularBookRankingRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -29,6 +31,14 @@ class PopularBookRankingBatchTest {
 
     @Autowired
     private PopularBookRankingRepository rankingRepository;
+
+    @Autowired
+    private Job popularBookRankingJob;
+
+    @BeforeEach
+    void setUp() {
+        jobLauncherTestUtils.setJob(popularBookRankingJob);
+    }
 
     @ParameterizedTest(name = "period={0}인 배치 Job이 성공적으로 실행되고 데이터가 저장된다")
     @EnumSource(RankingPeriod.class)

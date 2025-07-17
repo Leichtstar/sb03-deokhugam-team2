@@ -26,3 +26,7 @@ management:
   metrics:
     enable:
       all: true
+naver:
+  api:
+    client-id: dummy-id
+    client-secret: dummy-secret
