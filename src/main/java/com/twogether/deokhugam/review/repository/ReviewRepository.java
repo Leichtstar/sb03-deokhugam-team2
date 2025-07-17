@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository;
 public interface ReviewRepository extends JpaRepository<Review, UUID> {
 
     boolean existsByUserIdAndBookId(UUID userId, UUID bookId);
+
 }
