@@ -12,6 +12,10 @@ public class ReviewLikeMapper {
             return null;
         }
 
+        if (reviewLike.getReview() == null || reviewLike.getUser() == null){
+            throw new IllegalStateException("ReviewLike가 null 값인 리뷰나 사용자를 참조하고 있습니다.");
+        }
+
         return new ReviewLikeDto(
                 reviewLike.getReview().getId(),
                 reviewLike.getUser().getId(),
