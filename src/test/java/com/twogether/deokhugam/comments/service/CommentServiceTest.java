@@ -8,7 +8,9 @@ import static org.mockito.Mockito.*;
 
 import com.twogether.deokhugam.comments.dto.CommentCreateRequest;
 import com.twogether.deokhugam.comments.dto.CommentResponse;
+import com.twogether.deokhugam.comments.dto.CommentUpdateRequest;
 import com.twogether.deokhugam.comments.entity.Comment;
+import com.twogether.deokhugam.comments.exception.CommentForbiddenException;
 import com.twogether.deokhugam.comments.exception.CommentNotFoundException;
 import com.twogether.deokhugam.comments.mapper.CommentMapper;
 import com.twogether.deokhugam.comments.repository.CommentRepository;
@@ -228,5 +230,72 @@ class CommentServiceTest {
 
         assertThatThrownBy(() -> commentService.getComment(id))
             .isInstanceOf(CommentNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("댓글을 정상적으로 수정한다")
+    void updateComment_success() {
+        UUID commentId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        User user = mock(User.class);
+
+        Comment comment = mock(Comment.class);
+        CommentUpdateRequest request = new CommentUpdateRequest("수정된 내용");
+        CommentResponse expectedResponse = mock(CommentResponse.class);
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+        when(comment.getIsDeleted()).thenReturn(false);
+        when(comment.getUser()).thenReturn(user);
+        when(comment.getUser().getId()).thenReturn(userId);
+        when(commentMapper.toResponse(comment)).thenReturn(expectedResponse);
+
+        CommentResponse result = commentService.updateComment(commentId, userId, request);
+
+        verify(comment).editContent("수정된 내용");
+        assertThat(result).isEqualTo(expectedResponse);
+    }
+
+    @Test
+    @DisplayName("삭제된 댓글을 수정 시 예외 발생")
+    void updateComment_deleted() {
+        UUID commentId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        Comment comment = mock(Comment.class);
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+        when(comment.getIsDeleted()).thenReturn(true);
+
+        assertThatThrownBy(() -> commentService.updateComment(commentId, userId, new CommentUpdateRequest("수정")))
+            .isInstanceOf(CommentNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 댓글을 수정 시 예외 발생")
+    void updateComment_notFound() {
+        UUID commentId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> commentService.updateComment(commentId, userId, new CommentUpdateRequest("수정")))
+            .isInstanceOf(CommentNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("타인이 쓴 댓글을 수정 시 권한 예외 발생")
+    void updateComment_forbidden() {
+        UUID commentId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        UUID anotherUserId = UUID.randomUUID();
+        Comment comment = mock(Comment.class);
+        User anotherUser = mock(User.class);
+
+        when(anotherUser.getId()).thenReturn(anotherUserId);
+        when(comment.getIsDeleted()).thenReturn(false);
+        when(comment.getUser()).thenReturn(anotherUser);
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+
+        assertThatThrownBy(() -> commentService.updateComment(commentId, userId, new CommentUpdateRequest("수정")))
+            .isInstanceOf(CommentForbiddenException.class);
     }
 }
