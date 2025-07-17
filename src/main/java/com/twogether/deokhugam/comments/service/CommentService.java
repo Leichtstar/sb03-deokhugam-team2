@@ -2,7 +2,9 @@ package com.twogether.deokhugam.comments.service;
 
 import com.twogether.deokhugam.comments.dto.CommentCreateRequest;
 import com.twogether.deokhugam.comments.dto.CommentResponse;
+import com.twogether.deokhugam.comments.dto.CommentUpdateRequest;
 import com.twogether.deokhugam.comments.entity.Comment;
+import com.twogether.deokhugam.comments.exception.CommentForbiddenException;
 import com.twogether.deokhugam.comments.exception.CommentNotFoundException;
 import com.twogether.deokhugam.comments.mapper.CommentMapper;
 import com.twogether.deokhugam.comments.repository.CommentRepository;
@@ -55,6 +57,19 @@ public class CommentService {
         Comment comment = commentRepository.findById(id)
             .filter(c -> !c.getIsDeleted())
             .orElseThrow(CommentNotFoundException::new);
+        return commentMapper.toResponse(comment);
+    }
+
+    @Transactional
+    public CommentResponse updateComment(UUID commentId, UUID userId,CommentUpdateRequest request) {
+        Comment comment = commentRepository.findById(commentId)
+            .filter(c -> !c.getIsDeleted())
+            .orElseThrow(CommentNotFoundException::new);
+
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new CommentForbiddenException(); // 403 Forbidden 커스텀 예외
+        }
+        comment.editContent(request.content());
         return commentMapper.toResponse(comment);
     }
 }

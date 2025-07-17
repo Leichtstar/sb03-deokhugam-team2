@@ -2,6 +2,7 @@ package com.twogether.deokhugam.comments.controller;
 
 import com.twogether.deokhugam.comments.dto.CommentCreateRequest;
 import com.twogether.deokhugam.comments.dto.CommentResponse;
+import com.twogether.deokhugam.comments.dto.CommentUpdateRequest;
 import com.twogether.deokhugam.comments.service.CommentQueryService;
 import com.twogether.deokhugam.comments.service.CommentService;
 import com.twogether.deokhugam.common.dto.CursorPageResponse;
@@ -95,5 +96,15 @@ public class CommentController {
     @GetMapping("/{commentId}")
     public ResponseEntity<CommentResponse> get(@PathVariable UUID commentId) {
         return ResponseEntity.ok(commentService.getComment(commentId));
+    }
+
+    @Operation(summary = "댓글 수정", description = "본인이 작성한 댓글을 수정합니다.")
+    @PatchMapping("/{commentId}")
+    public ResponseEntity<CommentResponse> update(
+        @PathVariable UUID commentId,
+        @RequestHeader("Deokhugam-Request-User-Id") UUID userId,
+        @Valid @RequestBody CommentUpdateRequest request
+    ) {
+        return ResponseEntity.ok(commentService.updateComment(commentId, userId, request));
     }
 }
