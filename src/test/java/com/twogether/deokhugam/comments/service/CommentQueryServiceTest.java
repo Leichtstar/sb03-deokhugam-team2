@@ -40,24 +40,26 @@ class CommentQueryServiceTest {
     @Mock CommentMapper commentMapper;
     @InjectMocks CommentQueryService sut;
 
-    private static Comment stubComment(UUID reviewId, UUID id,
-                                       LocalDateTime at, boolean deleted) {
+    private static Comment stubComment(UUID reviewId, UUID id, LocalDateTime at, boolean deleted) {
         Comment c = mock(Comment.class);
         when(c.getId()).thenReturn(id);
         when(c.getCreatedAt()).thenReturn(at);
-        // ↓ 필요 없으므로 삭제
         return c;
     }
 
-
     private static CommentResponse stubDto(Comment c) {
         return new CommentResponse(
-            c.getId(), "dummy", null, null, null,
-            c.getCreatedAt(), null, c.getIsDeleted());
+            c.getId(),
+            "dummy",
+            null,
+            null, null,
+            c.getCreatedAt(),
+            null,
+            c.getIsDeleted());
     }
 
     @Test
-    void desc_first_page() {
+    void shouldReturnFirstPageInDescendingOrder() {
         UUID reviewId = UUID.randomUUID();
         Comment c1 = stubComment(reviewId, UUID.randomUUID(), LocalDateTime.now(), false);
 
@@ -100,7 +102,7 @@ class CommentQueryServiceTest {
     }
 
     @Test
-    void invalid_cursor_uses_after() {
+    void shouldFallbackToDefaultWhenCursorIsInvalid() {
         UUID reviewId = UUID.randomUUID();
         LocalDateTime after = LocalDateTime.now().minusDays(1);
 

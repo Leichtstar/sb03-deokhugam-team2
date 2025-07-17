@@ -148,16 +148,18 @@ class CommentServiceTest {
         User mockUser = mock(User.class);
         Review mockReview = mock(Review.class);
         Comment mockComment = new Comment(mockUser, mockReview, "테스트 댓글입니다.");
+        CommentResponse expectedResponse = mock(CommentResponse.class);
 
         when(reviewRepository.findById(any())).thenReturn(Optional.of(mockReview));
         when(userRepository.findById(any())).thenReturn(Optional.of(mockUser));
         when(commentRepository.save(any(Comment.class))).thenReturn(mockComment);
-        when(commentMapper.toResponse(any(Comment.class))).thenReturn(mock(CommentResponse.class));
+        when(commentMapper.toResponse(any(Comment.class))).thenReturn(expectedResponse);
 
         // when
-        commentService.createComment(commentCreateRequest);
+        CommentResponse actualResponse = commentService.createComment(commentCreateRequest);
 
         // then
+        assertThat(actualResponse).isEqualTo(expectedResponse);
         verify(reviewRepository, times(1)).findById(any());
         verify(userRepository, times(1)).findById(any());
         verify(commentRepository, times(1)).save(any(Comment.class));
