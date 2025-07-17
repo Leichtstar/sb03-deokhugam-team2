@@ -8,6 +8,7 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
@@ -69,9 +70,13 @@ public class Review {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    @LastModifiedDate
     @Column(name = "updated_at")
     private Instant updatedAt;
+
+    @PreUpdate
+    public void onPreUpdate() {
+        this.updatedAt = Instant.now();
+    }
 
     public Review(Book book, User user, String content, int rating) {
         this.id = UUID.randomUUID();
@@ -89,6 +94,16 @@ public class Review {
     public void updateLikeCount(long likeCount){
         this.likeCount = likeCount;
         this.updatedAt = Instant.now();
+    }
+
+    public void updateReview(String content, int rating){
+        if (!content.equals(this.content)){
+            this.content = content;
+        }
+
+        if (rating != this.rating){
+            this.rating = rating;
+        }
     }
 
 }
