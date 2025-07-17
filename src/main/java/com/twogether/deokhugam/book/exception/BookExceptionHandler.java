@@ -1,5 +1,5 @@
 package com.twogether.deokhugam.book.exception;
 
-public class BookExceptrionHandler {
+public class BookExceptionHandler {
 
 }
