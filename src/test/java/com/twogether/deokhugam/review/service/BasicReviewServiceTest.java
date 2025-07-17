@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -150,7 +151,7 @@ public class BasicReviewServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
         when(reviewRepository.save(any(Review.class))).thenReturn(review);
         when(reviewLikeRepository.save(any(ReviewLike.class))).thenReturn(mockReviewLike);
-        when(reviewMapper.toDto(any(Review.class))).thenReturn(expectedDto);
+        when(reviewMapper.toDto(any(Review.class), anyBoolean())).thenReturn(expectedDto);
 
         // When
         ReviewDto result = basicReviewService.create(reviewCreateRequest);
@@ -242,6 +243,7 @@ public class BasicReviewServiceTest {
             );
 
             when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(testReview));
+            when(reviewMapper.toDto(testReview, true)).thenReturn(expectedDto);
             when(reviewLikeRepository.findByUserIdAndReviewId(userId, reviewId)).thenReturn(Optional.of(testReviewLike));
 
             // When
