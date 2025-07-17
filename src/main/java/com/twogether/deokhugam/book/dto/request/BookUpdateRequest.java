@@ -13,7 +13,7 @@ public record BookUpdateRequest(
     @NotBlank(message = "저자는 필수 입력 사항입니다.") @Size(max = 100)
     String author,
 
-    @NotBlank(message = "설명은 필수 입력 사항입니다.")
+    @NotBlank(message = "설명은 필수 입력 사항입니다.") @Size(max = 2000)
     String description,
 
     @NotBlank(message = "출판사는 필수 입력 사항입니다.") @Size(max = 100)
