@@ -155,17 +155,22 @@ public class BasicReviewService implements ReviewService{
     @Override
     @Transactional
     public ReviewLikeDto reviewLike(UUID reviewId, UUID userId) {
-        if (reviewLikeRepository.findByUserIdAndReviewId(userId, reviewId).isEmpty()){
-            // 좋아요가 비어있다면
-            Review review = reviewRepository.findById(reviewId)
-                    .orElseThrow(
-                            () -> new ReviewNotFoundException(reviewId));
 
+        ReviewLike reviewLike = reviewLikeRepository.findByUserIdAndReviewId(userId, reviewId)
+                .orElseThrow(
+                        () -> new ReviewLikeNotFoundException());
+
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(
+                        () -> new ReviewNotFoundException(reviewId));
+
+        if (reviewLike == null){
+            // 좋아요가 비어있다면
             User reviewer = userRepository.findById(userId)
                     .orElseThrow(
                             () -> new NoSuchElementException("사용자를 찾을 수 없습니다. " + userId));
 
-            ReviewLike reviewLike = new ReviewLike(
+            ReviewLike newReviewLike = new ReviewLike(
                     review,
                     reviewer,
                     true
@@ -173,20 +178,12 @@ public class BasicReviewService implements ReviewService{
 
             review.updateLikeCount(review.getLikeCount() + 1);
 
-            reviewLikeRepository.save(reviewLike);
+            reviewLikeRepository.save(newReviewLike);
             reviewRepository.save(review);
 
-            return reviewLikeMapper.toDto(reviewLike);
+            return reviewLikeMapper.toDto(newReviewLike);
         }
         else{
-            // 좋아요가 있다면
-            ReviewLike reviewLike = reviewLikeRepository.findByUserIdAndReviewId(userId, reviewId)
-                    .orElseThrow(
-                            () -> new ReviewLikeNotFoundException());
-
-            Review review = reviewRepository.findById(reviewId)
-                    .orElseThrow(
-                            () -> new ReviewNotFoundException(reviewId));
 
             if (reviewLike.isLiked()){
                 // 좋아요 상태가 true 라면
