@@ -269,13 +269,17 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
 
     // 생성 시간 기준 커서 조건
     private void createdAtCursor(BooleanBuilder builder, String cursor, boolean isDesc){
-        Instant cursorTime = Instant.parse(cursor);
+        try {
+            Instant cursorTime = Instant.parse(cursor);
 
-        if (isDesc) {
-            builder.and(review.createdAt.lt(cursorTime));
+            if (isDesc) {
+                builder.and(review.createdAt.lt(cursorTime));
+            } else {
+                builder.and(review.createdAt.gt(cursorTime));
+            }
         }
-        else{
-            builder.and(review.createdAt.gt(cursorTime));
+        catch (Exception e){
+            log.warn("커서 조건을 위한 값 파싱 실패: {} ", cursor);
         }
     }
 }
