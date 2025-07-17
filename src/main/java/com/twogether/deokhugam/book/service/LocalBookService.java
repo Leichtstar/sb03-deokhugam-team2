@@ -198,19 +198,12 @@ public class LocalBookService implements BookService {
         Book book = bookRepository.findById(bookId)
             .orElseThrow(BookNotFoundException::new);
 
-        // 썸네일 URL에서 S3 key 추출
+        // 썸네일 URL 추출
         String thumbnailUrl = book.getThumbnailUrl(); // 예: https://your-bucket.s3.amazonaws.com/book/thumbnail/abc.jpg
         if (thumbnailUrl != null && !thumbnailUrl.isBlank()) {
-            String key = extractS3KeyFromUrl(thumbnailUrl); // 예: book/thumbnail/abc.jpg
-            //s3ImageStorage.delete(key); // s3 구현체에서 delete 호출
+            //s3에서 이미지 삭제 요청
+            s3ImageStorage.deleteImage(thumbnailUrl);
         }
         bookRepository.deleteById(bookId);
-    }
-    private String extractS3KeyFromUrl(String url) {
-        int index = url.indexOf(".amazonaws.com/");
-        if (index != -1) {
-            return url.substring(index + ".amazonaws.com/".length());
-        }
-        throw new IllegalArgumentException("잘못된 S3URL 형식입니다.: " + url);
     }
 }
