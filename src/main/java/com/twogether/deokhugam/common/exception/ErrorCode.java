@@ -26,6 +26,9 @@ public enum ErrorCode {
     INVALID_RANKING_PERIOD(HttpStatus.BAD_REQUEST, "지원하지 않는 랭킹 기간입니다."),
     INVALID_DIRECTION(HttpStatus.BAD_REQUEST, "정렬 방향은 ASC 또는 DESC만 가능합니다."),
 
+    // Cursor 관련 에러 코드
+    INVALID_CURSOR(HttpStatus.BAD_REQUEST, "커서 정보가 올바르지 않습니다."),
+
     // Book 관련 에러 코드
     BOOK_NOT_FOUND(HttpStatus.NOT_FOUND, "등록되지 않은 도서입니다."),
     DUPLICATED_ISBN(HttpStatus.CONFLICT, "이미 사용된 ISBN 코드입니다."),
