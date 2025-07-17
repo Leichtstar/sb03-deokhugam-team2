@@ -4,10 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.twogether.deokhugam.common.dto.CursorPageResponse;
 import com.twogether.deokhugam.dashboard.dto.response.PopularReviewDto;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PopularReviewRankingRepository;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -20,14 +23,32 @@ class PopularReviewServiceTest {
     @DisplayName("기간별 인기 리뷰 목록을 반환한다")
     void getPopularReviews_shouldReturnReviewsByPeriod() {
         // given
-        RankingPeriod period = RankingPeriod.DAILY;
-        when(repository.findByPeriodWithCursor(period, null, null, 10))
-            .thenReturn(List.of(new PopularReviewDto(/* TODO: 테스트용 생성자 */)));
+        PopularReviewDto dto = new PopularReviewDto(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            "이펙티브 자바",
+            "https://image.url",
+            UUID.randomUUID(),
+            "김코딩",
+            "이 책은 정말 훌륭해요.",
+            5.0,
+            RankingPeriod.DAILY,
+            LocalDateTime.now(),
+            1,
+            100.0,
+            10,
+            3
+        );
+
+        when(repository.findByPeriodWithCursor(RankingPeriod.DAILY, null, null, 10))
+            .thenReturn(List.of(dto));
 
         // when
-        var result = service.getPopularReviews(period, null, null, 10);
+        CursorPageResponse<PopularReviewDto> result = service.getPopularReviews(RankingPeriod.DAILY, null, null, 10);
 
         // then
-        assertThat(result.content()).isNotEmpty();
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).bookTitle()).isEqualTo("이펙티브 자바");
     }
 }
