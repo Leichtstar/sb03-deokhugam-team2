@@ -69,4 +69,42 @@ class PopularReviewControllerTest {
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.code").value("INVALID_RANKING_PERIOD"));
     }
+
+    @Test
+    @DisplayName("조회 결과가 없을 경우 빈 content와 hasNext=false를 반환한다")
+    void getPopularReviews_emptyResult() throws Exception {
+        CursorPageResponse<PopularReviewDto> response = new CursorPageResponse<>(
+            Collections.emptyList(),
+            null,
+            null,
+            10,
+            false
+        );
+
+        Mockito.when(popularReviewService.getPopularReviews(any(), any(), any(), any()))
+            .thenReturn(response);
+
+        mockMvc.perform(get("/api/reviews/popular")
+                .param("period", "DAILY")
+                .param("limit", "10"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content").isArray())
+            .andExpect(jsonPath("$.content").isEmpty())
+            .andExpect(jsonPath("$.hasNext").value(false));
+    }
+
+    @Test
+    @DisplayName("잘못된 커서/after 값을 전달하면 INVALID_CURSOR 에러를 반환한다")
+    void getPopularReviews_invalidCursor() throws Exception {
+        Mockito.when(popularReviewService.getPopularReviews(any(), any(), any(), any()))
+            .thenThrow(new DeokhugamException(ErrorCode.INVALID_CURSOR));
+
+        mockMvc.perform(get("/api/reviews/popular")
+                .param("period", "DAILY")
+                .param("cursor", "invalid-uuid")
+                .param("after", "not-a-timestamp")
+                .param("limit", "10"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.code").value("INVALID_CURSOR"));
+    }
 }
