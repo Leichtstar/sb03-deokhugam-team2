@@ -33,9 +33,9 @@ public class PopularReviewRankingWriter implements ItemWriter<PopularReviewRanki
             }
 
             popularReviewRankingRepository.saveAll(rankingList);
-            log.info("✅ 인기 리뷰 랭킹 {}건 저장 완료", rankingList.size());
+            log.info("인기 리뷰 랭킹 {}건 저장 완료", rankingList.size());
         } catch (Exception e) {
-            log.error("🔥 인기 리뷰 랭킹 저장 실패", e);
+            log.error("인기 리뷰 랭킹 저장 실패", e);
             throw new DeokhugamException(ErrorCode.RANKING_SAVE_FAILED);
         }
     }
