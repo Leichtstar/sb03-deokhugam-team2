@@ -11,5 +11,6 @@ import java.util.UUID;
  * <p>향후 사용자‧리뷰 연관 관계가 완성되면
  * 메서드 시그니처( findByReviewId … )를 추가해 주세요.
  */
-public interface CommentRepository extends JpaRepository<Comment, UUID> {
+public interface CommentRepository
+    extends JpaRepository<Comment, UUID>, CommentRepositoryCustom {
 }

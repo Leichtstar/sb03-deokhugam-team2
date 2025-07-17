@@ -1,4 +1,4 @@
-package com.twogether.deokhugam.comments;
+package com.twogether.deokhugam.comments.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -6,14 +6,17 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.twogether.deokhugam.comments.dto.CommentCreateRequest;
+import com.twogether.deokhugam.comments.dto.CommentResponse;
 import com.twogether.deokhugam.comments.entity.Comment;
 import com.twogether.deokhugam.comments.mapper.CommentMapper;
 import com.twogether.deokhugam.comments.repository.CommentRepository;
-import com.twogether.deokhugam.comments.service.CommentService;
 import com.twogether.deokhugam.review.entity.Review;
+import com.twogether.deokhugam.review.repository.ReviewRepository;
 import com.twogether.deokhugam.user.entity.User;
+import com.twogether.deokhugam.user.repository.UserRepository;
 import jakarta.validation.Validator;
 
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -34,6 +37,12 @@ class CommentServiceTest {
 
     @Mock
     private CommentMapper commentMapper;
+
+    @Mock
+    private ReviewRepository reviewRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     private Validator validator;
 
@@ -108,7 +117,6 @@ class CommentServiceTest {
         User mockUser = mock(User.class);
         Review mockReview = mock(Review.class);
 
-        // when
         Comment comment = new Comment(mockUser, mockReview, "테스트 댓글입니다.");
 
         // then
@@ -134,20 +142,27 @@ class CommentServiceTest {
     }
 
     @Test
-    @Disabled
     @DisplayName("정상적으로 댓글 등록에 성공한다")
     void createComment_success() {
         // given
-        Comment mockComment = new Comment(mock(User.class), mock(Review.class), "테스트 댓글입니다.");
-        when(commentMapper.toEntity(any(CommentCreateRequest.class))).thenReturn(mockComment);
+        User mockUser = mock(User.class);
+        Review mockReview = mock(Review.class);
+        Comment mockComment = new Comment(mockUser, mockReview, "테스트 댓글입니다.");
+        CommentResponse expectedResponse = mock(CommentResponse.class);
+
+        when(reviewRepository.findById(any())).thenReturn(Optional.of(mockReview));
+        when(userRepository.findById(any())).thenReturn(Optional.of(mockUser));
         when(commentRepository.save(any(Comment.class))).thenReturn(mockComment);
+        when(commentMapper.toResponse(any(Comment.class))).thenReturn(expectedResponse);
 
         // when
-        commentService.createComment(commentCreateRequest);
+        CommentResponse actualResponse = commentService.createComment(commentCreateRequest);
 
         // then
-        verify(commentMapper, times(1)).toEntity(any(CommentCreateRequest.class));
+        assertThat(actualResponse).isEqualTo(expectedResponse);
+        verify(reviewRepository, times(1)).findById(any());
+        verify(userRepository, times(1)).findById(any());
         verify(commentRepository, times(1)).save(any(Comment.class));
-        // 필요하면 반환값까지 assertThat 등으로 검증
+        verify(commentMapper, times(1)).toResponse(any(Comment.class));
     }
 }

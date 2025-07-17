@@ -1,15 +1,16 @@
 package com.twogether.deokhugam.comments.entity;
 
-import com.twogether.deokhugam.review.entity.Review;
-import com.twogether.deokhugam.user.entity.User;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Column;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import com.twogether.deokhugam.review.entity.Review;
+import com.twogether.deokhugam.user.entity.User;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -17,7 +18,12 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "comments")
+@Table(    name = "comments",
+    indexes = {
+        @Index(name = "idx_comments_review_createdAt",   columnList = "review_id, created_at"),
+        @Index(name = "idx_comments_createdAt_id",       columnList = "created_at, id")
+    }
+)
 public class Comment {
     @Id
     @GeneratedValue
