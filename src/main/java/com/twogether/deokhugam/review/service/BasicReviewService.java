@@ -74,7 +74,7 @@ public class BasicReviewService implements ReviewService{
 
         log.info("[BasicReviewService] 리뷰 등록 성공");
 
-        return reviewMapper.toDto(review);
+        return reviewMapper.toDto(review, false);
     }
 
     // 리뷰 상세 조회
@@ -89,23 +89,10 @@ public class BasicReviewService implements ReviewService{
                     .map(ReviewLike::isLiked)
                     .orElse(false);
 
-        log.info("리뷰 조회 완료");
+        log.info("[BasicReviewService]: 리뷰 조회 완료");
 
-        return new ReviewDto(
-                review.getId(),
-                review.getBook().getId(),
-                review.getBookTitle(),
-                review.getBookThumbnailUrl(),
-                review.getUser().getId(),
-                review.getUserNickName(),
-                review.getContent(),
-                review.getRating(),
-                review.getLikeCount(),
-                review.getCommentCount(),
-                likeByMe,
-                review.getCreatedAt(),
-                review.getUpdatedAt()
-        );
+        ReviewDto test =  reviewMapper.toDto(review, likeByMe);
+        return reviewMapper.toDto(review, likeByMe);
     }
 
     // 리뷰 목록 조회

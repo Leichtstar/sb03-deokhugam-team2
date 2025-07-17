@@ -9,35 +9,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReviewMapper {
 
-    public ReviewDto toDto(Review review){
-        if (review == null){
-            return null;
-        }
-
-        Book book = review.getBook();
-        User user = review.getUser();
-
-        if (book == null || user == null){
-            throw new IllegalStateException("Review가 null 값인 도서나 사용자를 참조하고 있습니다.");
-        }
-
-        return new ReviewDto(
-                review.getId(),
-                book.getId(),
-                review.getBookTitle(),
-                review.getBookThumbnailUrl(),
-                user.getId(),
-                review.getUserNickName(),
-                review.getContent(),
-                review.getRating(),
-                review.getLikeCount(),
-                review.getCommentCount(),
-                review.isLikedByMe(),
-                review.getCreatedAt(),
-                review.getUpdatedAt()
-        );
-    }
-
     public ReviewDto toDto(Review review, boolean likeByMe){
         if (review == null){
             return null;

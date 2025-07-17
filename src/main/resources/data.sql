@@ -420,7 +420,6 @@ INSERT INTO reviews (
     rating,
     like_count,
     comment_count,
-    liked_by_me,
     created_at,
     updated_at,
     is_deleted
@@ -436,7 +435,6 @@ INSERT INTO reviews (
           2.5,
           9,
           5,
-          true,
           '2025-07-07T05:00:00Z',
           '2025-07-07T08:00:00Z',
           false
@@ -452,7 +450,6 @@ INSERT INTO reviews (
           3.2,
           0,
           0,
-          true,
           '2025-06-29T23:00:00Z',
           '2025-06-30T00:00:00Z',
           false
@@ -468,7 +465,6 @@ INSERT INTO reviews (
           2.1,
           5,
           5,
-          false,
           '2025-07-02T06:00:00Z',
           '2025-07-02T10:00:00Z',
           false
@@ -484,7 +480,6 @@ INSERT INTO reviews (
           4.1,
           4,
           2,
-          true,
           '2025-06-10T07:00:00Z',
           '2025-06-10T12:00:00Z',
           false
@@ -500,7 +495,6 @@ INSERT INTO reviews (
           3.2,
           3,
           0,
-          true,
           '2025-06-09T22:00:00Z',
           '2025-06-09T23:00:00Z',
           false
@@ -516,7 +510,6 @@ INSERT INTO reviews (
           1.9,
           0,
           4,
-          false,
           '2025-06-29T07:00:00Z',
           '2025-06-29T09:00:00Z',
           false
@@ -532,7 +525,6 @@ INSERT INTO reviews (
           1.9,
           1,
           4,
-          false,
           '2025-06-29T23:00:00Z',
           '2025-06-30T03:00:00Z',
           false
@@ -548,7 +540,6 @@ INSERT INTO reviews (
           3.7,
           0,
           3,
-          false,
           '2025-06-22T10:00:00Z',
           '2025-06-22T15:00:00Z',
           false
@@ -564,7 +555,6 @@ INSERT INTO reviews (
           5.0,
           1,
           4,
-          false,
           '2025-06-24T09:00:00Z',
           '2025-06-24T11:00:00Z',
           false
@@ -580,7 +570,6 @@ INSERT INTO reviews (
           1.9,
           2,
           2,
-          true,
           '2025-06-26T07:00:00Z',
           '2025-06-26T10:00:00Z',
           false
@@ -596,7 +585,6 @@ INSERT INTO reviews (
           4.6,
           6,
           5,
-          true,
           '2025-06-16T01:00:00Z',
           '2025-06-16T02:00:00Z',
           false
@@ -612,7 +600,6 @@ INSERT INTO reviews (
           4.8,
           0,
           4,
-          false,
           '2025-06-25T04:00:00Z',
           '2025-06-25T06:00:00Z',
           false
@@ -628,7 +615,6 @@ INSERT INTO reviews (
           3.2,
           8,
           4,
-          true,
           '2025-07-01T23:00:00Z',
           '2025-07-02T03:00:00Z',
           false
@@ -644,7 +630,6 @@ INSERT INTO reviews (
           4.5,
           6,
           0,
-          true,
           '2025-07-08T08:00:00Z',
           '2025-07-08T10:00:00Z',
           false
@@ -660,7 +645,6 @@ INSERT INTO reviews (
           4.5,
           1,
           5,
-          false,
           '2025-07-05T10:00:00Z',
           '2025-07-05T11:00:00Z',
           false
@@ -676,7 +660,6 @@ INSERT INTO reviews (
           4.2,
           6,
           2,
-          true,
           '2025-06-25T03:00:00Z',
           '2025-06-25T07:00:00Z',
           false
@@ -692,7 +675,6 @@ INSERT INTO reviews (
           3.9,
           9,
           5,
-          false,
           '2025-07-08T00:00:00Z',
           '2025-07-08T01:00:00Z',
           false
