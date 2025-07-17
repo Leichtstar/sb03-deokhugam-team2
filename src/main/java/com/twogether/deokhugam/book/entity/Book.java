@@ -1,8 +1,10 @@
 package com.twogether.deokhugam.book.entity;
 
 import com.twogether.deokhugam.book.dto.BookDto;
+import com.twogether.deokhugam.book.dto.request.BookCreateRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -13,11 +15,15 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name= "books")
 @Getter
 @NoArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class Book {
 
     @Id
@@ -57,9 +63,11 @@ public class Book {
     private Float rating;
 
     @Column(name = "created_at", nullable = false)
+    @CreatedDate
     private Instant createdAt;
 
     @Column(name = "updated_at")
+    @LastModifiedDate
     private Instant updatedAt;
 
     @Setter
@@ -74,9 +82,20 @@ public class Book {
         this.publishedDate = publishedDate;
         this.rating = 0F;
         this.reviewCount = 0;
-        this.createdAt = Instant.now();
     }
-
+    public static Book of(BookCreateRequest request) {
+        Book book = new Book(
+            request.title(),
+            request.author(),
+            request.description(),
+            request.publisher(),
+            request.publishedDate()
+        );
+        if (request.isbn() != null && !request.isbn().isBlank()) {
+            book.setIsbn(request.isbn());
+        }
+        return book;
+    }
     public BookDto toDto(){
         return new BookDto(
             this.id,

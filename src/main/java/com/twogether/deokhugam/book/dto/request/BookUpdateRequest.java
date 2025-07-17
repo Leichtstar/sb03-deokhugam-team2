@@ -7,16 +7,16 @@ import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
 public record BookUpdateRequest(
-    @NotBlank @Size(max = 100)
+    @NotBlank(message = "제목은 필수 입력 사항입니다.") @Size(max = 255)
     String title,
 
-    @NotBlank @Size(max = 50)
+    @NotBlank(message = "저자는 필수 입력 사항입니다.") @Size(max = 100)
     String author,
 
-    @NotBlank
+    @NotBlank(message = "설명은 필수 입력 사항입니다.") @Size(max = 2000)
     String description,
 
-    @NotBlank @Size(max = 50)
+    @NotBlank(message = "출판사는 필수 입력 사항입니다.") @Size(max = 100)
     String publisher,
 
     @NotNull

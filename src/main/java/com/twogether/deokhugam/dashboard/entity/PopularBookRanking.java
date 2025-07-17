@@ -14,6 +14,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -35,32 +38,41 @@ public class PopularBookRanking {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @NotNull
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id", nullable = false, foreignKey = @ForeignKey(name = "fk_popular_book_ranking_book"))
+    @NotNull
     private Book book;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @NotNull
     private RankingPeriod period;
 
     @Column(nullable = false)
+    @PositiveOrZero
     private double score;
 
     @Column(name = "review_count", nullable = false)
+    @PositiveOrZero
     private long reviewCount;
 
     @Column(nullable = false)
+    @PositiveOrZero
     private double rating;
 
     @Column(nullable = false)
+    @Positive
     private int rank;
 
     @Column(nullable = false, length = 255)
+    @NotNull
     private String title;
 
     @Column(nullable = false, length = 100)
+    @NotNull
     private String author;
 
     @Column(name = "thumbnail_url", columnDefinition = "TEXT")
@@ -69,4 +81,8 @@ public class PopularBookRanking {
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    public void assignRank(int rank) {
+        this.rank = rank;
+    }
 }

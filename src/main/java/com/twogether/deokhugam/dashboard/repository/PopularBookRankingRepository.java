@@ -3,6 +3,7 @@ package com.twogether.deokhugam.dashboard.repository;
 import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import jakarta.transaction.Transactional;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -14,4 +15,6 @@ public interface PopularBookRankingRepository extends JpaRepository<PopularBookR
     @Transactional
     @Query("DELETE FROM PopularBookRanking r WHERE r.period = :period")
     void deleteByPeriod(RankingPeriod period);
+
+    List<PopularBookRanking> findAllByPeriod(RankingPeriod period);
 }

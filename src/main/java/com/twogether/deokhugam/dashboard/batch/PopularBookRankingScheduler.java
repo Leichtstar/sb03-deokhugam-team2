@@ -1,46 +1,55 @@
 package com.twogether.deokhugam.dashboard.batch;
 
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@Profile("prod")
 public class PopularBookRankingScheduler {
 
-    private final PopularBookBatchService popularBookBatchService;
+    private final JobLauncher jobLauncher;
+    private final Job popularBookRankingJob;
 
-    @Scheduled(cron = "0 0 0 * * *")
-    public void runAllPopularBookRankingBatches() {
-        log.info("인기 도서 랭킹 배치 시작");
+    @Scheduled(cron = "0 0 0 * * *") // 매일 자정
+    public void runRankingJob() {
+        String jobName = "popularBookRankingJob";
+        String requestId = UUID.randomUUID().toString();
 
-        try {
-            // 기준 시각: 오늘 00시
-            LocalDateTime end = LocalDate.now().atStartOfDay();
+        for (RankingPeriod period : RankingPeriod.values()) {
+            try {
+                // MDC 로그 컨텍스트 설정
+                MDC.put("jobName", jobName);
+                MDC.put("rankingPeriod", period.name());
+                MDC.put("requestId", requestId);
 
-            // 일간
-            LocalDateTime dailyStart = end.minusDays(1);
-            popularBookBatchService.calculateAndSaveRanking(RankingPeriod.DAILY, dailyStart, end);
+                log.info("인기 도서 랭킹 배치 시작: period={}, requestId={}", period, requestId);
 
-            // 주간
-            LocalDateTime weeklyStart = end.minusDays(7);
-            popularBookBatchService.calculateAndSaveRanking(RankingPeriod.WEEKLY, weeklyStart, end);
+                JobParameters params = new JobParametersBuilder()
+                    .addString("period", period.name())
+                    .addString("requestId", requestId)
+                    .toJobParameters();
 
-            // 월간
-            LocalDateTime monthlyStart = end.minusDays(30);
-            popularBookBatchService.calculateAndSaveRanking(RankingPeriod.MONTHLY, monthlyStart, end);
+                jobLauncher.run(popularBookRankingJob, params);
 
-            // 역대
-            popularBookBatchService.calculateAndSaveAllTimeRanking();
-
-            log.info("인기 도서 랭킹 배치 완료");
-        } catch (Exception e) {
-            log.error("인기 도서 랭킹 배치 실패", e);
+                log.info("인기 도서 랭킹 배치 성공: period={}, requestId={}", period, requestId);
+            } catch (Exception e) {
+                log.error("인기 도서 랭킹 배치 실패: period={}, requestId={}", period, requestId, e);
+            } finally {
+                // 컨텍스트 제거
+                MDC.clear();
+            }
         }
     }
 }
