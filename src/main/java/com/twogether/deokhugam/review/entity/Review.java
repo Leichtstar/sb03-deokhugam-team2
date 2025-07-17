@@ -62,9 +62,6 @@ public class Review {
     @Column(name = "comment_count", nullable = false)
     private long commentCount = 0;
 
-    @Column(name = "liked_by_me", nullable = false)
-    private boolean likedByMe = false;
-
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
