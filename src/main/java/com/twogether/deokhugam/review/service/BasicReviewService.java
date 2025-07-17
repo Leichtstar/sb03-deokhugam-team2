@@ -153,6 +153,7 @@ public class BasicReviewService implements ReviewService{
 
     // 리뷰 좋아요 기능
     @Override
+    @Transactional
     public ReviewLikeDto reviewLike(UUID reviewId, UUID userId) {
         if (reviewLikeRepository.findByUserIdAndReviewId(userId, reviewId).isEmpty()){
             // 좋아요가 비어있다면
