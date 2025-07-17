@@ -1,6 +1,7 @@
 package com.twogether.deokhugam.comments.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -16,6 +17,8 @@ import com.twogether.deokhugam.user.entity.User;
 import com.twogether.deokhugam.user.repository.UserRepository;
 import jakarta.validation.Validator;
 
+import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -164,5 +167,65 @@ class CommentServiceTest {
         verify(userRepository, times(1)).findById(any());
         verify(commentRepository, times(1)).save(any(Comment.class));
         verify(commentMapper, times(1)).toResponse(any(Comment.class));
+    }
+
+
+
+    @Test
+    @DisplayName("정상적으로 댓글을 상세 조회한다")
+    void getComment_success() throws Exception {
+        UUID id = UUID.randomUUID();
+        String content = "테스트";
+        UUID userId = UUID.randomUUID();
+        String userNickname = "user1";
+        UUID reviewId = UUID.randomUUID();
+        LocalDateTime createdAt = LocalDateTime.now();
+        LocalDateTime updatedAt = LocalDateTime.now();
+        Boolean isDeleted = false;
+
+        Comment comment = mock(Comment.class);
+        when(comment.getIsDeleted()).thenReturn(false);
+        when(commentRepository.findById(id)).thenReturn(Optional.of(comment));
+
+        CommentResponse dto = new CommentResponse(
+            id,             // UUID id
+            content,        // String content
+            userId,         // UUID userId
+            userNickname,   // String userNickname
+            reviewId,       // UUID reviewId
+            createdAt,      // LocalDateTime createdAt
+            updatedAt,      // LocalDateTime updatedAt
+            isDeleted       // Boolean isDeleted
+        );
+
+        when(commentMapper.toResponse(comment)).thenReturn(dto);
+
+        CommentResponse result = commentService.getComment(id);
+
+        assertThat(result).isEqualTo(dto);
+        verify(commentRepository).findById(id);
+        verify(commentMapper).toResponse(comment);
+    }
+
+    @Test
+    @DisplayName("삭제된 댓글 조회 시 예외를 던진다")
+    void getComment_deleted() {
+        UUID id = UUID.randomUUID();
+        Comment comment = mock(Comment.class);
+        when(comment.getIsDeleted()).thenReturn(true);
+        when(commentRepository.findById(id)).thenReturn(Optional.of(comment));
+
+        assertThatThrownBy(() -> commentService.getComment(id))
+            .isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 댓글 조회 시 예외를 던진다")
+    void getComment_notFound() {
+        UUID id = UUID.randomUUID();
+        when(commentRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> commentService.getComment(id))
+            .isInstanceOf(NoSuchElementException.class);
     }
 }
