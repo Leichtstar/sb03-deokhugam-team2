@@ -13,6 +13,7 @@ import jakarta.annotation.Nullable;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -44,7 +45,6 @@ public class LocalBookService implements BookService {
             throw new DuplicatedIsbnException();
         }
         Book book = Book.of(request);
-        bookRepository.save(book);
 	    String imageUrl;
 	    try {
 		    imageUrl = s3ImageStorage.uploadImage(thumbnailImg, "bookThumbnail/");
@@ -83,7 +83,14 @@ public class LocalBookService implements BookService {
                     : bookRepository.findPageByTitleDesc(kw, cursor, after, pageable);
             }
             case "publishedDate" -> {
-                LocalDate cursorDate = (cursor != null) ? LocalDate.parse(cursor) : null;
+                LocalDate cursorDate = null;
+                if (cursor != null) {
+                    try {
+                        cursorDate = LocalDate.parse(cursor);
+                    } catch (DateTimeParseException e) {
+                        throw new IllegalArgumentException("잘못된 날짜 형식입니다: " + cursor, e);
+                    }
+                }
                 results = isAsc
                     ? bookRepository.findPageByPublishedDateAsc(kw, cursorDate, after, pageable)
                     : bookRepository.findPageByPublishedDateDesc(kw, cursorDate, after, pageable);
@@ -102,10 +109,10 @@ public class LocalBookService implements BookService {
             }
             default -> {
                 // fallback: createdAt 기준
-                Instant afterTime = (after != null) ? after : Instant.EPOCH;
+//                Instant afterTime = (after != null) ? after : Instant.EPOCH;
                 results = isAsc
-                    ? bookRepository.findBooksByKeywordAndAfterAsc(kw, afterTime, pageable)
-                    : bookRepository.findBooksByKeywordAndAfter(kw, afterTime, pageable);
+                    ? bookRepository.findBooksByKeywordAndAfterAsc(kw, after, pageable)
+                    : bookRepository.findBooksByKeywordAndAfter(kw, after, pageable);
             }
         }
 
