@@ -9,6 +9,7 @@ import static org.mockito.Mockito.*;
 import com.twogether.deokhugam.comments.dto.CommentCreateRequest;
 import com.twogether.deokhugam.comments.dto.CommentResponse;
 import com.twogether.deokhugam.comments.entity.Comment;
+import com.twogether.deokhugam.comments.exception.CommentNotFoundException;
 import com.twogether.deokhugam.comments.mapper.CommentMapper;
 import com.twogether.deokhugam.comments.repository.CommentRepository;
 import com.twogether.deokhugam.review.entity.Review;
@@ -216,7 +217,7 @@ class CommentServiceTest {
         when(commentRepository.findById(id)).thenReturn(Optional.of(comment));
 
         assertThatThrownBy(() -> commentService.getComment(id))
-            .isInstanceOf(NoSuchElementException.class);
+            .isInstanceOf(CommentNotFoundException.class);
     }
 
     @Test
@@ -226,6 +227,6 @@ class CommentServiceTest {
         when(commentRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> commentService.getComment(id))
-            .isInstanceOf(NoSuchElementException.class);
+            .isInstanceOf(CommentNotFoundException.class);
     }
 }
