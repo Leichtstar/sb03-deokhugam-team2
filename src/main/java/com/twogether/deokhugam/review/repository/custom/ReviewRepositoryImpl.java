@@ -4,15 +4,12 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.twogether.deokhugam.book.entity.QBook;
-import com.twogether.deokhugam.dashboard.batch.model.BookScoreDto;
 import com.twogether.deokhugam.review.dto.request.ReviewSearchRequest;
 import com.twogether.deokhugam.review.entity.QReview;
 import com.twogether.deokhugam.review.entity.Review;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,47 +28,6 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
     private EntityManager em;
     private final JPAQueryFactory queryFactory;
     private final QReview review = QReview.review;
-    private final QBook book = QBook.book;
-
-    @Override
-    public List<BookScoreDto> calculateBookScores(LocalDateTime start, LocalDateTime end) {
-        return em.createQuery("""
-            SELECT new com.twogether.deokhugam.dashboard.batch.model.BookScoreDto(
-            r.book.id,
-            r.book.title,
-            r.book.author,
-            r.book.thumbnailUrl,
-            COUNT(r),
-            COALESCE(AVG(r.rating), 0) 
-          )
-          FROM Review r
-          WHERE r.createdAt >= :start AND r.createdAt < :end
-          GROUP BY r.book.id, r.book.title, r.book.author, r.book.thumbnailUrl
-          ORDER BY COUNT(r) DESC, COALESCE(AVG(r.rating), 0) DESC
-        """, BookScoreDto.class)
-        .setParameter("start", start)
-        .setParameter("end", end)
-        .getResultList();
-    }
-
-    @Override
-    public List<BookScoreDto> calculateBookScoresAllTime() {
-        String jpql = """
-    SELECT new com.twogether.deokhugam.dashboard.batch.model.BookScoreDto(
-        r.book.id,
-        r.book.title,
-        r.book.author,
-        r.book.thumbnailUrl,
-        COUNT(r),
-        COALESCE(AVG(r.rating), 0)
-    )
-    FROM Review r
-    GROUP BY r.book.id, r.book.title, r.book.author, r.book.thumbnailUrl
-    ORDER BY COUNT(r) DESC, COALESCE(AVG(r.rating), 0) DESC
-""";
-
-        return em.createQuery(jpql, BookScoreDto.class).getResultList();
-    }
 
     // 리뷰 목록 조회
     public Slice<Review> findReviewsWithCursor(ReviewSearchRequest request, Pageable pageable) {
