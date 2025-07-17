@@ -38,11 +38,14 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 ? COMMENT.createdAt.gt(afterCreatedAt)
                 : COMMENT.createdAt.lt(afterCreatedAt);
 
-            BooleanExpression tieBreakCmp = asc
+        BooleanExpression tieBreakCmp = null;
+        if (afterId != null) {
+            tieBreakCmp = asc
                 ? COMMENT.createdAt.eq(afterCreatedAt).and(COMMENT.id.gt(afterId))
                 : COMMENT.createdAt.eq(afterCreatedAt).and(COMMENT.id.lt(afterId));
+        }
 
-            where.and(cursorCmp.or(tieBreakCmp));
+            where.and(tieBreakCmp != null ? cursorCmp.or(tieBreakCmp) : cursorCmp);
         }
 
         OrderSpecifier<?> createdOrder = asc
