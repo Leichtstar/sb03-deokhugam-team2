@@ -22,7 +22,7 @@ import org.springframework.test.context.jdbc.Sql;
 @SpringBootTest
 @SpringBatchTest
 @ActiveProfiles("test")
-class PopularBookRankingJobIntegrationTest {
+class PopularBookRankingBatchTest {
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
