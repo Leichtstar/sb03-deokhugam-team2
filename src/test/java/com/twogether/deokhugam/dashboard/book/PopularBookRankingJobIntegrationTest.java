@@ -1,11 +1,9 @@
-package com.twogether.deokhugam.dashboard;
+package com.twogether.deokhugam.dashboard.book;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PopularBookRankingRepository;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;

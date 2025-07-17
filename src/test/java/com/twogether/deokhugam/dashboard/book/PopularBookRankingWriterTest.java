@@ -1,4 +1,4 @@
-package com.twogether.deokhugam.dashboard;
+package com.twogether.deokhugam.dashboard.book;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;

@@ -1,4 +1,4 @@
-package com.twogether.deokhugam.dashboard;
+package com.twogether.deokhugam.dashboard.book;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+@DisplayName("BookScoreProcessor 단위 테스트")
 class BookScoreProcessorTest {
 
     private EntityManager em;
