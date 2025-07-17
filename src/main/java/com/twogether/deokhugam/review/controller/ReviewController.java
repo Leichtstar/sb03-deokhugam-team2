@@ -55,7 +55,7 @@ public class ReviewController {
 
     // 리뷰 목록 조회
     @GetMapping
-    public ResponseEntity<CursorPageResponseDto<ReviewDto>> findById(
+    public ResponseEntity<CursorPageResponseDto<ReviewDto>> findReviews(
             @RequestParam(required = false) UUID userId,
             @RequestParam(required = false) UUID bookId,
             @RequestParam(required = false) String keyword,
