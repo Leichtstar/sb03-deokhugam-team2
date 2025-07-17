@@ -12,9 +12,11 @@ import com.twogether.deokhugam.user.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 /**
  * 댓글 도메인의 비즈니스 로직을 담당.
@@ -43,5 +45,13 @@ public class CommentService {
         Comment entity = new Comment(user, review, request.content());
         Comment saved = commentRepository.save(entity);
         return commentMapper.toResponse(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public CommentResponse getComment(UUID id) {
+        Comment comment = commentRepository.findById(id)
+            .filter(c -> !c.getIsDeleted())
+            .orElseThrow(() -> new NoSuchElementException("댓글이 없습니다."));
+        return commentMapper.toResponse(comment);
     }
 }

@@ -78,4 +78,10 @@ public class CommentController {
     ) {
         return queryService.getComments(reviewId, direction, cursor, after, limit);
     }
+
+    @Operation(summary = "댓글 상세 조회")
+    @GetMapping("/{commentId}")
+    public ResponseEntity<CommentResponse> get(@PathVariable UUID commentId) {
+        return ResponseEntity.ok(commentService.getComment(commentId));
+    }
 }
