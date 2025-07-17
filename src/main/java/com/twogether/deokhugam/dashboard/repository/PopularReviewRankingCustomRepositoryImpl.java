@@ -2,8 +2,10 @@ package com.twogether.deokhugam.dashboard.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.twogether.deokhugam.dashboard.dto.response.PopularReviewDto;
+import com.twogether.deokhugam.dashboard.entity.PopularReviewRanking;
 import com.twogether.deokhugam.dashboard.entity.QPopularReviewRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
+import com.twogether.deokhugam.dashboard.mapper.PopularReviewDtoMapper;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -23,28 +25,13 @@ public class PopularReviewRankingCustomRepositoryImpl implements PopularReviewRa
     ) {
         QPopularReviewRanking r = QPopularReviewRanking.popularReviewRanking;
 
-        return queryFactory
-            .select(new QPopularReviewDto(
-                r.id,
-                r.review.id,
-                r.book.id,
-                r.book.title,
-                r.book.thumbnailUrl,
-                r.user.id,
-                r.user.nickname,
-                r.review.content,
-                r.review.rating,
-                r.period,
-                r.createdAt,
-                r.rank,
-                r.score,
-                r.likeCount,
-                r.commentCount
-            ))
-            .from(r)
+        List<PopularReviewRanking> rankings = queryFactory
+            .selectFrom(r)
             .where(r.period.eq(period))
             .orderBy(r.createdAt.desc(), r.id.desc())
             .limit(limit)
             .fetch();
+
+        return PopularReviewDtoMapper.toDtoList(rankings);
     }
 }
