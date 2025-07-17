@@ -36,7 +36,7 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
     @Override
     public List<BookScoreDto> calculateBookScores(LocalDateTime start, LocalDateTime end) {
         return em.createQuery("""
-            SELECT new com.twogether.deokhugam.dashboard.dto.BookScoreDto(
+            SELECT new com.twogether.deokhugam.dashboard.batch.model.BookScoreDto(
             r.book.id,
             r.book.title,
             r.book.author,
@@ -57,7 +57,7 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
     @Override
     public List<BookScoreDto> calculateBookScoresAllTime() {
         String jpql = """
-    SELECT new com.twogether.deokhugam.dashboard.dto.BookScoreDto(
+    SELECT new com.twogether.deokhugam.dashboard.batch.model.BookScoreDto(
         r.book.id,
         r.book.title,
         r.book.author,
@@ -75,22 +75,8 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
 
     // 리뷰 목록 조회
     public Slice<Review> findReviewsWithCursor(ReviewSearchRequest request, Pageable pageable) {
-        BooleanBuilder builder = new BooleanBuilder();
 
-        // 검색 키워드 (부분일치)
-        if (StringUtils.hasText(request.keyword())){
-            builder.and(keywordLike(request.keyword()));
-        }
-
-        // 작성자 id 검색 (완전 일치)
-        if (request.userId() != null){
-            builder.and(review.user.id.eq(request.userId()));
-        }
-
-        // 도서 id 검색 (완전 일치)
-        if (request.bookId() != null){
-            builder.and(review.book.id.eq(request.bookId()));
-        }
+        BooleanBuilder builder = buildSearchCondition(request);
 
         // 커서 조건 추가
         cursorCondition(builder, request);
@@ -119,22 +105,8 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
     // totalElement 구하기
     @Override
     public long totalElementCount(ReviewSearchRequest request) {
-        BooleanBuilder builder = new BooleanBuilder();
 
-        // 검색 키워드 (부분일치)
-        if (StringUtils.hasText(request.keyword())){
-            builder.and(keywordLike(request.keyword()));
-        }
-
-        // 작성자 id 검색 (완전 일치)
-        if (request.userId() != null){
-            builder.and(review.user.id.eq(request.userId()));
-        }
-
-        // 도서 id 검색 (완전 일치)
-        if (request.bookId() != null){
-            builder.and(review.book.id.eq(request.bookId()));
-        }
+        BooleanBuilder builder = buildSearchCondition(request);
 
         // 만약 조건 없다면 전체 조회
         Long count =  queryFactory
@@ -145,8 +117,6 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
 
         return count != null ? count : 0L;
     }
-
-
 
     /**
      *
@@ -180,6 +150,30 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
         booleanBuilder.or(contentLike(keyword));
 
         return booleanBuilder;
+    }
+
+    /**
+     * 중복 로직 분리 메서드
+     */
+    private BooleanBuilder buildSearchCondition(ReviewSearchRequest request){
+        BooleanBuilder builder = new BooleanBuilder();
+
+        // 검색 키워드 (부분일치)
+        if (StringUtils.hasText(request.keyword())){
+            builder.and(keywordLike(request.keyword()));
+        }
+
+        // 작성자 id 검색 (완전 일치)
+        if (request.userId() != null){
+            builder.and(review.user.id.eq(request.userId()));
+        }
+
+        // 도서 id 검색 (완전 일치)
+        if (request.bookId() != null){
+            builder.and(review.book.id.eq(request.bookId()));
+        }
+
+        return builder;
     }
 
     /**
