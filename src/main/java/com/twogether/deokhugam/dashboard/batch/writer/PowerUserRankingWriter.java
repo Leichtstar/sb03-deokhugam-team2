@@ -3,6 +3,7 @@ package com.twogether.deokhugam.dashboard.batch.writer;
 import com.twogether.deokhugam.common.exception.DeokhugamException;
 import com.twogether.deokhugam.common.exception.ErrorCode;
 import com.twogether.deokhugam.dashboard.entity.PowerUserRanking;
+import com.twogether.deokhugam.dashboard.repository.PowerUserRankingRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
