@@ -3,6 +3,8 @@ package com.twogether.deokhugam.dashboard.repository;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.twogether.deokhugam.common.exception.DeokhugamException;
+import com.twogether.deokhugam.common.exception.ErrorCode;
 import com.twogether.deokhugam.dashboard.dto.request.PopularRankingSearchRequest;
 import com.twogether.deokhugam.dashboard.dto.response.PopularReviewDto;
 import com.twogether.deokhugam.dashboard.dto.response.QPopularReviewDto;
@@ -56,7 +58,12 @@ public class PopularReviewRankingCustomRepositoryImpl implements PopularReviewRa
         QPopularReviewRanking r = QPopularReviewRanking.popularReviewRanking;
         if (cursor == null || after == null) return null;
 
-        UUID cursorId = UUID.fromString(cursor);
+        UUID cursorId;
+        try {
+            cursorId = UUID.fromString(cursor);
+        } catch (IllegalArgumentException e) {
+            throw new DeokhugamException(ErrorCode.INVALID_CURSOR);
+        }
 
         if ("DESC".equalsIgnoreCase(direction)) {
             return r.createdAt.lt(after)

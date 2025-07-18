@@ -5,7 +5,6 @@ import com.twogether.deokhugam.dashboard.dto.request.PopularRankingSearchRequest
 import com.twogether.deokhugam.dashboard.dto.response.PopularBookDto;
 import org.springframework.stereotype.Service;
 
-@Service
 public interface PopularBookService {
 
     CursorPageResponse<PopularBookDto> getPopularBooks(PopularRankingSearchRequest request);

@@ -1,6 +1,7 @@
 package com.twogether.deokhugam.dashboard.review;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.twogether.deokhugam.dashboard.batch.model.ReviewScoreDto;
 import com.twogether.deokhugam.dashboard.batch.processor.ReviewScoreProcessor;
@@ -45,6 +46,17 @@ class ReviewScoreProcessorTest {
         assertEquals(12.0, result.getScore(), 0.0001); // double 비교는 delta 설정
         assertEquals(RankingPeriod.DAILY, result.getPeriod());
         assertEquals(input.reviewId(), result.getReviewId());
+        assertEquals(input.userId(), result.getUserId());
+        assertEquals(input.userNickname(), result.getUserNickname());
+        assertEquals(input.reviewContent(), result.getReviewContent());
+        assertEquals(input.reviewRating(), result.getReviewRating());
+        assertEquals(input.bookId(), result.getBookId());
+        assertEquals(input.bookTitle(), result.getBookTitle());
+        assertEquals(input.bookThumbnailUrl(), result.getBookThumbnailUrl());
+        assertEquals(input.likeCount(), result.getLikeCount());
+        assertEquals(input.commentCount(), result.getCommentCount());
+        assertEquals(0, result.getRank());
+        assertNotNull(result.getCreatedAt());
     }
 
     @Test
