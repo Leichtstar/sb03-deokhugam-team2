@@ -15,6 +15,7 @@ import com.twogether.deokhugam.dashboard.dto.response.PopularReviewDto;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PopularReviewRankingRepository;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -63,6 +64,18 @@ class PopularReviewServiceTest {
         assertThat(result.getContent().get(0).bookTitle()).isEqualTo("이펙티브 자바");
     }
 
+    @Test
+    @DisplayName("기간이 null이면 예외를 던진다")
+    void getPopularReviews_nullPeriod() {
+        PopularRankingSearchRequest request = new PopularRankingSearchRequest();
+        request.setPeriod(null);
+        request.setDirection("ASC");
+
+        assertThatThrownBy(() -> service.getPopularReviews(request))
+            .isInstanceOf(DeokhugamException.class)
+            .hasMessageContaining(ErrorCode.INVALID_RANKING_PERIOD.getMessage());
+    }
+
     @DisplayName("정렬 방향이 null이면 예외를 던진다")
     @Test
     void getPopularReviews_nullDirection() {
@@ -73,5 +86,20 @@ class PopularReviewServiceTest {
         assertThatThrownBy(() -> service.getPopularReviews(request))
             .isInstanceOf(DeokhugamException.class)
             .hasMessageContaining(ErrorCode.INVALID_DIRECTION.getMessage());
+    }
+
+    @Test
+    @DisplayName("소문자 정렬 방향도 정상 처리된다")
+    void getPopularReviews_lowercaseDirection() {
+        PopularRankingSearchRequest request = new PopularRankingSearchRequest();
+        request.setPeriod(RankingPeriod.DAILY);
+        request.setDirection("asc");
+
+        when(repository.findAllByPeriodWithCursor(eq(request), any()))
+            .thenReturn(Collections.emptyList());
+
+        var result = service.getPopularReviews(request);
+
+        assertThat(result.getContent()).isEmpty();
     }
 }
