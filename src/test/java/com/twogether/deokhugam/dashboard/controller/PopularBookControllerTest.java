@@ -37,11 +37,11 @@ class PopularBookControllerTest {
     void getPopularBooks_success() throws Exception {
         // given
         CursorPageResponse<PopularBookDto> dummyResponse = new CursorPageResponse<>(
-            Collections.emptyList(), // content
-            null,                   // nextCursor
-            null,                   // nextAfter
-            10,                     // size
-            false                   // hasNext
+            Collections.emptyList(),
+            null,
+            null,
+            10,
+            false
         );
 
         Mockito.when(popularBookService.getPopularBooks(any()))
