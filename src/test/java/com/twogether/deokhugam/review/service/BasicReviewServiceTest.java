@@ -456,14 +456,21 @@ public class BasicReviewServiceTest {
         // Given
         Review mockReview = mock(Review.class);
         User mockUser = mock(User.class);
+        Book mockBook = mock(Book.class);
 
         UUID mockReviewId = UUID.randomUUID();
         UUID mockUserId = UUID.randomUUID();
         UUID requestUserId = UUID.randomUUID();
+        UUID mockBookId = UUID.randomUUID();
 
         when(reviewRepository.findById(mockReviewId)).thenReturn(Optional.of(mockReview));
         when(mockReview.getUser()).thenReturn(mockUser);
         when(mockUser.getId()).thenReturn(mockUserId);
+
+        when(mockReview.getBook()).thenReturn(mockBook);
+        when(mockBook.getId()).thenReturn(mockBookId);
+
+        when(bookRepository.findById(mockBookId)).thenReturn(Optional.of(mockBook));
 
         assertThrows(ReviewNotOwnedException.class, () -> {
             basicReviewService.deleteReviewSoft(mockReviewId, requestUserId);
