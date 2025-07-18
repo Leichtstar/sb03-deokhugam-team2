@@ -29,24 +29,7 @@ class PopularReviewServiceTest {
     @Test
     @DisplayName("기간별 인기 리뷰 목록을 반환한다")
     void getPopularReviews_shouldReturnReviewsByPeriod() {
-        // given
-        PopularReviewDto dto = new PopularReviewDto(
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            "이펙티브 자바",
-            "https://image.url",
-            UUID.randomUUID(),
-            "김코딩",
-            "이 책은 정말 훌륭해요.",
-            5.0,
-            RankingPeriod.DAILY,
-            LocalDateTime.now(),
-            1,
-            100.0,
-            10,
-            3
-        );
+        PopularReviewDto dto = createDummyReviewDto();
 
         PopularRankingSearchRequest request = new PopularRankingSearchRequest();
         request.setPeriod(RankingPeriod.DAILY);
@@ -56,10 +39,8 @@ class PopularReviewServiceTest {
         when(repository.findAllByPeriodWithCursor(eq(request), any()))
             .thenReturn(List.of(dto));
 
-        // when
         CursorPageResponse<PopularReviewDto> result = service.getPopularReviews(request);
 
-        // then
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0).bookTitle()).isEqualTo("이펙티브 자바");
     }
@@ -76,8 +57,8 @@ class PopularReviewServiceTest {
             .hasMessageContaining(ErrorCode.INVALID_RANKING_PERIOD.getMessage());
     }
 
-    @DisplayName("정렬 방향이 null이면 예외를 던진다")
     @Test
+    @DisplayName("정렬 방향이 null이면 예외를 던진다")
     void getPopularReviews_nullDirection() {
         PopularRankingSearchRequest request = new PopularRankingSearchRequest();
         request.setPeriod(RankingPeriod.DAILY);
@@ -101,5 +82,76 @@ class PopularReviewServiceTest {
         var result = service.getPopularReviews(request);
 
         assertThat(result.getContent()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("대소문자 혼합 정렬 방향도 정상 처리된다")
+    void getPopularReviews_mixedCaseDirection() {
+        PopularRankingSearchRequest request = new PopularRankingSearchRequest();
+        request.setPeriod(RankingPeriod.DAILY);
+        request.setDirection("Asc");
+
+        when(repository.findAllByPeriodWithCursor(eq(request), any()))
+            .thenReturn(Collections.emptyList());
+
+        var result = service.getPopularReviews(request);
+
+        assertThat(result.getContent()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("조회 결과가 limit보다 작으면 hasNext가 false가 된다")
+    void getPopularReviews_hasNext_false() {
+        PopularReviewDto dto = createDummyReviewDto();
+
+        PopularRankingSearchRequest request = new PopularRankingSearchRequest();
+        request.setPeriod(RankingPeriod.DAILY);
+        request.setDirection("DESC");
+        request.setLimit(10);
+
+        when(repository.findAllByPeriodWithCursor(eq(request), any()))
+            .thenReturn(List.of(dto)); // size = 1 < limit = 10
+
+        var result = service.getPopularReviews(request);
+
+        assertThat(result.isHasNext()).isFalse();
+    }
+
+    @Test
+    @DisplayName("조회 결과가 limit과 같으면 hasNext가 true가 된다")
+    void getPopularReviews_hasNext_true() {
+        PopularReviewDto dto = createDummyReviewDto();
+
+        PopularRankingSearchRequest request = new PopularRankingSearchRequest();
+        request.setPeriod(RankingPeriod.DAILY);
+        request.setDirection("DESC");
+        request.setLimit(1);
+
+        when(repository.findAllByPeriodWithCursor(eq(request), any()))
+            .thenReturn(List.of(dto)); // size = 1 == limit = 1
+
+        var result = service.getPopularReviews(request);
+
+        assertThat(result.isHasNext()).isTrue();
+    }
+
+    private PopularReviewDto createDummyReviewDto() {
+        return new PopularReviewDto(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            "이펙티브 자바",
+            "https://image.url",
+            UUID.randomUUID(),
+            "김코딩",
+            "이 책은 정말 훌륭해요.",
+            5.0,
+            RankingPeriod.DAILY,
+            LocalDateTime.now(),
+            1,
+            100.0,
+            10,
+            3
+        );
     }
 }
