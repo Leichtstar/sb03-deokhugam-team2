@@ -72,4 +72,28 @@ public class CommentService {
         comment.editContent(request.content());
         return commentMapper.toResponse(comment);
     }
+
+    @Transactional
+    public void deleteLogical(UUID commentId, UUID requestUserId) {
+        Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(CommentNotFoundException::new);
+        if (!comment.getUser().getId().equals(requestUserId)) {
+            throw new CommentForbiddenException();
+        }
+        if (Boolean.TRUE.equals(comment.getIsDeleted())) {
+            throw new IllegalStateException("이미 삭제된 댓글입니다.");
+        }
+        commentRepository.logicalDeleteById(commentId);
+    }
+
+    @Transactional
+    public void deletePhysical(UUID commentId, UUID requestUserId) {
+        Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(CommentNotFoundException::new);
+        if (!comment.getUser().getId().equals(requestUserId)) {
+            throw new CommentForbiddenException();
+        }
+        commentRepository.deleteById(commentId);
+    }
+
 }
