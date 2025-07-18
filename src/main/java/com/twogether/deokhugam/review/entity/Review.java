@@ -21,9 +21,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 // 한 유저는 한 책에 한개의 리뷰만 가능
-@Table(name = "reviews", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "book_id"})
-})
+@Table(name = "reviews")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Getter
@@ -103,6 +101,12 @@ public class Review {
 
         if (rating != this.rating){
             this.rating = rating;
+        }
+    }
+
+    public void updateIsDelete(boolean isDeleted){
+        if(isDeleted != this.isDeleted){
+            this.isDeleted = isDeleted;
         }
     }
 
