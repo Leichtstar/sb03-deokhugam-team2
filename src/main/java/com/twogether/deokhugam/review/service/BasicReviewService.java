@@ -51,7 +51,7 @@ public class BasicReviewService implements ReviewService{
     @Transactional
     public ReviewDto create(ReviewCreateRequest request) {
         // 이미 존재하는 리뷰 시 예외
-        if (reviewRepository.existsByUserIdAndBookId(request.userId(), request.bookId())){
+        if (reviewRepository.existsByUserIdAndBookIdAndIsDeletedFalse(request.userId(), request.bookId())){
             throw new ReviewExistException(request.userId(), request.bookId());
         }
 
