@@ -16,5 +16,5 @@ public interface PowerUserRankingRepository extends JpaRepository<PowerUserRanki
     @Query("DELETE FROM PowerUserRanking r WHERE r.period = :period")
     void deleteByPeriod(RankingPeriod period);
 
-    List<PowerUserRanking> findByPeriodOrderByRankAsc(RankingPeriod period);
+    List<PowerUserRanking> findAllByPeriod(RankingPeriod period);
 }
