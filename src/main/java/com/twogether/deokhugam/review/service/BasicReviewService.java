@@ -162,6 +162,22 @@ public class BasicReviewService implements ReviewService{
         return reviewMapper.toDto(review, likeByMe);
     }
 
+    // 리뷰 논리 삭제
+    @Override
+    public void deleteReviewSoft(UUID reviewId, UUID requestUserId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ReviewNotFoundException(reviewId));
+
+        if (!review.getUser().getId().equals(requestUserId)){
+            throw new ReviewNotOwnedException();
+        }
+        review.updateIsDelete(true);
+        // 댓글 논리 삭제 부분도 추가?
+        reviewRepository.save(review);
+
+        log.info("[BasicReviewService]: 리뷰 논리 삭제 완료");
+    }
+
     // 리뷰 좋아요 기능
     @Override
     @Transactional
