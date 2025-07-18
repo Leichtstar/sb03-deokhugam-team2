@@ -3,11 +3,16 @@ package com.twogether.deokhugam.review.mapper;
 import com.twogether.deokhugam.book.entity.Book;
 import com.twogether.deokhugam.review.dto.ReviewDto;
 import com.twogether.deokhugam.review.entity.Review;
+import com.twogether.deokhugam.review.repository.ReviewRepository;
 import com.twogether.deokhugam.user.entity.User;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+@RequiredArgsConstructor
 @Component
 public class ReviewMapper {
+
+    public final ReviewRepository reviewRepository;
 
     public ReviewDto toDto(Review review, boolean likeByMe){
         if (review == null){
@@ -21,6 +26,8 @@ public class ReviewMapper {
             throw new IllegalStateException("Review가 null 값인 도서나 사용자를 참조하고 있습니다.");
         }
 
+        long commentCount = reviewRepository.countCommentsByReviewId(review.getId());
+
         return new ReviewDto(
                 review.getId(),
                 book.getId(),
@@ -31,7 +38,7 @@ public class ReviewMapper {
                 review.getContent(),
                 review.getRating(),
                 review.getLikeCount(),
-                review.getCommentCount(),
+                commentCount,
                 likeByMe,
                 review.getCreatedAt(),
                 review.getUpdatedAt()
