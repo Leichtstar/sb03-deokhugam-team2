@@ -26,62 +26,75 @@ public class MDCLoggingInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        // 요청 ID 생성 (UUID)
-        String requestId = UUID.randomUUID().toString().replaceAll("-", "");
+        try {
+            // 요청 ID 생성 (UUID)
+            String requestId = UUID.randomUUID().toString().replaceAll("-", "");
 
-        // 클라이언트 IP 주소 추출
-        String clientIp = getClientIpAddress(request);
+            // 클라이언트 IP 주소 추출
+            String clientIp = getClientIpAddress(request);
 
-        // MDC에 컨텍스트 정보 추가
-        MDC.put(REQUEST_ID, requestId);
-        MDC.put(REQUEST_METHOD, request.getMethod());
-        MDC.put(REQUEST_URI, request.getRequestURI());
-        MDC.put(CLIENT_IP, clientIp);
+            // MDC에 컨텍스트 정보 추가
+            MDC.put(REQUEST_ID, requestId);
+            MDC.put(REQUEST_METHOD, request.getMethod());
+            MDC.put(REQUEST_URI, request.getRequestURI());
+            MDC.put(CLIENT_IP, clientIp);
 
-        // 응답 헤더에 요청 ID 추가
-        response.setHeader(REQUEST_ID_HEADER, requestId);
-        response.setHeader(CLIENT_IP_HEADER, clientIp);
+            // 응답 헤더에 요청 ID 추가
+            response.setHeader(REQUEST_ID_HEADER, requestId);
+            response.setHeader(CLIENT_IP_HEADER, clientIp);
 
-        log.debug("Request started");
-        return true;
+            log.debug("Request started");
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to setup MDC context", e);
+            return true; // 인터셉터 오류가 요청 처리를 중단하지 않도록
+        }
     }
 
     /**
      * 클라이언트의 실제 IP 주소를 추출하는 메서드
-     * 프록시나 로드밸런서를 거치는 경우도 고려
      */
     private String getClientIpAddress(HttpServletRequest request) {
-        String clientIp = null;
+        String clientIp = "";
 
-        // X-Forwarded-For 헤더 확인 (프록시 서버를 거친 경우)
-        clientIp = request.getHeader("X-Forwarded-For");
-        if (clientIp == null || clientIp.isEmpty() || "unknown".equalsIgnoreCase(clientIp)) {
-            // Proxy-Client-IP 헤더 확인
-            clientIp = request.getHeader("Proxy-Client-IP");
+        // 신뢰할 수 있는 헤더 목록 (우선순위 순서로 배열)
+        String[] headers = {
+            "X-Forwarded-For",      // 가장 일반적인 프록시 헤더
+            "Proxy-Client-IP",      // 일반 프록시 서버 헤더
+            "WL-Proxy-Client-IP",   // WebLogic 프록시 헤더
+            "HTTP_CLIENT_IP",       // HTTP 클라이언트 IP 헤더
+            "HTTP_X_FORWARDED_FOR"  // HTTP X-Forwarded-For 헤더
+        };
+
+        // 헤더들을 순서대로 확인하여 유효한 IP 찾기
+        for (String header : headers) {
+            clientIp = request.getHeader(header);
+            if (isValidIp(clientIp)) {
+                break; // 유효한 IP를 찾으면 반복 중단
+            }
         }
-        if (clientIp == null || clientIp.isEmpty() || "unknown".equalsIgnoreCase(clientIp)) {
-            // WL-Proxy-Client-IP 헤더 확인 (WebLogic)
-            clientIp = request.getHeader("WL-Proxy-Client-IP");
-        }
-        if (clientIp == null || clientIp.isEmpty() || "unknown".equalsIgnoreCase(clientIp)) {
-            // HTTP_CLIENT_IP 헤더 확인
-            clientIp = request.getHeader("HTTP_CLIENT_IP");
-        }
-        if (clientIp == null || clientIp.isEmpty() || "unknown".equalsIgnoreCase(clientIp)) {
-            // HTTP_X_FORWARDED_FOR 헤더 확인
-            clientIp = request.getHeader("HTTP_X_FORWARDED_FOR");
-        }
-        if (clientIp == null || clientIp.isEmpty() || "unknown".equalsIgnoreCase(clientIp)) {
-            // 직접 연결된 경우의 IP
+
+        // 헤더에서 찾지 못한 경우 직접 연결 IP 사용
+        if (!isValidIp(clientIp)) {
             clientIp = request.getRemoteAddr();
         }
 
         // X-Forwarded-For에 여러 IP가 있는 경우 첫 번째 IP 사용
+        // 예: "192.168.1.1, 10.0.0.1" -> "192.168.1.1"
         if (clientIp != null && clientIp.contains(",")) {
             clientIp = clientIp.split(",")[0].trim();
         }
 
-        return clientIp;
+        // null 방지를 위한 안전장치
+        return clientIp != null ? clientIp : "unknown";
+    }
+
+    /**
+     * IP 주소가 유효한지 검증하는 헬퍼 메서드
+     * null, 빈 문자열, "unknown" 값을 무효한 IP로 판단
+     */
+    private boolean isValidIp(String ip) {
+        return ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip);
     }
 
     @Override
