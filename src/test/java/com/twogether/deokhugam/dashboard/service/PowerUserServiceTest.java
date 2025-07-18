@@ -78,4 +78,16 @@ class PowerUserServiceTest {
             .isInstanceOf(DeokhugamException.class)
             .hasMessageContaining(ErrorCode.INVALID_RANKING_PERIOD.getMessage());
     }
+
+    @DisplayName("정렬 방향이 null이면 예외를 던진다")
+    @Test
+    void getPowerUsers_nullDirection() {
+        PopularRankingSearchRequest request = new PopularRankingSearchRequest();
+        request.setPeriod(RankingPeriod.DAILY);
+        request.setDirection(null);
+
+        assertThatThrownBy(() -> powerUserService.getPowerUsers(request))
+            .isInstanceOf(DeokhugamException.class)
+            .hasMessageContaining(ErrorCode.INVALID_DIRECTION.getMessage());
+    }
 }

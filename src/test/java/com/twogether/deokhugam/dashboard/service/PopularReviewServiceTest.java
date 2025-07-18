@@ -1,12 +1,15 @@
 package com.twogether.deokhugam.dashboard.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.twogether.deokhugam.common.dto.CursorPageResponse;
+import com.twogether.deokhugam.common.exception.DeokhugamException;
+import com.twogether.deokhugam.common.exception.ErrorCode;
 import com.twogether.deokhugam.dashboard.dto.request.PopularRankingSearchRequest;
 import com.twogether.deokhugam.dashboard.dto.response.PopularReviewDto;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
@@ -58,5 +61,17 @@ class PopularReviewServiceTest {
         // then
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0).bookTitle()).isEqualTo("이펙티브 자바");
+    }
+
+    @DisplayName("정렬 방향이 null이면 예외를 던진다")
+    @Test
+    void getPopularReviews_nullDirection() {
+        PopularRankingSearchRequest request = new PopularRankingSearchRequest();
+        request.setPeriod(RankingPeriod.DAILY);
+        request.setDirection(null);
+
+        assertThatThrownBy(() -> service.getPopularReviews(request))
+            .isInstanceOf(DeokhugamException.class)
+            .hasMessageContaining(ErrorCode.INVALID_DIRECTION.getMessage());
     }
 }
