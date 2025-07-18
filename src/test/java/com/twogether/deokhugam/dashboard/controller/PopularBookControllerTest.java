@@ -20,7 +20,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(PopularBookControllerTest.class)
+@WebMvcTest(PopularBookController.class)
 class PopularBookControllerTest {
 
     @Autowired
