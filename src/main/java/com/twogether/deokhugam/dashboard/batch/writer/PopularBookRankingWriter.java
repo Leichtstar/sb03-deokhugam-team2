@@ -1,4 +1,4 @@
-package com.twogether.deokhugam.dashboard.batch;
+package com.twogether.deokhugam.dashboard.batch.writer;
 
 import com.twogether.deokhugam.common.exception.DeokhugamException;
 import com.twogether.deokhugam.common.exception.ErrorCode;
