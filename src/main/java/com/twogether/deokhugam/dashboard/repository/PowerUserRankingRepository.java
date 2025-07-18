@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-public interface PowerUserRankingRepository extends JpaRepository<PowerUserRanking, UUID> {
+public interface PowerUserRankingRepository extends JpaRepository<PowerUserRanking, UUID>, PowerUserRankingCustomRepository {
 
     @Modifying
     @Transactional
