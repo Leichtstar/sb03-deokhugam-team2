@@ -3,11 +3,13 @@ package com.twogether.deokhugam.dashboard.review;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.twogether.deokhugam.dashboard.entity.PopularReviewRanking;
+import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PopularReviewRankingRepository;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
@@ -43,12 +45,13 @@ class PopularReviewRankingBatchTest {
         jobLauncherTestUtils.setJob(popularReviewRankingJob);
     }
 
-    @Test
-    @DisplayName("리뷰 랭킹 배치가 성공적으로 실행되어 DB에 랭킹이 저장된다")
-    void runReviewRankingBatch() throws Exception {
+    @ParameterizedTest(name = "period={0}인 배치 Job이 성공적으로 실행되고 데이터가 저장된다")
+    @EnumSource(RankingPeriod.class)
+    @DisplayName("기간별 리뷰 랭킹 배치 성공 테스트")
+    void runReviewRankingBatch(RankingPeriod period) throws Exception {
         // given
         JobParameters jobParameters = new JobParametersBuilder()
-            .addString("period", "DAILY")
+            .addString("period", period.name())
             .addLong("time", System.currentTimeMillis())
             .toJobParameters();
 

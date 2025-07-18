@@ -6,10 +6,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,9 +24,11 @@ import com.twogether.deokhugam.review.dto.ReviewDto;
 import com.twogether.deokhugam.review.dto.ReviewLikeDto;
 import com.twogether.deokhugam.review.dto.request.ReviewCreateRequest;
 import com.twogether.deokhugam.review.dto.request.ReviewSearchRequest;
+import com.twogether.deokhugam.review.dto.request.ReviewUpdateRequest;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.review.entity.ReviewLike;
 import com.twogether.deokhugam.review.exception.ReviewExistException;
+import com.twogether.deokhugam.review.exception.ReviewNotOwnedException;
 import com.twogether.deokhugam.review.mapper.ReviewLikeMapper;
 import com.twogether.deokhugam.review.mapper.ReviewMapper;
 import com.twogether.deokhugam.review.repository.ReviewLikeRepository;
@@ -146,7 +152,7 @@ public class BasicReviewServiceTest {
 
         Review review = new Review(mockBook, mockUser, "재밌는 책이다.", 4);
 
-        when(reviewRepository.existsByUserIdAndBookId(userId, bookId)).thenReturn(false);
+        when(reviewRepository.existsByUserIdAndBookIdAndIsDeletedFalse(userId, bookId)).thenReturn(false);
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(mockBook));
         when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
         when(reviewRepository.save(any(Review.class))).thenReturn(review);
@@ -165,7 +171,7 @@ public class BasicReviewServiceTest {
     @Test
     @DisplayName("이미 리뷰가 존재하는 경우 예외가 발생한다.")
     void review_exist() {
-        when(reviewRepository.existsByUserIdAndBookId(userId, bookId)).thenReturn(true);
+        when(reviewRepository.existsByUserIdAndBookIdAndIsDeletedFalse(userId, bookId)).thenReturn(true);
 
         // when & then
         assertThrows(ReviewExistException.class, () -> {
@@ -179,7 +185,7 @@ public class BasicReviewServiceTest {
     @Test
     @DisplayName("도서를 찾을 수 없는 경우 예외가 발생한다.")
     void book_notFound() {
-        when(reviewRepository.existsByUserIdAndBookId(userId, bookId)).thenReturn(false);
+        when(reviewRepository.existsByUserIdAndBookIdAndIsDeletedFalse(userId, bookId)).thenReturn(false);
         when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
 
         // when & then
@@ -196,7 +202,7 @@ public class BasicReviewServiceTest {
     void user_notFound() {
         Book mockBook = mock(Book.class);
 
-        when(reviewRepository.existsByUserIdAndBookId(userId, bookId)).thenReturn(false);
+        when(reviewRepository.existsByUserIdAndBookIdAndIsDeletedFalse(userId, bookId)).thenReturn(false);
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(mockBook));
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
@@ -314,6 +320,139 @@ public class BasicReviewServiceTest {
             verify(reviewMapper).toDto(expectedReview1, false);
             verify(reviewMapper).toDto(expectedReview2, false);
         }
+    }
+
+    @Test
+    @DisplayName("작성자는 본인의 리뷰를 수정할 수 있어야 한다.")
+    void shouldUpdate_review_content(){
+        // Given
+        Review mockReview = mock(Review.class);
+        User mockUser = mock(User.class);
+
+        UUID requestUserId = UUID.randomUUID();
+        UUID reviewId1 = UUID.randomUUID();
+        ReviewUpdateRequest updateRequest = new ReviewUpdateRequest(
+                "수정했습니다.",
+                3
+        );
+
+        ReviewLike reviewLike = new ReviewLike(
+                testReview,
+                testUser,
+                true
+        );
+
+        // 기대하는 Dto
+        ReviewDto expectedDto = new ReviewDto(
+                testReview.getId(),
+                testBook.getId(),
+                testBook.getTitle(),
+                testBook.getThumbnailUrl(),
+                testUser.getId(),
+                testUser.getNickname(),
+                testReview.getContent(),
+                testReview.getRating(),
+                testReview.getLikeCount(),
+                testReview.getCommentCount(),
+                true, // likedByMe
+                testReview.getCreatedAt(),
+                testReview.getUpdatedAt()
+        );
+
+        when(mockReview.getId()).thenReturn(reviewId1);
+        when(mockReview.getUser()).thenReturn(mockUser);
+        when(mockUser.getId()).thenReturn(requestUserId);
+
+        when(reviewRepository.findById(reviewId1)).thenReturn(Optional.of(mockReview));
+
+        when(reviewLikeRepository.findByUserIdAndReviewId(requestUserId, reviewId1)).thenReturn(Optional.of(reviewLike));
+        when(reviewMapper.toDto(any(Review.class), anyBoolean())).thenReturn(expectedDto);
+
+        // When
+        basicReviewService.updateReview(mockReview.getId(), requestUserId, updateRequest);
+
+        // Then
+        verify(mockReview).updateReview("수정했습니다.", 3);
+        verify(reviewRepository).save(mockReview);
+    }
+
+    @Test
+    @DisplayName("작성자가 아닌 사람은 리뷰를 수정할 수 없다.")
+    void cannotUpdateReview_whenUserNotAuthor(){
+        // Given
+        Review mockReview = mock(Review.class);
+        User mockUser = mock(User.class);
+
+        UUID requestUserId = UUID.randomUUID();
+        UUID reviewId1 = UUID.randomUUID();
+        UUID reviewerId = UUID.randomUUID();
+
+        ReviewUpdateRequest updateRequest = new ReviewUpdateRequest(
+                "수정 하고싶습니다",
+                4
+        );
+
+        when(mockReview.getUser()).thenReturn(mockUser);
+        when(mockUser.getId()).thenReturn(reviewerId);
+
+        when(reviewRepository.findById(reviewId1)).thenReturn(Optional.of(mockReview));
+
+        assertThrows(ReviewNotOwnedException.class, () -> {
+            basicReviewService.updateReview(reviewId1, requestUserId, updateRequest);
+        });
+
+        // Then - 수정 메서드가 진짜 호출 안 됐는지?
+        verify(mockReview, never()).updateReview(anyString(), anyInt());
+        verify(reviewRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("작성자는 리뷰를 논리삭제 할 수 있다.")
+    void shouldSoftDelete_whenUserIsAuthor(){
+        // Given
+        User mockUser = mock(User.class);
+
+        UUID mockReviewId = UUID.randomUUID();
+        UUID requestUserId = UUID.randomUUID();
+
+        Review deletedReview = new Review(testBook, testUser, "논리 삭제된 리뷰", 5);
+        Review spyReview = spy(deletedReview); // 실제 동작하는 spy 객체
+
+        when(reviewRepository.findById(mockReviewId)).thenReturn(Optional.of(spyReview));
+        when(spyReview.getUser()).thenReturn(mockUser);
+        when(mockUser.getId()).thenReturn(requestUserId);
+
+        // When
+        basicReviewService.deleteReviewSoft(mockReviewId, requestUserId);
+
+        // Then
+        assertTrue(spyReview.isDeleted());
+        verify(reviewRepository).save(spyReview);
+
+        // mock으로 만든 Review는 가짜 객체라서 내부 필드를 변경하지 않음
+    }
+
+    @Test
+    @DisplayName("작성자가 아닌 사람은 리뷰를 논리삭제 할 수 없다.")
+    void cannotSoftDelete_whenUserIsNotAuthor() {
+        // Given
+        Review mockReview = mock(Review.class);
+        User mockUser = mock(User.class);
+
+        UUID mockReviewId = UUID.randomUUID();
+        UUID mockUserId = UUID.randomUUID();
+        UUID requestUserId = UUID.randomUUID();
+
+        when(reviewRepository.findById(mockReviewId)).thenReturn(Optional.of(mockReview));
+        when(mockReview.getUser()).thenReturn(mockUser);
+        when(mockUser.getId()).thenReturn(mockUserId);
+
+        assertThrows(ReviewNotOwnedException.class, () -> {
+            basicReviewService.deleteReviewSoft(mockReviewId, requestUserId);
+        });
+
+        verify(mockReview, never()).updateIsDelete(true);
+        verify(reviewRepository, never()).save(mockReview);
     }
 
     @Test

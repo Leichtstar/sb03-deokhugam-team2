@@ -30,5 +30,5 @@ management:
 
 naver:
   api:
-    client-id: ${NAVER_CLIENT_ID}
-    client-secret: ${NAVER_CLIENT_SECRET}
+    client-id: ${NAVER_CLIENT_ID:dummy-id}
+    client-secret: ${NAVER_CLIENT_SECRET:dummy-secret}

@@ -49,7 +49,9 @@ public class RankingBatchJobConfig {
         PlatformTransactionManager transactionManager,
         @Value("#{jobParameters['period']}") String periodKey) {
 
-        RankingPeriod period = RankingPeriod.valueOf(periodKey.toUpperCase());
+        RankingPeriod period = RankingPeriod.valueOf(
+            periodKey != null ? periodKey.toUpperCase() : "DAILY"
+        );
         ItemReader<BookScoreDto> reader = new JpaBookScoreReader(em, period);
         ItemProcessor<BookScoreDto, PopularBookRanking> processor = new BookScoreProcessor(em, period);
 
@@ -76,7 +78,10 @@ public class RankingBatchJobConfig {
         PlatformTransactionManager transactionManager,
         @Value("#{jobParameters['period']}") String periodKey) {
 
-        RankingPeriod period = RankingPeriod.valueOf(periodKey.toUpperCase());
+        RankingPeriod period = RankingPeriod.valueOf(
+            periodKey != null ? periodKey.toUpperCase() : "DAILY"
+        );
+
         ItemReader<ReviewScoreDto> reader = new JpaReviewScoreReader(em, period);
         ItemProcessor<ReviewScoreDto, PopularReviewRanking> processor = new ReviewScoreProcessor(period);
 

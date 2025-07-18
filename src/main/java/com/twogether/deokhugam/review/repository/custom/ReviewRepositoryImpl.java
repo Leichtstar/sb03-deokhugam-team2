@@ -129,6 +129,9 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
             builder.and(review.book.id.eq(request.bookId()));
         }
 
+        // is_delete가 false인 것만
+        builder.and(review.isDeleted.eq(false));
+
         return builder;
     }
 

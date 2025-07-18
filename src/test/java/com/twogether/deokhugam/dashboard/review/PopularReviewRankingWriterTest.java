@@ -19,8 +19,11 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.batch.item.Chunk;
 
+@ExtendWith(MockitoExtension.class)
 @DisplayName("PopularReviewRankingWriter 단위 테스트")
 class PopularReviewRankingWriterTest {
 
