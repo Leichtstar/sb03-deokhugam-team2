@@ -1,4 +1,4 @@
-package com.twogether.deokhugam.dashboard.batch;
+package com.twogether.deokhugam.dashboard.batch.reader;
 
 import com.twogether.deokhugam.dashboard.batch.model.BookScoreDto;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;

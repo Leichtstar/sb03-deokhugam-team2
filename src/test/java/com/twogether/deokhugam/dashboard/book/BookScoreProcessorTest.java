@@ -1,11 +1,11 @@
-package com.twogether.deokhugam.dashboard;
+package com.twogether.deokhugam.dashboard.book;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.twogether.deokhugam.book.entity.Book;
-import com.twogether.deokhugam.dashboard.batch.BookScoreProcessor;
+import com.twogether.deokhugam.dashboard.batch.processor.BookScoreProcessor;
 import com.twogether.deokhugam.dashboard.batch.model.BookScoreDto;
 import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+@DisplayName("BookScoreProcessor 단위 테스트")
 class BookScoreProcessorTest {
 
     private EntityManager em;

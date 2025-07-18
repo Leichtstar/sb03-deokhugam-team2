@@ -78,4 +78,22 @@ public class CommentController {
     ) {
         return queryService.getComments(reviewId, direction, cursor, after, limit);
     }
+
+    @Operation(summary = "댓글 상세 조회", description = "댓글 ID로 댓글의 상세 정보를 조회합니다.")
+    @ApiResponses(value = {
+                @ApiResponse(
+                    responseCode = "200",
+                    description = "댓글 상세 조회 성공",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommentResponse.class))
+        ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "댓글을 찾을 수 없음",
+                    content = @Content(mediaType = "application/json")
+        )
+        })
+    @GetMapping("/{commentId}")
+    public ResponseEntity<CommentResponse> get(@PathVariable UUID commentId) {
+        return ResponseEntity.ok(commentService.getComment(commentId));
+    }
 }

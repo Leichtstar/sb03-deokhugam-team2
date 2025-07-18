@@ -8,6 +8,7 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
@@ -19,14 +20,12 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity
 // 한 유저는 한 책에 한개의 리뷰만 가능
-@Table(name = "reviews", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "book_id"})
-})
+@Table(name = "reviews")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Getter
+@Entity
 public class Review {
 
     @Id
@@ -62,9 +61,6 @@ public class Review {
     @Column(name = "comment_count", nullable = false)
     private long commentCount = 0;
 
-    @Column(name = "liked_by_me", nullable = false)
-    private boolean likedByMe = false;
-
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
@@ -72,27 +68,12 @@ public class Review {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    @LastModifiedDate
     @Column(name = "updated_at")
     private Instant updatedAt;
 
-    public Review(UUID id, Book book, User user, String bookTitle, String bookThumbnailUrl,
-            String userNickName, String content, int rating, Long likeCount, Long commentCount,
-            boolean likedByMe, boolean isDeleted, Instant createdAt, Instant updatedAt) {
-        this.id = id;
-        this.book = book;
-        this.user = user;
-        this.bookTitle = bookTitle;
-        this.bookThumbnailUrl = bookThumbnailUrl;
-        this.userNickName = userNickName;
-        this.content = content;
-        this.rating = rating;
-        this.likeCount = likeCount;
-        this.commentCount = commentCount;
-        this.likedByMe = likedByMe;
-        this.isDeleted = isDeleted;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
+    @PreUpdate
+    public void onPreUpdate() {
+        this.updatedAt = Instant.now();
     }
 
     public Review(Book book, User user, String content, int rating) {
@@ -106,6 +87,27 @@ public class Review {
         this.bookTitle = book.getTitle();
         this.bookThumbnailUrl = book.getThumbnailUrl();
         this.userNickName = user.getNickname();
+    }
+
+    public void updateLikeCount(long likeCount){
+        this.likeCount = likeCount;
+        this.updatedAt = Instant.now();
+    }
+
+    public void updateReview(String content, int rating){
+        if (!content.equals(this.content)){
+            this.content = content;
+        }
+
+        if (rating != this.rating){
+            this.rating = rating;
+        }
+    }
+
+    public void updateIsDelete(boolean isDeleted){
+        if(isDeleted != this.isDeleted){
+            this.isDeleted = isDeleted;
+        }
     }
 
 }

@@ -1,4 +1,4 @@
-package com.twogether.deokhugam.dashboard;
+package com.twogether.deokhugam.dashboard.service;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -15,22 +15,20 @@ import com.twogether.deokhugam.common.exception.ErrorCode;
 import com.twogether.deokhugam.dashboard.dto.request.PopularRankingSearchRequest;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PopularBookRankingRepository;
-import com.twogether.deokhugam.dashboard.service.DashboardService;
-import com.twogether.deokhugam.dashboard.service.DashboardServiceImpl;
 import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class DashboardServiceTest {
+class PopularBookServiceTest {
 
-    private DashboardService dashboardService;
-    private PopularBookRankingRepository repository;
+    private PopularBookService bookService;
+    private PopularBookRankingRepository bookRepository;
 
     @BeforeEach
     void setUp() {
-        repository = mock(PopularBookRankingRepository.class);
-        dashboardService = new DashboardServiceImpl(repository);
+        bookRepository = mock(PopularBookRankingRepository.class);
+        bookService = new PopularBookServiceImpl(bookRepository);
     }
 
     @Test
@@ -42,16 +40,16 @@ class DashboardServiceTest {
         request.setDirection("ASC");
         request.setLimit(10);
 
-        when(repository.findAllByPeriodWithCursor(eq(request), any()))
+        when(bookRepository.findAllByPeriodWithCursor(eq(request), any()))
             .thenReturn(Collections.emptyList());
 
         // when
-        var response = dashboardService.getPopularBooks(request);
+        var response = bookService.getPopularBooks(request);
 
         // then
         assertThat(response).isNotNull();
         assertThat(response.getContent()).isEmpty();
-        verify(repository, times(1)).findAllByPeriodWithCursor(eq(request), any());
+        verify(bookRepository, times(1)).findAllByPeriodWithCursor(eq(request), any());
     }
 
     @Test
@@ -63,7 +61,7 @@ class DashboardServiceTest {
         request.setDirection("UPWARD");
 
         // when & then
-        assertThatThrownBy(() -> dashboardService.getPopularBooks(request))
+        assertThatThrownBy(() -> bookService.getPopularBooks(request))
             .isInstanceOf(DeokhugamException.class)
             .hasMessageContaining(ErrorCode.INVALID_DIRECTION.getMessage());
     }
@@ -77,7 +75,7 @@ class DashboardServiceTest {
         request.setDirection("ASC");
 
         // when & then
-        assertThatThrownBy(() -> dashboardService.getPopularBooks(request))
+        assertThatThrownBy(() -> bookService.getPopularBooks(request))
             .isInstanceOf(DeokhugamException.class)
             .hasMessageContaining(ErrorCode.INVALID_RANKING_PERIOD.getMessage());
     }

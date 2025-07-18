@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReviewMapper {
 
-    public ReviewDto toDto(Review review){
+    public ReviewDto toDto(Review review, boolean likeByMe){
         if (review == null){
             return null;
         }
@@ -32,7 +32,7 @@ public class ReviewMapper {
                 review.getRating(),
                 review.getLikeCount(),
                 review.getCommentCount(),
-                review.isLikedByMe(),
+                likeByMe,
                 review.getCreatedAt(),
                 review.getUpdatedAt()
         );
