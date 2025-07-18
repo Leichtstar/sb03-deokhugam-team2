@@ -56,12 +56,12 @@ public class PopularReviewRanking {
     private String userNickname;
 
     @NotNull
-    @Column(columnDefinition = "TEXT", nullable = false)
-    private String content;
+    @Column(name = "content", columnDefinition = "TEXT", nullable = false)
+    private String reviewContent;
 
     @PositiveOrZero
-    @Column(nullable = false)
-    private double rating;
+    @Column(name = "rating", nullable = false)
+    private double reviewRating;
 
     @NotNull
     @Column(name = "book_id", columnDefinition = "UUID", nullable = false)

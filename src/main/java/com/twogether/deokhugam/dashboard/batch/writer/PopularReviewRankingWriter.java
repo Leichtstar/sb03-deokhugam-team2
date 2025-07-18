@@ -29,7 +29,18 @@ public class PopularReviewRankingWriter implements ItemWriter<PopularReviewRanki
 
         try {
             for (int i = 0; i < rankingList.size(); i++) {
-                rankingList.get(i).assignRank(i + 1); // 1위부터
+                PopularReviewRanking current = rankingList.get(i);
+
+                if (i > 0) {
+                    PopularReviewRanking previous = rankingList.get(i - 1);
+                    if (Double.compare(current.getScore(), previous.getScore()) == 0) {
+                        current.assignRank(previous.getRank());
+                    } else {
+                        current.assignRank(i + 1);
+                    }
+                } else {
+                    current.assignRank(1); // 첫 번째는 무조건 1위
+                }
             }
 
             popularReviewRankingRepository.saveAll(rankingList);
