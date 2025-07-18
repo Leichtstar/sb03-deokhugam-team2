@@ -10,14 +10,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 // 한 유저는 한 책에 한개의 리뷰만 가능
@@ -92,6 +90,10 @@ public class Review {
     public void updateLikeCount(long likeCount){
         this.likeCount = likeCount;
         this.updatedAt = Instant.now();
+    }
+
+    public void updateCommentCount(int commentCount){
+        this.commentCount = commentCount;
     }
 
     public void updateReview(String content, int rating){
