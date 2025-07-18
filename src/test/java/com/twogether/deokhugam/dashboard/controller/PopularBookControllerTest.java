@@ -9,7 +9,8 @@ import com.twogether.deokhugam.common.dto.CursorPageResponse;
 import com.twogether.deokhugam.common.exception.DeokhugamException;
 import com.twogether.deokhugam.common.exception.ErrorCode;
 import com.twogether.deokhugam.dashboard.dto.response.PopularBookDto;
-import com.twogether.deokhugam.dashboard.service.DashboardService;
+import com.twogether.deokhugam.dashboard.service.PopularBookService;
+import com.twogether.deokhugam.dashboard.service.PopularReviewService;
 import java.util.Collections;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,10 @@ class PopularBookControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private DashboardService dashboardService;
+    private PopularBookService popularBookService;
+
+    @MockitoBean
+    private PopularReviewService popularReviewService;
 
     @Test
     @DisplayName("인기 도서 목록을 정상적으로 조회할 수 있다")
@@ -40,7 +44,7 @@ class PopularBookControllerTest {
             false                   // hasNext
         );
 
-        Mockito.when(dashboardService.getPopularBooks(any()))
+        Mockito.when(popularBookService.getPopularBooks(any()))
             .thenReturn(dummyResponse);
 
         // when & then
@@ -56,7 +60,7 @@ class PopularBookControllerTest {
     @Test
     @DisplayName("잘못된 정렬 방향이면 400을 반환한다")
     void getPopularBooks_invalidDirection() throws Exception {
-        Mockito.when(dashboardService.getPopularBooks(any()))
+        Mockito.when(popularBookService.getPopularBooks(any()))
             .thenThrow(new DeokhugamException(ErrorCode.INVALID_DIRECTION));
 
         mockMvc.perform(get("/api/books/popular")

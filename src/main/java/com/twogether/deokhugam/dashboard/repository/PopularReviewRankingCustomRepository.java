@@ -1,15 +1,11 @@
 package com.twogether.deokhugam.dashboard.repository;
 
+import com.twogether.deokhugam.dashboard.dto.request.PopularRankingSearchRequest;
 import com.twogether.deokhugam.dashboard.dto.response.PopularReviewDto;
-import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 public interface PopularReviewRankingCustomRepository {
 
-    List<PopularReviewDto> findByPeriodWithCursor(
-        RankingPeriod period,
-        String cursor,
-        String after,
-        int limits
-    );
+    List<PopularReviewDto> findAllByPeriodWithCursor(PopularRankingSearchRequest request, Pageable pageable);
 }

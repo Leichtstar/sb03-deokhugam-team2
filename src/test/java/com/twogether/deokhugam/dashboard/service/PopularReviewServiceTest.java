@@ -1,10 +1,13 @@
 package com.twogether.deokhugam.dashboard.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.twogether.deokhugam.common.dto.CursorPageResponse;
+import com.twogether.deokhugam.dashboard.dto.request.PopularRankingSearchRequest;
 import com.twogether.deokhugam.dashboard.dto.response.PopularReviewDto;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PopularReviewRankingRepository;
@@ -17,7 +20,7 @@ import org.junit.jupiter.api.Test;
 class PopularReviewServiceTest {
 
     private final PopularReviewRankingRepository repository = mock(PopularReviewRankingRepository.class);
-    private final PopularReviewService service = new PopularReviewService(repository);
+    private final PopularReviewService service = new PopularReviewServiceImpl(repository);
 
     @Test
     @DisplayName("기간별 인기 리뷰 목록을 반환한다")
@@ -41,11 +44,16 @@ class PopularReviewServiceTest {
             3
         );
 
-        when(repository.findByPeriodWithCursor(RankingPeriod.DAILY, null, null, 10))
+        PopularRankingSearchRequest request = new PopularRankingSearchRequest();
+        request.setPeriod(RankingPeriod.DAILY);
+        request.setDirection("DESC");
+        request.setLimit(10);
+
+        when(repository.findAllByPeriodWithCursor(eq(request), any()))
             .thenReturn(List.of(dto));
 
         // when
-        CursorPageResponse<PopularReviewDto> result = service.getPopularReviews(RankingPeriod.DAILY, null, null, 10);
+        CursorPageResponse<PopularReviewDto> result = service.getPopularReviews(request);
 
         // then
         assertThat(result.getContent()).hasSize(1);

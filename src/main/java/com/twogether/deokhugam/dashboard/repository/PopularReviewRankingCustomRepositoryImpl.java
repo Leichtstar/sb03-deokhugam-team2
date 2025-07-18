@@ -1,19 +1,17 @@
 package com.twogether.deokhugam.dashboard.repository;
 
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.twogether.deokhugam.common.exception.DeokhugamException;
-import com.twogether.deokhugam.common.exception.ErrorCode;
+import com.twogether.deokhugam.dashboard.dto.request.PopularRankingSearchRequest;
 import com.twogether.deokhugam.dashboard.dto.response.PopularReviewDto;
-import com.twogether.deokhugam.dashboard.entity.PopularReviewRanking;
+import com.twogether.deokhugam.dashboard.dto.response.QPopularReviewDto;
 import com.twogether.deokhugam.dashboard.entity.QPopularReviewRanking;
-import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
-import com.twogether.deokhugam.dashboard.mapper.PopularReviewDtoMapper;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -23,47 +21,62 @@ public class PopularReviewRankingCustomRepositoryImpl implements PopularReviewRa
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<PopularReviewDto> findByPeriodWithCursor(
-        RankingPeriod period,
-        String cursor,
-        String after,
-        int limit
-    ) {
+    public List<PopularReviewDto> findAllByPeriodWithCursor(PopularRankingSearchRequest request, Pageable pageable) {
         QPopularReviewRanking r = QPopularReviewRanking.popularReviewRanking;
 
-        List<PopularReviewRanking> rankings = queryFactory
-            .selectFrom(r)
+        return queryFactory
+            .select(new QPopularReviewDto(
+                r.id,
+                r.reviewId,
+                r.bookId,
+                r.bookTitle,
+                r.bookThumbnailUrl,
+                r.userId,
+                r.userNickname,
+                r.reviewContent,
+                r.reviewRating,
+                r.period,
+                r.createdAt,
+                r.rank,
+                r.score,
+                r.likeCount,
+                r.commentCount
+            ))
+            .from(r)
             .where(
-                r.period.eq(period)
-                    .and(applyCursorConditions(r, cursor, after))
+                r.period.eq(request.getPeriod()),
+                ltCursor(request.getCursor(), request.getAfter(), request.getDirection())
             )
-            .orderBy(r.createdAt.desc(), r.id.desc())
-            .limit(limit)
+            .orderBy(getOrderSpecifiers(request.getDirection()))
+            .limit(pageable.getPageSize())
             .fetch();
-
-        return PopularReviewDtoMapper.toDtoList(rankings);
     }
 
-    private BooleanExpression applyCursorConditions(QPopularReviewRanking r, String cursor, String after) {
-        BooleanExpression condition = null;
+    private BooleanExpression ltCursor(String cursor, LocalDateTime after, String direction) {
+        QPopularReviewRanking r = QPopularReviewRanking.popularReviewRanking;
+        if (cursor == null || after == null) return null;
 
-        try {
-            if (after != null && cursor != null) {
-                LocalDateTime afterTime = LocalDateTime.parse(after);
-                UUID cursorId = UUID.fromString(cursor);
-                condition = r.createdAt.lt(afterTime)
-                    .or(r.createdAt.eq(afterTime).and(r.id.lt(cursorId)));
-            } else if (after != null) {
-                LocalDateTime afterTime = LocalDateTime.parse(after);
-                condition = r.createdAt.lt(afterTime);
-            } else if (cursor != null) {
-                UUID cursorId = UUID.fromString(cursor);
-                condition = r.id.lt(cursorId);
-            }
-        } catch (IllegalArgumentException | DateTimeParseException e) {
-            throw new DeokhugamException(ErrorCode.INVALID_CURSOR);
+        UUID cursorId = UUID.fromString(cursor);
+
+        if ("DESC".equalsIgnoreCase(direction)) {
+            return r.createdAt.lt(after)
+                .or(r.createdAt.eq(after).and(r.id.lt(cursorId)));
         }
+        return r.createdAt.gt(after)
+            .or(r.createdAt.eq(after).and(r.id.gt(cursorId)));
+    }
 
-        return condition;
+    private OrderSpecifier<?>[] getOrderSpecifiers(String direction) {
+        QPopularReviewRanking r = QPopularReviewRanking.popularReviewRanking;
+        if ("DESC".equalsIgnoreCase(direction)) {
+            return new OrderSpecifier[]{
+                r.createdAt.desc(),
+                r.id.desc()
+            };
+        }
+        return new OrderSpecifier[]{
+            r.createdAt.asc(),
+            r.id.asc()
+        };
     }
 }

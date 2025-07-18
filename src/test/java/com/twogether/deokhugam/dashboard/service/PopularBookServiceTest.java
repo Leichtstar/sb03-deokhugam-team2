@@ -22,13 +22,13 @@ import org.junit.jupiter.api.Test;
 
 class PopularBookServiceTest {
 
-    private DashboardService dashboardService;
-    private PopularBookRankingRepository repository;
+    private PopularBookService bookService;
+    private PopularBookRankingRepository bookRepository;
 
     @BeforeEach
     void setUp() {
-        repository = mock(PopularBookRankingRepository.class);
-        dashboardService = new DashboardServiceImpl(repository);
+        bookRepository = mock(PopularBookRankingRepository.class);
+        bookService = new PopularBookServiceImpl(bookRepository);
     }
 
     @Test
@@ -40,16 +40,16 @@ class PopularBookServiceTest {
         request.setDirection("ASC");
         request.setLimit(10);
 
-        when(repository.findAllByPeriodWithCursor(eq(request), any()))
+        when(bookRepository.findAllByPeriodWithCursor(eq(request), any()))
             .thenReturn(Collections.emptyList());
 
         // when
-        var response = dashboardService.getPopularBooks(request);
+        var response = bookService.getPopularBooks(request);
 
         // then
         assertThat(response).isNotNull();
         assertThat(response.getContent()).isEmpty();
-        verify(repository, times(1)).findAllByPeriodWithCursor(eq(request), any());
+        verify(bookRepository, times(1)).findAllByPeriodWithCursor(eq(request), any());
     }
 
     @Test
@@ -61,7 +61,7 @@ class PopularBookServiceTest {
         request.setDirection("UPWARD");
 
         // when & then
-        assertThatThrownBy(() -> dashboardService.getPopularBooks(request))
+        assertThatThrownBy(() -> bookService.getPopularBooks(request))
             .isInstanceOf(DeokhugamException.class)
             .hasMessageContaining(ErrorCode.INVALID_DIRECTION.getMessage());
     }
@@ -75,7 +75,7 @@ class PopularBookServiceTest {
         request.setDirection("ASC");
 
         // when & then
-        assertThatThrownBy(() -> dashboardService.getPopularBooks(request))
+        assertThatThrownBy(() -> bookService.getPopularBooks(request))
             .isInstanceOf(DeokhugamException.class)
             .hasMessageContaining(ErrorCode.INVALID_RANKING_PERIOD.getMessage());
     }
