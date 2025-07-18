@@ -120,12 +120,12 @@ class CommentQueryServiceTest {
     @Test
     void limit_zero_replaced_by_defaultSize() {
         UUID rid = UUID.randomUUID();
-        when(commentRepository.findSlice(eq(rid), isNull(), isNull(), eq(50), eq(false)))
+        when(commentRepository.findSlice(eq(rid), isNull(), isNull(), eq(20), eq(false)))
             .thenReturn(List.of());
 
         sut.getComments(rid, Sort.Direction.DESC, null, null, 0);
 
-        verify(commentRepository).findSlice(rid, null, null, 50, false);
+        verify(commentRepository).findSlice(rid, null, null, 20, false);
     }
 
     @Test
@@ -165,14 +165,14 @@ class CommentQueryServiceTest {
         Comment c = stubComment(rid, UUID.randomUUID(), base.plusSeconds(1), false);
         CommentResponse dto = stubDto(c);
 
-        when(commentRepository.findSlice(eq(rid), eq(base), eq(baseId), eq(50), eq(true)))
+        when(commentRepository.findSlice(eq(rid), eq(base), eq(baseId), eq(20), eq(true)))
             .thenReturn(List.of(c));
         when(commentMapper.toResponse(c)).thenReturn(dto);
 
 
         sut.getComments(rid, Sort.Direction.ASC, cursor, null, null);
 
-        verify(commentRepository).findSlice(rid, base, baseId, 50, true);
+        verify(commentRepository).findSlice(rid, base, baseId, 20, true);
     }
 
     @Test
@@ -200,7 +200,7 @@ class CommentQueryServiceTest {
         CursorPageResponse<CommentResponse> res =
             sut.getComments(rid, Sort.Direction.DESC, null, null, 1);
 
-        assertThat(res.getNextCursor()).isNotNull();        // ③ 분기 실행 검증
+        assertThat(res.getNextCursor()).isNotNull();
     }
 
 
