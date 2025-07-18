@@ -32,6 +32,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 @ExtendWith(MockitoExtension.class)
@@ -296,6 +298,126 @@ class CommentServiceTest {
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
         assertThatThrownBy(() -> commentService.updateComment(commentId, userId, new CommentUpdateRequest("수정")))
+            .isInstanceOf(CommentForbiddenException.class);
+    }
+
+    @Test
+    @DisplayName("댓글 논리삭제에 성공한다")
+    void deleteLogical_success() {
+        UUID commentId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        User mockUser = mock(User.class);
+        when(mockUser.getId()).thenReturn(userId);
+
+        Comment mockComment = mock(Comment.class);
+        when(mockComment.getUser()).thenReturn(mockUser);
+        when(mockComment.getIsDeleted()).thenReturn(false);
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(mockComment));
+
+        // when
+        commentService.deleteLogical(commentId, userId);
+
+        // then
+        verify(commentRepository).logicalDeleteById(commentId);
+    }
+
+    @Test
+    @DisplayName("논리삭제 - 존재하지 않는 댓글이면 예외 발생")
+    void deleteLogical_notFound() {
+        UUID commentId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> commentService.deleteLogical(commentId, userId))
+            .isInstanceOf(CommentNotFoundException.class);
+    }
+
+
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    @Test
+    @DisplayName("논리삭제 - 타인 댓글이면 권한 예외 발생")
+    void deleteLogical_forbidden() {
+        UUID commentId = UUID.randomUUID();
+        UUID ownerId = UUID.randomUUID();
+        UUID attackerId = UUID.randomUUID();
+        User mockUser = mock(User.class);
+        when(mockUser.getId()).thenReturn(ownerId);
+
+        Comment mockComment = mock(Comment.class);
+        when(mockComment.getUser()).thenReturn(mockUser);
+        when(mockComment.getIsDeleted()).thenReturn(false);
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(mockComment));
+
+        assertThatThrownBy(() -> commentService.deleteLogical(commentId, attackerId))
+            .isInstanceOf(CommentForbiddenException.class);
+    }
+
+
+    @Test
+    @DisplayName("논리삭제 - 이미 삭제된 댓글이면 예외 발생")
+    void deleteLogical_alreadyDeleted() {
+        UUID commentId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        User mockUser = mock(User.class);
+        when(mockUser.getId()).thenReturn(userId);
+
+        Comment mockComment = mock(Comment.class);
+        when(mockComment.getUser()).thenReturn(mockUser);
+        when(mockComment.getIsDeleted()).thenReturn(true);
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(mockComment));
+
+        assertThatThrownBy(() -> commentService.deleteLogical(commentId, userId))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("이미 삭제된 댓글입니다");
+    }
+
+    @Test
+    @DisplayName("댓글 물리삭제에 성공한다")
+    void deletePhysical_success() {
+        UUID commentId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        User mockUser = mock(User.class);
+        when(mockUser.getId()).thenReturn(userId);
+
+        Comment mockComment = mock(Comment.class);
+        when(mockComment.getUser()).thenReturn(mockUser);
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(mockComment));
+
+        commentService.deletePhysical(commentId, userId);
+
+        verify(commentRepository).deleteById(commentId);
+    }
+
+    @Test
+    @DisplayName("물리삭제 - 존재하지 않는 댓글이면 예외 발생")
+    void deletePhysical_notFound() {
+        UUID commentId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> commentService.deletePhysical(commentId, userId))
+            .isInstanceOf(CommentNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("물리삭제 - 타인 댓글이면 권한 예외 발생")
+    void deletePhysical_forbidden() {
+        UUID commentId = UUID.randomUUID();
+        UUID ownerId = UUID.randomUUID();
+        UUID attackerId = UUID.randomUUID();
+        User mockUser = mock(User.class);
+        when(mockUser.getId()).thenReturn(ownerId);
+
+        Comment mockComment = mock(Comment.class);
+        when(mockComment.getUser()).thenReturn(mockUser);
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(mockComment));
+
+        assertThatThrownBy(() -> commentService.deletePhysical(commentId, attackerId))
             .isInstanceOf(CommentForbiddenException.class);
     }
 }
