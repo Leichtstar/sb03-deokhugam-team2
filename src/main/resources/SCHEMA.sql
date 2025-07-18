@@ -59,7 +59,7 @@ CREATE TABLE reviews
     user_nickname VARCHAR(50)           NOT NULL,
 
     content TEXT                        NOT NULL,
-    rating REAL                         NOT NULL,
+    rating INTEGER                         NOT NULL,
     like_count BIGINT,
     comment_count BIGINT,
     created_at TIMESTAMPTZ              NOT NULL,
@@ -70,7 +70,7 @@ CREATE TABLE reviews
     CONSTRAINT fk_reviews_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
--- Partial Unique Index 추가
+-- Partial Unique Index 추가 (리뷰 테이블 생성시 꼭 같이 실행할 것)
 CREATE UNIQUE INDEX uq_reviews_book_user_partial
     ON reviews (book_id, user_id)
     WHERE is_deleted = FALSE;
