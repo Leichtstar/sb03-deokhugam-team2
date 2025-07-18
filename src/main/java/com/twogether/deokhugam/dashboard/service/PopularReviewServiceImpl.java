@@ -35,7 +35,7 @@ public class PopularReviewServiceImpl implements PopularReviewService {
 
         if (hasNext) {
             var last = content.get(content.size() - 1);
-            nextCursor = String.valueOf(last.rank());
+            nextCursor = last.id().toString();
             nextAfter = last.createdAt();
         }
 
