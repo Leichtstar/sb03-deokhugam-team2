@@ -17,6 +17,7 @@ public enum ErrorCode {
     REVIEW_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 작성한 리뷰가 있습니다."),
     INVALID_RATING(HttpStatus.BAD_REQUEST, "리뷰 평점은 1점 이상 5점 이하이어야 합니다."),
     REVIEW_LIKE_NOT_FOUND(HttpStatus.NOT_FOUND, "리뷰의 좋아요 정보를 찾을 수 없습니다."),
+    REVIEW_NOT_OWNED(HttpStatus.FORBIDDEN, "본인이 작성한 리뷰만 수정/삭제할 수 있습니다."),
 
     // Batch 관련 에러 코드
     RANKING_DATA_EMPTY(HttpStatus.NOT_FOUND, "해당 기간의 리뷰 데이터가 존재하지 않습니다."),
@@ -25,6 +26,9 @@ public enum ErrorCode {
     // Dashboard 관련 에러 코드
     INVALID_RANKING_PERIOD(HttpStatus.BAD_REQUEST, "지원하지 않는 랭킹 기간입니다."),
     INVALID_DIRECTION(HttpStatus.BAD_REQUEST, "정렬 방향은 ASC 또는 DESC만 가능합니다."),
+
+    // Cursor 관련 에러 코드
+    INVALID_CURSOR(HttpStatus.BAD_REQUEST, "커서 정보가 올바르지 않습니다."),
 
     // Book 관련 에러 코드
     BOOK_NOT_FOUND(HttpStatus.NOT_FOUND, "등록되지 않은 도서입니다."),
