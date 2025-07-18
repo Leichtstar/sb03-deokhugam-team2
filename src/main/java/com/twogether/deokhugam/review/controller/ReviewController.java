@@ -12,6 +12,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -77,6 +78,19 @@ public class ReviewController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(searchResult);
+    }
+
+    // 리뷰 논리 삭제
+    @DeleteMapping(path = "/{reviewId}")
+    public ResponseEntity<Void> deleteReview(
+            @PathVariable("reviewId") UUID reviewId,
+            @RequestHeader(value = "Deokhugam-Request-User-ID", required = true) UUID requestUserId
+    ){
+        reviewService.deleteReviewSoft(reviewId, requestUserId);
+
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
     }
 
     // 리뷰 수정
