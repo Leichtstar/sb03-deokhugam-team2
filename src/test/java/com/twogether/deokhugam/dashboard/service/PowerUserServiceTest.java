@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import com.twogether.deokhugam.common.exception.DeokhugamException;
 import com.twogether.deokhugam.common.exception.ErrorCode;
 import com.twogether.deokhugam.dashboard.dto.request.PopularRankingSearchRequest;
+import com.twogether.deokhugam.dashboard.dto.response.PowerUserDto;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PowerUserRankingRepository;
 import java.util.Collections;
@@ -89,5 +90,58 @@ class PowerUserServiceTest {
         assertThatThrownBy(() -> powerUserService.getPowerUsers(request))
             .isInstanceOf(DeokhugamException.class)
             .hasMessageContaining(ErrorCode.INVALID_DIRECTION.getMessage());
+    }
+
+    @Test
+    @DisplayName("결과 수가 limit보다 작으면 hasNext는 false다")
+    void getPowerUsers_hasNextFalse() {
+        // given
+        PopularRankingSearchRequest request = new PopularRankingSearchRequest();
+        request.setPeriod(RankingPeriod.DAILY);
+        request.setDirection("ASC");
+        request.setLimit(10);
+
+        var dto = new PowerUserDto(
+            java.util.UUID.randomUUID(),
+            "홍길동",
+            RankingPeriod.DAILY,
+            java.time.LocalDateTime.now(),
+            1,
+            99.5,
+            50.0,
+            20,
+            10
+        );
+
+        when(repository.findAllByPeriodWithCursor(eq(request), any()))
+            .thenReturn(java.util.List.of(dto)); // limit보다 적은 결과
+
+        // when
+        var response = powerUserService.getPowerUsers(request);
+
+        // then
+        assertThat(response.getContent()).hasSize(1);
+        assertThat(response.isHasNext()).isFalse();
+    }
+
+    @Test
+    @DisplayName("정렬 방향이 DESC인 경우도 정상적으로 조회된다")
+    void getPowerUsers_descDirection() {
+        // given
+        PopularRankingSearchRequest request = new PopularRankingSearchRequest();
+        request.setPeriod(RankingPeriod.DAILY);
+        request.setDirection("DESC");
+        request.setLimit(10);
+
+        when(repository.findAllByPeriodWithCursor(eq(request), any()))
+            .thenReturn(Collections.emptyList());
+
+        // when
+        var response = powerUserService.getPowerUsers(request);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getContent()).isEmpty();
+        assertThat(response.isHasNext()).isFalse();
     }
 }
