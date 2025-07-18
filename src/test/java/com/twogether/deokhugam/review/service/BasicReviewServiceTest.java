@@ -150,7 +150,10 @@ public class BasicReviewServiceTest {
         ReviewLike mockReviewLike = mock(ReviewLike.class);
         ReviewDto expectedDto = mock(ReviewDto.class);
 
+        when(mockBook.getReviewCount()).thenReturn(5);
+
         Review review = new Review(mockBook, mockUser, "재밌는 책이다.", 4);
+
 
         when(reviewRepository.existsByUserIdAndBookIdAndIsDeletedFalse(userId, bookId)).thenReturn(false);
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(mockBook));
@@ -164,7 +167,10 @@ public class BasicReviewServiceTest {
 
         // Then
         assertEquals(expectedDto, result);
+
         verify(reviewRepository).save(any(Review.class));
+        verify(bookRepository).save(any(Book.class));
+        verify(mockBook).setReviewCount(6);
         verify(reviewLikeRepository).save(any(ReviewLike.class));
     }
 
@@ -411,14 +417,24 @@ public class BasicReviewServiceTest {
     void shouldSoftDelete_whenUserIsAuthor(){
         // Given
         User mockUser = mock(User.class);
+        Book mockBook = mock(Book.class);
 
         UUID mockReviewId = UUID.randomUUID();
         UUID requestUserId = UUID.randomUUID();
+        UUID mockBookId = UUID.randomUUID();
 
-        Review deletedReview = new Review(testBook, testUser, "논리 삭제된 리뷰", 5);
+        Review deletedReview = new Review(mockBook, testUser, "논리 삭제된 리뷰", 5);
         Review spyReview = spy(deletedReview); // 실제 동작하는 spy 객체
 
         when(reviewRepository.findById(mockReviewId)).thenReturn(Optional.of(spyReview));
+
+        when(spyReview.getBook()).thenReturn(mockBook);
+        when(mockBook.getId()).thenReturn(mockBookId);
+
+        when(bookRepository.findById(mockBookId)).thenReturn(Optional.of(mockBook));
+
+        when(mockBook.getReviewCount()).thenReturn(4);
+
         when(spyReview.getUser()).thenReturn(mockUser);
         when(mockUser.getId()).thenReturn(requestUserId);
 
@@ -427,7 +443,9 @@ public class BasicReviewServiceTest {
 
         // Then
         assertTrue(spyReview.isDeleted());
+        verify(mockBook).setReviewCount(3);
         verify(reviewRepository).save(spyReview);
+        verify(bookRepository).save(mockBook);
 
         // mock으로 만든 Review는 가짜 객체라서 내부 필드를 변경하지 않음
     }
