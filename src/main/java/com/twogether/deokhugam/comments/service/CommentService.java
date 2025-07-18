@@ -14,6 +14,7 @@ import com.twogether.deokhugam.user.exception.UserNotFoundException;
 import com.twogether.deokhugam.user.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -24,6 +25,7 @@ import java.util.UUID;
 /**
  * 댓글 도메인의 비즈니스 로직을 담당.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Validated
@@ -40,6 +42,7 @@ public class CommentService {
      * @param request 등록 요청 DTO
      * @return 등록 결과 DTO
      */
+    @Transactional
     public CommentResponse createComment(@Valid CommentCreateRequest request) {
         Review review = reviewRepository.findById(request.reviewId())
             .orElseThrow(() -> new ReviewNotFoundException(request.reviewId()));
@@ -47,6 +50,10 @@ public class CommentService {
             .orElseThrow(() -> new UserNotFoundException());
         Comment entity = new Comment(user, review, request.content());
         Comment saved = commentRepository.save(entity);
+
+        reviewRepository.incrementCommentCount(review.getId());
+        log.info("[CommentService] 리뷰에 댓글 개수 추가: {}", review.getCommentCount());
+
         return commentMapper.toResponse(saved);
     }
 
