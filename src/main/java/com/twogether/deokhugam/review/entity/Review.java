@@ -112,4 +112,15 @@ public class Review {
         }
     }
 
+    public void incrementCommentCount(){
+        this.commentCount++;
+        this.updatedAt = Instant.now();
+    }
+
+    public void decrementCommentCount() {
+        if (this.commentCount > 0) {
+            this.commentCount--;
+            this.updatedAt = Instant.now();
+        }
+    }
 }
