@@ -1,6 +1,7 @@
 package com.twogether.deokhugam.review.service;
 
 import com.twogether.deokhugam.book.entity.Book;
+import com.twogether.deokhugam.book.exception.BookNotFoundException;
 import com.twogether.deokhugam.book.repository.BookRepository;
 import com.twogether.deokhugam.common.dto.CursorPageResponseDto;
 import com.twogether.deokhugam.review.dto.ReviewDto;
@@ -56,7 +57,7 @@ public class BasicReviewService implements ReviewService{
         }
 
         // 리뷰 작성하려는 책, 유저
-        Book reviewdBook = bookRepository.findById(request.bookId())
+        Book reviewedBook = bookRepository.findById(request.bookId())
                 .orElseThrow(
                         () -> new NoSuchElementException("책을 찾을 수 없습니다. " + request.bookId()));
 
@@ -64,7 +65,9 @@ public class BasicReviewService implements ReviewService{
                 .orElseThrow(
                         () -> new NoSuchElementException("사용자를 찾을 수 없습니다. " + request.userId()));
 
-        Review review = new Review(reviewdBook, reviewer, request.content(), request.rating());
+        int beforeCount = reviewedBook.getReviewCount();
+
+        Review review = new Review(reviewedBook, reviewer, request.content(), request.rating());
         reviewRepository.save(review);
 
         ReviewLike reviewLike = new ReviewLike(
@@ -72,6 +75,10 @@ public class BasicReviewService implements ReviewService{
                 reviewer,
                 false
         );
+
+        reviewedBook.setReviewCount(beforeCount + 1);
+        bookRepository.save(reviewedBook);
+
         reviewLikeRepository.save(reviewLike);
 
         log.info("[BasicReviewService] 리뷰 등록 성공");
@@ -168,12 +175,20 @@ public class BasicReviewService implements ReviewService{
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
 
+        Book reviewedBook = bookRepository.findById(review.getBook().getId())
+                .orElseThrow(BookNotFoundException::new);
+
+        int beforeCount = reviewedBook.getReviewCount();
+
         if (!review.getUser().getId().equals(requestUserId)){
             throw new ReviewNotOwnedException();
         }
         review.updateIsDelete(true);
-        // 댓글 논리 삭제 부분도 추가?
+
+        reviewedBook.setReviewCount(beforeCount - 1);
+
         reviewRepository.save(review);
+        bookRepository.save(reviewedBook);
 
         log.info("[BasicReviewService]: 리뷰 논리 삭제 완료");
     }
