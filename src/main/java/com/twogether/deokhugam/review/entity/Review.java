@@ -8,6 +8,7 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
@@ -20,9 +21,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 // 한 유저는 한 책에 한개의 리뷰만 가능
-@Table(name = "reviews", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "book_id"})
-})
+@Table(name = "reviews")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Getter
@@ -69,9 +68,13 @@ public class Review {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    @LastModifiedDate
     @Column(name = "updated_at")
     private Instant updatedAt;
+
+    @PreUpdate
+    public void onPreUpdate() {
+        this.updatedAt = Instant.now();
+    }
 
     public Review(Book book, User user, String content, int rating) {
         this.id = UUID.randomUUID();
@@ -89,6 +92,22 @@ public class Review {
     public void updateLikeCount(long likeCount){
         this.likeCount = likeCount;
         this.updatedAt = Instant.now();
+    }
+
+    public void updateReview(String content, int rating){
+        if (!content.equals(this.content)){
+            this.content = content;
+        }
+
+        if (rating != this.rating){
+            this.rating = rating;
+        }
+    }
+
+    public void updateIsDelete(boolean isDeleted){
+        if(isDeleted != this.isDeleted){
+            this.isDeleted = isDeleted;
+        }
     }
 
 }
