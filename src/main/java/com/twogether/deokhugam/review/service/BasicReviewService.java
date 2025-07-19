@@ -3,6 +3,7 @@ package com.twogether.deokhugam.review.service;
 import com.twogether.deokhugam.book.entity.Book;
 import com.twogether.deokhugam.book.exception.BookNotFoundException;
 import com.twogether.deokhugam.book.repository.BookRepository;
+import com.twogether.deokhugam.book.service.BookService;
 import com.twogether.deokhugam.common.dto.CursorPageResponseDto;
 import com.twogether.deokhugam.review.dto.ReviewDto;
 import com.twogether.deokhugam.review.dto.ReviewLikeDto;
@@ -65,8 +66,6 @@ public class BasicReviewService implements ReviewService{
                 .orElseThrow(
                         () -> new NoSuchElementException("사용자를 찾을 수 없습니다. " + request.userId()));
 
-        int beforeCount = reviewedBook.getReviewCount();
-
         Review review = new Review(reviewedBook, reviewer, request.content(), request.rating());
         reviewRepository.save(review);
 
@@ -76,7 +75,7 @@ public class BasicReviewService implements ReviewService{
                 false
         );
 
-        reviewedBook.setReviewCount(beforeCount + 1);
+        bookRepository.updateBookReviewStats(request.bookId());
         bookRepository.save(reviewedBook);
 
         reviewLikeRepository.save(reviewLike);
@@ -171,6 +170,7 @@ public class BasicReviewService implements ReviewService{
 
     // 리뷰 논리 삭제
     @Override
+    @Transactional
     public void deleteReviewSoft(UUID reviewId, UUID requestUserId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
@@ -178,17 +178,15 @@ public class BasicReviewService implements ReviewService{
         Book reviewedBook = bookRepository.findById(review.getBook().getId())
                 .orElseThrow(BookNotFoundException::new);
 
-        int beforeCount = reviewedBook.getReviewCount();
-
         if (!review.getUser().getId().equals(requestUserId)){
             throw new ReviewNotOwnedException();
         }
         review.updateIsDelete(true);
 
-        reviewedBook.setReviewCount(beforeCount - 1);
+        bookRepository.updateBookReviewStats(reviewedBook.getId());
+        bookRepository.save(reviewedBook);
 
         reviewRepository.save(review);
-        bookRepository.save(reviewedBook);
 
         log.info("[BasicReviewService]: 리뷰 논리 삭제 완료");
     }
