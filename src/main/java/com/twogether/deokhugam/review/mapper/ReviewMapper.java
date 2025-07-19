@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReviewMapper {
 
-    public final ReviewRepository reviewRepository;
+    private final ReviewRepository reviewRepository;
 
     public ReviewDto toDto(Review review, boolean likeByMe){
         if (review == null){
