@@ -59,6 +59,7 @@ public class Comment {
         this.review = review;
         this.content = content;
         this.isDeleted = false;
+        this.createdAt = LocalDateTime.now();
     }
 
     public void editContent(String newContent) {
