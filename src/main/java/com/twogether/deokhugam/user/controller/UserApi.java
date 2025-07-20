@@ -193,48 +193,48 @@ public interface UserApi {
                     @ExampleObject(
                         name = "userIdMismatch",
                         value = """
-                        {
-                            "timestamp": "2025-07-20T10:30:00.123456Z",
-                            "code": "USER_ACCESS_DENIED",
-                            "message": "사용자 정보 수정 권한이 없습니다.",
-                            "details": {
-                                "requestUserId": "a244bc95-f26a-4814-8c4d-a050f0dbde11",
-                                "targetUserId": "b244bc95-f26a-4814-8c4d-a050f0dbde10"
-                            },
-                            "exceptionType": "UserAccessDeniedException",
-                            "status": 403
-                        }
-                        """
+                            {
+                                "timestamp": "2025-07-20T10:30:00.123456Z",
+                                "code": "USER_ACCESS_DENIED",
+                                "message": "사용자 정보 수정 권한이 없습니다.",
+                                "details": {
+                                    "requestUserId": "a244bc95-f26a-4814-8c4d-a050f0dbde11",
+                                    "targetUserId": "b244bc95-f26a-4814-8c4d-a050f0dbde10"
+                                },
+                                "exceptionType": "UserAccessDeniedException",
+                                "status": 403
+                            }
+                            """
                     ),
                     @ExampleObject(
                         name = "missingUserIdHeader",
                         value = """
-                        {
-                            "timestamp": "2025-07-20T10:30:00.123456Z",
-                            "code": "USER_ACCESS_DENIED",
-                            "message": "사용자 정보 수정 권한이 없습니다.",
-                            "details": {
-                                "missingUserIdHeader": ""
-                            },
-                            "exceptionType": "UserAccessDeniedException",
-                            "status": 403
-                        }
-                        """
+                            {
+                                "timestamp": "2025-07-20T10:30:00.123456Z",
+                                "code": "USER_ACCESS_DENIED",
+                                "message": "사용자 정보 수정 권한이 없습니다.",
+                                "details": {
+                                    "missingUserIdHeader": ""
+                                },
+                                "exceptionType": "UserAccessDeniedException",
+                                "status": 403
+                            }
+                            """
                     ),
                     @ExampleObject(
                         name = "invalidUserIdFormat",
                         value = """
-                        {
-                            "timestamp": "2025-07-20T10:30:00.123456Z",
-                            "code": "USER_ACCESS_DENIED",
-                            "message": "사용자 정보 수정 권한이 없습니다.",
-                            "details": {
-                                "invalidUserId": "a3dc2482697c4124bcbfee0a706c0e6"
-                            },
-                            "exceptionType": "UserAccessDeniedException",
-                            "status": 403
-                        }
-                        """
+                            {
+                                "timestamp": "2025-07-20T10:30:00.123456Z",
+                                "code": "USER_ACCESS_DENIED",
+                                "message": "사용자 정보 수정 권한이 없습니다.",
+                                "details": {
+                                    "invalidUserId": "a3dc2482697c4124bcbfee0a706c0e6"
+                                },
+                                "exceptionType": "UserAccessDeniedException",
+                                "status": 403
+                            }
+                            """
                     )
                 }
             )
@@ -289,7 +289,7 @@ public interface UserApi {
                             "code": "INVALID_INPUT_VALUE",
                             "message": "잘못된 입력값입니다.",
                             "details": {
-                                "password": "비밀번호는 8자 이상 20자 이하, 영문자, 숫자, 특수문자를 포함해야 합니다."
+                                "nickname": "닉네임은 2자 이상 20자 이하여야 합니다."
                             },
                             "exceptionType": "MethodArgumentNotValidException",
                             "status": 400
@@ -305,48 +305,48 @@ public interface UserApi {
                     @ExampleObject(
                         name = "userIdMismatch",
                         value = """
-                        {
-                            "timestamp": "2025-07-20T10:30:00.123456Z",
-                            "code": "USER_ACCESS_DENIED",
-                            "message": "사용자 정보 수정 권한이 없습니다.",
-                            "details": {
-                                "requestUserId": "a244bc95-f26a-4814-8c4d-a050f0dbde11",
-                                "targetUserId": "b244bc95-f26a-4814-8c4d-a050f0dbde10"
-                            },
-                            "exceptionType": "UserAccessDeniedException",
-                            "status": 403
-                        }
-                        """
+                            {
+                                "timestamp": "2025-07-20T10:30:00.123456Z",
+                                "code": "USER_ACCESS_DENIED",
+                                "message": "사용자 정보 수정 권한이 없습니다.",
+                                "details": {
+                                    "requestUserId": "a244bc95-f26a-4814-8c4d-a050f0dbde11",
+                                    "targetUserId": "b244bc95-f26a-4814-8c4d-a050f0dbde10"
+                                },
+                                "exceptionType": "UserAccessDeniedException",
+                                "status": 403
+                            }
+                            """
                     ),
                     @ExampleObject(
                         name = "missingUserIdHeader",
                         value = """
-                        {
-                            "timestamp": "2025-07-20T10:30:00.123456Z",
-                            "code": "USER_ACCESS_DENIED",
-                            "message": "사용자 정보 수정 권한이 없습니다.",
-                            "details": {
-                                "missingUserIdHeader": ""
-                            },
-                            "exceptionType": "UserAccessDeniedException",
-                            "status": 403
-                        }
-                        """
+                            {
+                                "timestamp": "2025-07-20T10:30:00.123456Z",
+                                "code": "USER_ACCESS_DENIED",
+                                "message": "사용자 정보 수정 권한이 없습니다.",
+                                "details": {
+                                    "missingUserIdHeader": ""
+                                },
+                                "exceptionType": "UserAccessDeniedException",
+                                "status": 403
+                            }
+                            """
                     ),
                     @ExampleObject(
                         name = "invalidUserIdFormat",
                         value = """
-                        {
-                            "timestamp": "2025-07-20T10:30:00.123456Z",
-                            "code": "USER_ACCESS_DENIED",
-                            "message": "사용자 정보 수정 권한이 없습니다.",
-                            "details": {
-                                "invalidUserId": "a3dc2482697c4124bcbfee0a706c0e6"
-                            },
-                            "exceptionType": "UserAccessDeniedException",
-                            "status": 403
-                        }
-                        """
+                            {
+                                "timestamp": "2025-07-20T10:30:00.123456Z",
+                                "code": "USER_ACCESS_DENIED",
+                                "message": "사용자 정보 수정 권한이 없습니다.",
+                                "details": {
+                                    "invalidUserId": "a3dc2482697c4124bcbfee0a706c0e6"
+                                },
+                                "exceptionType": "UserAccessDeniedException",
+                                "status": 403
+                            }
+                            """
                     )
                 }
             )
@@ -365,6 +365,25 @@ public interface UserApi {
                             },
                             "exceptionType": "UserNotFoundException",
                             "status": 404
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "409", description = "닉네임 중복",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = """
+                        {
+                            "timestamp": "2025-07-20T10:30:00.123456Z",
+                            "code": "NICKNAME_DUPLICATION",
+                            "message": "이미 존재하는 닉네임입니다.",
+                            "details": {
+                                "nickname": "test"
+                            },
+                            "exceptionType": "NicknameAlreadyExistsException",
+                            "status": 409
                         }
                         """
                 )
@@ -401,48 +420,48 @@ public interface UserApi {
                     @ExampleObject(
                         name = "userIdMismatch",
                         value = """
-                        {
-                            "timestamp": "2025-07-20T10:30:00.123456Z",
-                            "code": "USER_ACCESS_DENIED",
-                            "message": "사용자 정보 수정 권한이 없습니다.",
-                            "details": {
-                                "requestUserId": "a244bc95-f26a-4814-8c4d-a050f0dbde11",
-                                "targetUserId": "b244bc95-f26a-4814-8c4d-a050f0dbde10"
-                            },
-                            "exceptionType": "UserAccessDeniedException",
-                            "status": 403
-                        }
-                        """
+                            {
+                                "timestamp": "2025-07-20T10:30:00.123456Z",
+                                "code": "USER_ACCESS_DENIED",
+                                "message": "사용자 정보 수정 권한이 없습니다.",
+                                "details": {
+                                    "requestUserId": "a244bc95-f26a-4814-8c4d-a050f0dbde11",
+                                    "targetUserId": "b244bc95-f26a-4814-8c4d-a050f0dbde10"
+                                },
+                                "exceptionType": "UserAccessDeniedException",
+                                "status": 403
+                            }
+                            """
                     ),
                     @ExampleObject(
                         name = "missingUserIdHeader",
                         value = """
-                        {
-                            "timestamp": "2025-07-20T10:30:00.123456Z",
-                            "code": "USER_ACCESS_DENIED",
-                            "message": "사용자 정보 수정 권한이 없습니다.",
-                            "details": {
-                                "missingUserIdHeader": ""
-                            },
-                            "exceptionType": "UserAccessDeniedException",
-                            "status": 403
-                        }
-                        """
+                            {
+                                "timestamp": "2025-07-20T10:30:00.123456Z",
+                                "code": "USER_ACCESS_DENIED",
+                                "message": "사용자 정보 수정 권한이 없습니다.",
+                                "details": {
+                                    "missingUserIdHeader": ""
+                                },
+                                "exceptionType": "UserAccessDeniedException",
+                                "status": 403
+                            }
+                            """
                     ),
                     @ExampleObject(
                         name = "invalidUserIdFormat",
                         value = """
-                        {
-                            "timestamp": "2025-07-20T10:30:00.123456Z",
-                            "code": "USER_ACCESS_DENIED",
-                            "message": "사용자 정보 수정 권한이 없습니다.",
-                            "details": {
-                                "invalidUserId": "a3dc2482697c4124bcbfee0a706c0e6"
-                            },
-                            "exceptionType": "UserAccessDeniedException",
-                            "status": 403
-                        }
-                        """
+                            {
+                                "timestamp": "2025-07-20T10:30:00.123456Z",
+                                "code": "USER_ACCESS_DENIED",
+                                "message": "사용자 정보 수정 권한이 없습니다.",
+                                "details": {
+                                    "invalidUserId": "a3dc2482697c4124bcbfee0a706c0e6"
+                                },
+                                "exceptionType": "UserAccessDeniedException",
+                                "status": 403
+                            }
+                            """
                     )
                 }
             )
