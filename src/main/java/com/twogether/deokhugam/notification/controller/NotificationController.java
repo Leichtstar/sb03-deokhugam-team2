@@ -20,22 +20,22 @@ public class NotificationController {
 
     private final NotificationQueryService notificationQueryService;
 
-    @Operation(summary = "알림 목록 조회", description = "사용자의 알림 목록을 커서 기반으로 조회합니다.")
+    @Operation(summary = "알림 목록 조회", description = "사용자의 알림 목록을 커서 기반으로 조회합니다. 최신 알림부터 정렬됩니다.")
     @GetMapping("/api/notifications")
     public CursorPageResponse<NotificationDto> getNotifications(
         @Parameter(description = "요청자 ID", required = true)
         @RequestHeader("Deokhugam-Request-User-ID") UUID userId,
 
-        @Parameter(description = "커서 (이전 페이지 마지막 createdAt)")
+        @Parameter(description = "커서 (이전 페이지 마지막 알림의 createdAt ISO-8601 형식)", example = "2025-07-20T19:30:00")
         @RequestParam(required = false) String cursor,
 
-        @Parameter(description = "보조 정렬용 createdAt (optional)")
+        @Parameter(description = "보조 커서 (정확한 정렬을 위한 createdAt 값)", example = "2025-07-20T19:00:00")
         @RequestParam(required = false) LocalDateTime after,
 
-        @Parameter(description = "페이지 크기 (기본값: 20)")
+        @Parameter(description = "페이지 크기", example = "20")
         @RequestParam(required = false) Integer limit,
 
-        @Parameter(description = "정렬 방향 (ASC or DESC, 기본: DESC)")
+        @Parameter(description = "정렬 방향 (DESC 또는 ASC)", example = "DESC")
         @RequestParam(required = false) Sort.Direction direction
     ) {
         return notificationQueryService.getNotifications(userId, cursor, after, limit, direction);
