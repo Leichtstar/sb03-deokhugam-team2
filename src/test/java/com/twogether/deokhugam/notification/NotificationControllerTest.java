@@ -92,4 +92,33 @@ class NotificationControllerTest {
             )
             .andExpect(status().isOk());
     }
+
+    @DisplayName("알림 목록 조회 - 사용자 ID 헤더 누락 시 400 응답")
+    @Test
+    void 알림_조회_실패_헤더_누락() throws Exception {
+        mockMvc.perform(get("/api/notifications"))
+            .andExpect(status().isBadRequest());
+    }
+
+    @DisplayName("알림 목록 조회 - 음수 limit 파라미터")
+    @Test
+    void 알림_조회_실패_음수_limit() throws Exception {
+        UUID userId = UUID.randomUUID();
+
+        mockMvc.perform(get("/api/notifications")
+                .header("Deokhugam-Request-User-ID", userId.toString())
+                .param("limit", "-5"))
+            .andExpect(status().isBadRequest());
+    }
+
+    @DisplayName("알림 목록 조회 - 유효하지 않은 정렬 direction")
+    @Test
+    void 알림_조회_실패_잘못된_direction() throws Exception {
+        UUID userId = UUID.randomUUID();
+
+        mockMvc.perform(get("/api/notifications")
+                .header("Deokhugam-Request-User-ID", userId.toString())
+                .param("direction", "INVALID"))
+            .andExpect(status().isBadRequest());
+    }
 }

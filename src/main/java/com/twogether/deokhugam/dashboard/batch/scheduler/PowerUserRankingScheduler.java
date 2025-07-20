@@ -9,20 +9,20 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@Profile("prod")
+@ConditionalOnProperty(name = "batch.power-user-ranking.enabled", havingValue = "true")
 public class PowerUserRankingScheduler {
 
     private final JobLauncher jobLauncher;
     private final Job powerUserRankingJob;
 
-    @Scheduled(cron = "0 0 0 * * *") // 매일 자정
+    @Scheduled(cron = "${batch.power-user-ranking.cron}")
     public void runRankingJob() {
         String jobName = "powerUserRankingJob";
         String requestId = UUID.randomUUID().toString();
@@ -52,9 +52,8 @@ public class PowerUserRankingScheduler {
             } finally {
                 MDC.clear();
             }
-
-            log.info("파워 유저 랭킹 배치 전체 완료: 성공={}, 실패={}, requestId={}",
-                successCount, failureCount, requestId);
         }
+        log.info("파워 유저 랭킹 배치 전체 완료: 성공={}, 실패={}, requestId={}",
+            successCount, failureCount, requestId);
     }
 }

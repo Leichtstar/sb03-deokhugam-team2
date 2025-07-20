@@ -9,6 +9,7 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -16,13 +17,13 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@Profile("prod")
+@ConditionalOnProperty(name = "batch.popular-book-ranking.enabled", havingValue = "true")
 public class PopularBookRankingScheduler {
 
     private final JobLauncher jobLauncher;
     private final Job popularBookRankingJob;
 
-    @Scheduled(cron = "0 0 0 * * *") // 매일 자정
+    @Scheduled(cron = "${batch.popular-book-ranking.cron}")
     public void runRankingJob() {
         String jobName = "popularBookRankingJob";
         String requestId = UUID.randomUUID().toString();

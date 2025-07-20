@@ -41,8 +41,9 @@ public class JpaPowerUserScoreReader extends IteratorItemReader<PowerUserScoreDt
         LocalDateTime start = period.getStartTime(now);
         LocalDateTime end = period.getEndTime(now);
 
-        Instant startInstant = start.atZone(ZoneId.of("UTC")).toInstant();
-        Instant endInstant = end.atZone(ZoneId.of("UTC")).toInstant();
+        ZoneId zoneId = ZoneId.systemDefault();
+        Instant startInstant = start.atZone(zoneId).toInstant();
+        Instant endInstant = end.atZone(zoneId).toInstant();
 
         TypedQuery<PowerUserScoreDto> query = em.createQuery(jpql, PowerUserScoreDto.class);
         query.setParameter("start", startInstant);
