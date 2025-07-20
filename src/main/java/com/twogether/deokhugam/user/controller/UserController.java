@@ -7,12 +7,10 @@ import com.twogether.deokhugam.user.dto.UserUpdateRequest;
 import com.twogether.deokhugam.user.exception.UserAccessDeniedException;
 import com.twogether.deokhugam.user.service.UserService;
 import jakarta.validation.Valid;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,19 +20,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/users")
-public class UserController {
+public class UserController implements UserApi {
 
     private final UserService userService;
 
     @PostMapping
+    @Override
     public ResponseEntity<UserDto> create(
         @RequestBody @Valid UserRegisterRequest userRegisterRequest
     ) {
@@ -48,6 +45,7 @@ public class UserController {
     }
 
     @PostMapping(path = "/login")
+    @Override
     public ResponseEntity<UserDto> login(
         @RequestBody @Valid UserLoginRequest userLoginRequest
     ) {
@@ -61,6 +59,7 @@ public class UserController {
     }
 
     @GetMapping(path = "/{userId}")
+    @Override
     public ResponseEntity<UserDto> find(
         @PathVariable("userId") UUID userId
     ) {
@@ -74,6 +73,7 @@ public class UserController {
     }
 
     @PatchMapping(path = "/{userId}")
+    @Override
     public ResponseEntity<UserDto> update(
         @PathVariable("userId") UUID userId,
         @RequestBody @Valid UserUpdateRequest userUpdateRequest,
@@ -91,6 +91,7 @@ public class UserController {
     }
 
     @DeleteMapping(path = "/{userId}")
+    @Override
     public ResponseEntity<Void> softDelete(
         @PathVariable("userId") UUID userId,
         @RequestHeader(value = "Deokhugam-Request-User-ID", required = false) String requestUserIdHeader
@@ -107,6 +108,7 @@ public class UserController {
     }
 
     @DeleteMapping(path = "/{userId}/hard")
+    @Override
     public ResponseEntity<Void> hardDelete(
         @PathVariable("userId") UUID userId,
         @RequestHeader(value = "Deokhugam-Request-User-ID", required = false) String requestUserIdHeader
