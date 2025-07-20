@@ -50,6 +50,22 @@ class PowerUserRankingWriterTest {
     }
 
     @Test
+    @DisplayName("동점자가 있을 때 동일한 순위를 부여한다")
+    void write_sameScores_assignsSameRank() {
+        PowerUserRanking r1 = createRanking("user1", 10.0);
+        PowerUserRanking r2 = createRanking("user2", 10.0);
+        PowerUserRanking r3 = createRanking("user3", 8.0);
+        Chunk<PowerUserRanking> chunk = new Chunk<>(List.of(r1, r2, r3));
+
+        writer.write(chunk);
+
+        assertEquals(1, r1.getRank());
+        assertEquals(1, r2.getRank());
+        assertEquals(3, r3.getRank()); // 동점자 다음 순위는 건너뛰어야 함
+        verify(repository).saveAll(List.of(r1, r2, r3));
+    }
+
+    @Test
     @DisplayName("빈 리스트가 들어오면 예외 발생")
     void write_emptyList_throwsException() {
         Chunk<PowerUserRanking> chunk = new Chunk<>(Collections.emptyList());
