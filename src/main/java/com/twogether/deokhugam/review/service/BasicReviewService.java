@@ -191,6 +191,19 @@ public class BasicReviewService implements ReviewService{
         log.info("[BasicReviewService]: 리뷰 논리 삭제 완료");
     }
 
+    // 리뷰 물리 삭제
+    @Override
+    public void deleteReviewHard(UUID reviewId, UUID requestUserId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ReviewNotFoundException(reviewId));
+
+        if (!review.getUser().getId().equals(requestUserId)){
+            throw new ReviewNotOwnedException();
+        }
+
+        reviewRepository.delete(review);
+    }
+
     // 리뷰 좋아요 기능
     @Override
     @Transactional
