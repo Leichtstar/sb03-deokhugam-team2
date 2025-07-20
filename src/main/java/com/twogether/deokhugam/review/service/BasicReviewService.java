@@ -3,6 +3,7 @@ package com.twogether.deokhugam.review.service;
 import com.twogether.deokhugam.book.entity.Book;
 import com.twogether.deokhugam.book.repository.BookRepository;
 import com.twogether.deokhugam.common.dto.CursorPageResponseDto;
+import com.twogether.deokhugam.notification.service.NotificationService;
 import com.twogether.deokhugam.review.dto.ReviewDto;
 import com.twogether.deokhugam.review.dto.ReviewLikeDto;
 import com.twogether.deokhugam.review.dto.request.ReviewCreateRequest;
@@ -45,6 +46,7 @@ public class BasicReviewService implements ReviewService{
     private final ReviewMapper reviewMapper;
     private final ReviewLikeMapper reviewLikeMapper;
     private final ReviewCursorHelper reviewCursorHelper;
+    private final NotificationService notificationService;
 
     // 리뷰 생성
     @Override
@@ -203,6 +205,14 @@ public class BasicReviewService implements ReviewService{
 
             reviewLikeRepository.save(newReviewLike);
             reviewRepository.save(review);
+
+            // 좋아요 알림 생성 트리거
+            if (!review.getUser().getId().equals(userId)) {
+                User liker = userRepository.findById(userId)
+                    .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다. " + userId));
+
+                notificationService.createLikeNotification(liker, review);
+            }
 
             return reviewLikeMapper.toDto(newReviewLike);
         }
