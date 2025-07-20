@@ -150,10 +150,7 @@ public class BasicReviewServiceTest {
         ReviewLike mockReviewLike = mock(ReviewLike.class);
         ReviewDto expectedDto = mock(ReviewDto.class);
 
-        when(mockBook.getReviewCount()).thenReturn(5);
-
         Review review = new Review(mockBook, mockUser, "재밌는 책이다.", 4);
-
 
         when(reviewRepository.existsByUserIdAndBookIdAndIsDeletedFalse(userId, bookId)).thenReturn(false);
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(mockBook));
@@ -169,8 +166,8 @@ public class BasicReviewServiceTest {
         assertEquals(expectedDto, result);
 
         verify(reviewRepository).save(any(Review.class));
+        verify(bookRepository).updateBookReviewStats(bookId);
         verify(bookRepository).save(any(Book.class));
-        verify(mockBook).setReviewCount(6);
         verify(reviewLikeRepository).save(any(ReviewLike.class));
     }
 
