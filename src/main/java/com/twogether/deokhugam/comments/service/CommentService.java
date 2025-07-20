@@ -6,6 +6,7 @@ import com.twogether.deokhugam.comments.entity.Comment;
 import com.twogether.deokhugam.comments.exception.CommentNotFoundException;
 import com.twogether.deokhugam.comments.mapper.CommentMapper;
 import com.twogether.deokhugam.comments.repository.CommentRepository;
+import com.twogether.deokhugam.notification.service.NotificationService;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.review.exception.ReviewNotFoundException;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
@@ -13,13 +14,11 @@ import com.twogether.deokhugam.user.entity.User;
 import com.twogether.deokhugam.user.exception.UserNotFoundException;
 import com.twogether.deokhugam.user.repository.UserRepository;
 import jakarta.validation.Valid;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-
-import java.util.NoSuchElementException;
-import java.util.UUID;
 
 /**
  * 댓글 도메인의 비즈니스 로직을 담당.
@@ -33,6 +32,7 @@ public class CommentService {
     private final CommentMapper commentMapper;
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     /**
      * 댓글 등록.
@@ -47,6 +47,12 @@ public class CommentService {
             .orElseThrow(() -> new UserNotFoundException());
         Comment entity = new Comment(user, review, request.content());
         Comment saved = commentRepository.save(entity);
+
+        // 알림 생성 조건 추가 (자기 댓글은 제외)
+        if (!user.getId().equals(review.getUser().getId())) {
+            notificationService.createCommentNotification(user, review, saved.getContent());
+        }
+
         return commentMapper.toResponse(saved);
     }
 
