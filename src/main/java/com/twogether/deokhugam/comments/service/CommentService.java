@@ -53,9 +53,6 @@ public class CommentService {
         Comment entity = new Comment(user, review, request.content());
         Comment saved = commentRepository.save(entity);
 
-        reviewRepository.incrementCommentCount(review.getId());
-        log.info("[CommentService] 리뷰에 댓글 개수 추가: {}", review.getCommentCount());
-
         return commentMapper.toResponse(saved);
     }
 
