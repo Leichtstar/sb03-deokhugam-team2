@@ -208,10 +208,7 @@ public class BasicReviewService implements ReviewService{
 
             // 좋아요 알림 생성 트리거
             if (!review.getUser().getId().equals(userId)) {
-                User liker = userRepository.findById(userId)
-                    .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다. " + userId));
-
-                notificationService.createLikeNotification(liker, review);
+            notificationService.createLikeNotification(reviewer, review);
             }
 
             return reviewLikeMapper.toDto(newReviewLike);
@@ -231,6 +228,13 @@ public class BasicReviewService implements ReviewService{
                 // 좋아요가 false 라면
                 reviewLike.updateLike(true);
                 review.updateLikeCount(review.getLikeCount() + 1);
+
+                // 좋아요 알림 생성 트리거
+                if (!review.getUser().getId().equals(userId)) {
+                    User liker = userRepository.findById(userId)
+                        .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다. " + userId));
+                    notificationService.createLikeNotification(liker, review);
+                }
             }
 
             reviewLikeRepository.save(reviewLike);
