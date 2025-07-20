@@ -19,6 +19,7 @@ import org.springframework.stereotype.Repository;
 public class PowerUserRankingCustomRepositoryImpl implements PowerUserRankingCustomRepository {
 
     private final JPAQueryFactory queryFactory;
+    private static final int MAX_PAGE_SIZE = 50;
 
     @Override
     public List<PowerUserDto> findAllByPeriodWithCursor(PopularRankingSearchRequest request, Pageable pageable) {
@@ -43,7 +44,7 @@ public class PowerUserRankingCustomRepositoryImpl implements PowerUserRankingCus
                 ltCursor(request.parseCursor(), request.getAfter(), request.getDirection())
             )
             .orderBy(getOrderSpecifiers(request.getDirection()))
-            .limit(pageable.getPageSize())
+            .limit(Math.min(pageable.getPageSize(), MAX_PAGE_SIZE))
             .fetch();
     }
 

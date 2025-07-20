@@ -67,9 +67,10 @@ public class PowerUserRanking {
     @PositiveOrZero
     private long commentCount;
 
-    @Column(nullable = false)
+    @Builder.Default
     @Positive
-    private int rank;
+    @Column(nullable = false)
+    private int rank = 1;
 
     @Column(nullable = false, length = 50)
     @NotNull
@@ -79,7 +80,10 @@ public class PowerUserRanking {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    public void assignRank(@Positive int rank) {
+    public void assignRank(int rank) {
+        if (rank <= 0) {
+            throw new IllegalArgumentException("rank는 1 이상이어야 합니다");
+        }
         this.rank = rank;
     }
 }

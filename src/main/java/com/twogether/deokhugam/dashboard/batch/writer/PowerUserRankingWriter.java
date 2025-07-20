@@ -28,19 +28,17 @@ public class PowerUserRankingWriter implements ItemWriter<PowerUserRanking> {
         }
 
         try {
+            int currentRank = 1;
             for (int i = 0; i < rankingList.size(); i++) {
                 PowerUserRanking current = rankingList.get(i);
 
                 if (i > 0) {
                     PowerUserRanking previous = rankingList.get(i - 1);
-                    if (Double.compare(current.getScore(), previous.getScore()) == 0) {
-                        current.assignRank(previous.getRank());
-                    } else {
-                        current.assignRank(i + 1);
+                    if (Double.compare(current.getScore(), previous.getScore()) != 0) {
+                        currentRank = i + 1;
                     }
-                } else {
-                    current.assignRank(1);
                 }
+                current.assignRank(currentRank);
             }
 
             powerUserRankingRepository.saveAll(rankingList);

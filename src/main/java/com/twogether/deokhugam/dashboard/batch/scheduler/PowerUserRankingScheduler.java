@@ -52,9 +52,8 @@ public class PowerUserRankingScheduler {
             } finally {
                 MDC.clear();
             }
-
-            log.info("파워 유저 랭킹 배치 전체 완료: 성공={}, 실패={}, requestId={}",
-                successCount, failureCount, requestId);
         }
+        log.info("파워 유저 랭킹 배치 전체 완료: 성공={}, 실패={}, requestId={}",
+            successCount, failureCount, requestId);
     }
 }
