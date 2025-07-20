@@ -1,6 +1,7 @@
 package com.twogether.deokhugam.notification.service;
 
 import com.twogether.deokhugam.notification.entity.Notification;
+import com.twogether.deokhugam.notification.repository.NotificationRepository;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.user.entity.User;
 import jakarta.transaction.Transactional;
