@@ -26,6 +26,8 @@ public class PowerUserRankingScheduler {
     public void runRankingJob() {
         String jobName = "powerUserRankingJob";
         String requestId = UUID.randomUUID().toString();
+        int successCount = 0;
+        int failureCount = 0;
 
         for (RankingPeriod period : RankingPeriod.values()) {
             try {
@@ -43,11 +45,16 @@ public class PowerUserRankingScheduler {
                 jobLauncher.run(powerUserRankingJob, params);
 
                 log.info("파워 유저 랭킹 배치 성공: period={}, requestId={}", period, requestId);
+                successCount++;
             } catch (Exception e) {
                 log.error("파워 유저 랭킹 배치 실패: period={}, requestId={}", period, requestId, e);
+                failureCount++;
             } finally {
                 MDC.clear();
             }
+
+            log.info("파워 유저 랭킹 배치 전체 완료: 성공={}, 실패={}, requestId={}",
+                successCount, failureCount, requestId);
         }
     }
 }

@@ -27,8 +27,8 @@ public class PowerUserRankingCustomRepositoryImpl implements PowerUserRankingCus
 
         return queryFactory
             .select(new QPowerUserDto(
-                u.id,
-                u.nickname,
+                r.user.id,
+                r.nickname,
                 r.period,
                 r.createdAt,
                 r.rank,
@@ -38,7 +38,6 @@ public class PowerUserRankingCustomRepositoryImpl implements PowerUserRankingCus
                 r.commentCount
             ))
             .from(r)
-            .join(r.user, u)
             .where(
                 r.period.eq(request.getPeriod()),
                 ltCursor(request.parseCursor(), request.getAfter(), request.getDirection())

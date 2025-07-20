@@ -24,7 +24,7 @@ public class PowerUserRankingWriter implements ItemWriter<PowerUserRanking> {
 
         if (rankingList == null || rankingList.isEmpty()) {
             log.warn("파워 유저 랭킹 저장 스킵: 저장할 데이터가 없습니다.");
-            throw new DeokhugamException(ErrorCode.RANKING_DATA_EMPTY);
+            return;
         }
 
         try {
@@ -47,7 +47,7 @@ public class PowerUserRankingWriter implements ItemWriter<PowerUserRanking> {
             log.info("파워 유저 랭킹 {}건 저장 완료", rankingList.size());
         } catch (Exception e) {
             log.error("파워 유저 랭킹 저장 실패", e);
-            throw new DeokhugamException(ErrorCode.RANKING_SAVE_FAILED);
+            throw new DeokhugamException(ErrorCode.RANKING_SAVE_FAILED, e);
         }
     }
 }

@@ -63,6 +63,11 @@ class PowerUserRankingBatchTest {
 
         List<PowerUserRanking> rankings = rankingRepository.findAll();
         assertThat(rankings).isNotEmpty();
+        assertThat(rankings).allMatch(ranking -> ranking.getPeriod() == period);
         assertThat(rankings.get(0).getRank()).isEqualTo(1);
+        for (int i = 0; i < rankings.size(); i++) {
+            assertThat(rankings.get(i).getRank()).isEqualTo(i + 1);
+        }
+        assertThat(rankings).hasSize(2);
     }
 }

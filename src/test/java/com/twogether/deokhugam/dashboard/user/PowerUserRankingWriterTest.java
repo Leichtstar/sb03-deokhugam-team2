@@ -50,6 +50,25 @@ class PowerUserRankingWriterTest {
     }
 
     @Test
+    @DisplayName("동점자가 있는 경우 같은 순위를 부여하고 다음 순위를 올바르게 계산한다")
+    void write_tiedScores_assignCorrectRanks() {
+        PowerUserRanking r1 = createRanking("user1", 10.0);
+        PowerUserRanking r2 = createRanking("user2", 10.0); // 동점
+        PowerUserRanking r3 = createRanking("user3", 8.0);
+        PowerUserRanking r4 = createRanking("user4", 8.0);  // 동점
+        PowerUserRanking r5 = createRanking("user5", 6.0);
+        Chunk<PowerUserRanking> chunk = new Chunk<>(List.of(r1, r2, r3, r4, r5));
+
+        writer.write(chunk);
+
+        assertEquals(1, r1.getRank()); // 1위
+        assertEquals(1, r2.getRank()); // 1위 (동점)
+        assertEquals(3, r3.getRank()); // 3위 (2위 건너뜀)
+        assertEquals(3, r4.getRank()); // 3위 (동점)
+        assertEquals(5, r5.getRank()); // 5위 (4위 건너뜀)
+    }
+
+    @Test
     @DisplayName("빈 리스트가 들어오면 예외 발생")
     void write_emptyList_throwsException() {
         Chunk<PowerUserRanking> chunk = new Chunk<>(Collections.emptyList());
