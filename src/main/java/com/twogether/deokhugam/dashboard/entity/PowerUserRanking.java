@@ -79,7 +79,7 @@ public class PowerUserRanking {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    public void assignRank(int rank) {
+    public void assignRank(@Positive int rank) {
         this.rank = rank;
     }
 }

@@ -8,9 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.twogether.deokhugam.common.dto.CursorPageResponse;
 import com.twogether.deokhugam.common.exception.DeokhugamException;
 import com.twogether.deokhugam.common.exception.ErrorCode;
-import com.twogether.deokhugam.dashboard.dto.response.PopularBookDto;
-import com.twogether.deokhugam.dashboard.service.PopularBookService;
-import com.twogether.deokhugam.dashboard.service.PopularReviewService;
+import com.twogether.deokhugam.dashboard.dto.response.PowerUserDto;
+import com.twogether.deokhugam.dashboard.service.PowerUserService;
 import java.util.Collections;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,23 +19,20 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(PopularBookController.class)
-class PopularBookControllerTest {
+@WebMvcTest(PowerUserController.class)
+class PowerUserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
-    private PopularBookService popularBookService;
-
-    @MockitoBean
-    private PopularReviewService popularReviewService;
+    private PowerUserService powerUserService;
 
     @Test
-    @DisplayName("인기 도서 목록을 정상적으로 조회할 수 있다")
-    void getPopularBooks_success() throws Exception {
+    @DisplayName("파워 유저 목록을 정상적으로 조회할 수 있다")
+    void getPowerUsers_success() throws Exception {
         // given
-        CursorPageResponse<PopularBookDto> dummyResponse = new CursorPageResponse<>(
+        CursorPageResponse<PowerUserDto> dummyResponse = new CursorPageResponse<>(
             Collections.emptyList(),
             null,
             null,
@@ -44,11 +40,11 @@ class PopularBookControllerTest {
             false
         );
 
-        Mockito.when(popularBookService.getPopularBooks(any()))
+        Mockito.when(powerUserService.getPowerUsers(any()))
             .thenReturn(dummyResponse);
 
         // when & then
-        mockMvc.perform(get("/api/books/popular")
+        mockMvc.perform(get("/api/users/power")
                 .param("period", "DAILY")
                 .param("direction", "ASC")
                 .param("limit", "10"))
@@ -59,11 +55,11 @@ class PopularBookControllerTest {
 
     @Test
     @DisplayName("잘못된 정렬 방향이면 400을 반환한다")
-    void getPopularBooks_invalidDirection() throws Exception {
-        Mockito.when(popularBookService.getPopularBooks(any()))
+    void getPowerUsers_invalidDirection() throws Exception {
+        Mockito.when(powerUserService.getPowerUsers(any()))
             .thenThrow(new DeokhugamException(ErrorCode.INVALID_DIRECTION));
 
-        mockMvc.perform(get("/api/books/popular")
+        mockMvc.perform(get("/api/users/power")
                 .param("period", "DAILY")
                 .param("direction", "WRONG")
                 .param("limit", "10"))

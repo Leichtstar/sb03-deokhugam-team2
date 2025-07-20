@@ -10,6 +10,13 @@ public record BookScoreDto(
     long reviewCount,
     double averageRating
 ) {
+
+    /**
+     * 파워 유저 점수 계산을 위한 가중치
+     * - 리뷰 수: 40%
+     * - 평점: 60%
+     */
+
     private static final double REVIEW_COUNT_WEIGHT = 0.4;
     private static final double AVERAGE_RATING_WEIGHT = 0.6;
 
