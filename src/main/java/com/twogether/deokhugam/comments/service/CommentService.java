@@ -2,7 +2,9 @@ package com.twogether.deokhugam.comments.service;
 
 import com.twogether.deokhugam.comments.dto.CommentCreateRequest;
 import com.twogether.deokhugam.comments.dto.CommentResponse;
+import com.twogether.deokhugam.comments.dto.CommentUpdateRequest;
 import com.twogether.deokhugam.comments.entity.Comment;
+import com.twogether.deokhugam.comments.exception.CommentForbiddenException;
 import com.twogether.deokhugam.comments.exception.CommentNotFoundException;
 import com.twogether.deokhugam.comments.mapper.CommentMapper;
 import com.twogether.deokhugam.comments.repository.CommentRepository;
@@ -57,4 +59,41 @@ public class CommentService {
             .orElseThrow(CommentNotFoundException::new);
         return commentMapper.toResponse(comment);
     }
+
+    @Transactional
+    public CommentResponse updateComment(UUID commentId, UUID userId,CommentUpdateRequest request) {
+        Comment comment = commentRepository.findById(commentId)
+            .filter(c -> !c.getIsDeleted())
+            .orElseThrow(CommentNotFoundException::new);
+
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new CommentForbiddenException(); // 403 Forbidden 커스텀 예외
+        }
+        comment.editContent(request.content());
+        return commentMapper.toResponse(comment);
+    }
+
+    @Transactional
+    public void deleteLogical(UUID commentId, UUID requestUserId) {
+        Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(CommentNotFoundException::new);
+        if (!comment.getUser().getId().equals(requestUserId)) {
+            throw new CommentForbiddenException();
+        }
+        if (Boolean.TRUE.equals(comment.getIsDeleted())) {
+            throw new IllegalStateException("이미 삭제된 댓글입니다.");
+        }
+        commentRepository.logicalDeleteById(commentId);
+    }
+
+    @Transactional
+    public void deletePhysical(UUID commentId, UUID requestUserId) {
+        Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(CommentNotFoundException::new);
+        if (!comment.getUser().getId().equals(requestUserId)) {
+            throw new CommentForbiddenException();
+        }
+        commentRepository.deleteById(commentId);
+    }
+
 }

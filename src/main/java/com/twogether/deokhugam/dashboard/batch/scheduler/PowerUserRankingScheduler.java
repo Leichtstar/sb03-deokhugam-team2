@@ -1,6 +1,7 @@
 package com.twogether.deokhugam.dashboard.batch.scheduler;
 
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
+import com.twogether.deokhugam.dashboard.repository.PowerUserRankingRepository;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ public class PowerUserRankingScheduler {
 
     private final JobLauncher jobLauncher;
     private final Job powerUserRankingJob;
+    private final PowerUserRankingRepository powerUserRankingRepository;
 
     @Scheduled(cron = "0 0 0 * * *") // 매일 자정
     public void runRankingJob() {
@@ -36,6 +38,7 @@ public class PowerUserRankingScheduler {
                 MDC.put("requestId", requestId);
 
                 log.info("파워 유저 랭킹 배치 시작: period={}, requestId={}", period, requestId);
+                powerUserRankingRepository.deleteByPeriod(period);
 
                 JobParameters params = new JobParametersBuilder()
                     .addString("period", period.name())
@@ -56,5 +59,7 @@ public class PowerUserRankingScheduler {
             log.info("파워 유저 랭킹 배치 전체 완료: 성공={}, 실패={}, requestId={}",
                 successCount, failureCount, requestId);
         }
+        log.info("파워 유저 랭킹 배치 전체 완료: 성공={}, 실패={}, requestId={}",
+            successCount, failureCount, requestId);
     }
 }
