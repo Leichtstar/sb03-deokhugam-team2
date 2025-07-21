@@ -14,6 +14,8 @@ import com.twogether.deokhugam.dashboard.batch.writer.PopularReviewRankingWriter
 import com.twogether.deokhugam.dashboard.entity.PopularReviewRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PopularReviewRankingRepository;
+import com.twogether.deokhugam.notification.service.NotificationService;
+import com.twogether.deokhugam.review.repository.ReviewRepository;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +35,10 @@ class PopularReviewRankingWriterTest {
     @BeforeEach
     void setUp() {
         repository = mock(PopularReviewRankingRepository.class);
-        writer = new PopularReviewRankingWriter(repository);
+        NotificationService notificationService = mock(NotificationService.class);
+        ReviewRepository reviewRepository = mock(ReviewRepository.class);
+
+        writer = new PopularReviewRankingWriter(repository, notificationService, reviewRepository);
     }
 
     @Test
