@@ -9,6 +9,7 @@ import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.user.entity.User;
 import jakarta.transaction.Transactional;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -67,7 +68,7 @@ public class NotificationService {
             .orElseThrow(NotificationNotFoundException::new);
 
         notification.setConfirmed(confirmed);
-        notification.setUpdatedAt(Instant.now());
+        notification.setUpdatedAt(LocalDateTime.now());
 
         return notificationMapper.toDto(notification);
     }
