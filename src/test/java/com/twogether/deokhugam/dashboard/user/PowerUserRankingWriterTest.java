@@ -1,5 +1,6 @@
 package com.twogether.deokhugam.dashboard.user;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -69,13 +70,16 @@ class PowerUserRankingWriterTest {
     }
 
     @Test
-    @DisplayName("빈 리스트가 들어오면 예외 발생")
-    void write_emptyList_throwsException() {
+    @DisplayName("빈 리스트가 들어오면 스킵 처리됨")
+    void write_emptyList_skipsWithoutException() {
+        // given
         Chunk<PowerUserRanking> chunk = new Chunk<>(Collections.emptyList());
 
-        assertThatThrownBy(() -> writer.write(chunk))
-            .isInstanceOf(DeokhugamException.class)
-            .hasMessageContaining(ErrorCode.RANKING_DATA_EMPTY.getMessage());
+        // when & then: 예외 없이 정상 종료되는지 확인
+        assertThatCode(() -> writer.write(chunk)).doesNotThrowAnyException();
+
+        // (선택) 로그 검증 예시 - logback 테스트 도구를 사용할 경우
+        // verify(log).warn("파워 유저 랭킹 저장 스킵: 저장할 데이터가 없습니다.");
     }
 
     @Test

@@ -8,7 +8,10 @@ import com.twogether.deokhugam.notification.service.NotificationService;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.Chunk;
@@ -51,21 +54,37 @@ public class PopularReviewRankingWriter implements ItemWriter<PopularReviewRanki
 
             popularReviewRankingRepository.saveAll(rankingList);
             log.info("인기 리뷰 랭킹 {}건 저장 완료", rankingList.size());
+        } catch (Exception e) {
+            log.error("인기 리뷰 랭킹 저장 실패", e);
+            throw new DeokhugamException(ErrorCode.RANKING_SAVE_FAILED);
+        }
 
-            // 알림 생성 트리거 (Top 10만)
+        try {
+            // 리뷰 ID 수집
+            List<UUID> top10ReviewIds = rankingList.stream()
+                .filter(r -> r.getRank() <= 10)
+                .map(PopularReviewRanking::getReviewId)
+                .toList();
+
+            // 일괄 조회
+            Map<UUID, Review> reviewMap = reviewRepository.findAllById(top10ReviewIds)
+                .stream()
+                .collect(Collectors.toMap(Review::getId, Function.identity()));
+
             for (PopularReviewRanking ranking : rankingList) {
                 if (ranking.getRank() <= 10) {
-                    UUID reviewId = ranking.getReviewId();
-                    Review review = reviewRepository.findById(reviewId)
-                        .orElseThrow(() -> new IllegalStateException("리뷰가 존재하지 않습니다: " + reviewId));
-
-                    notificationService.createRankingNotification(review.getUser(), review);
+                    Review review = reviewMap.get(ranking.getReviewId());
+                    if (review != null) {
+                        notificationService.createRankingNotification(review.getUser(), review);
+                    } else {
+                        log.warn("알림 생성 스킵: 리뷰가 존재하지 않습니다. reviewId: {}", ranking.getReviewId());
+                    }
                 }
             }
 
         } catch (Exception e) {
-            log.error("인기 리뷰 랭킹 저장 실패", e);
-            throw new DeokhugamException(ErrorCode.RANKING_SAVE_FAILED);
+            log.error("랭킹 알림 생성 실패 - 랭킹 저장은 성공", e);
+            // 전체 프로세스를 중단시키지 않음
         }
     }
 }
