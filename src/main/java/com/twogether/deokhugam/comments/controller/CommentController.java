@@ -2,6 +2,7 @@ package com.twogether.deokhugam.comments.controller;
 
 import com.twogether.deokhugam.comments.dto.CommentCreateRequest;
 import com.twogether.deokhugam.comments.dto.CommentResponse;
+import com.twogether.deokhugam.comments.dto.CommentUpdateRequest;
 import com.twogether.deokhugam.comments.service.CommentQueryService;
 import com.twogether.deokhugam.comments.service.CommentService;
 import com.twogether.deokhugam.common.dto.CursorPageResponse;
@@ -96,4 +97,41 @@ public class CommentController {
     public ResponseEntity<CommentResponse> get(@PathVariable UUID commentId) {
         return ResponseEntity.ok(commentService.getComment(commentId));
     }
+
+    @Operation(summary = "댓글 수정", description = "본인이 작성한 댓글을 수정합니다.")
+    @PatchMapping("/{commentId}")
+    public ResponseEntity<CommentResponse> update(
+        @PathVariable UUID commentId,
+        @RequestHeader("Deokhugam-Request-User-Id") UUID userId,
+        @Valid @RequestBody CommentUpdateRequest request
+    ) {
+        return ResponseEntity.ok(commentService.updateComment(commentId, userId, request));
+    }
+
+    @Operation(
+        summary = "댓글 논리 삭제",
+        description = "본인이 작성한 댓글을 논리적으로 삭제합니다. <br>DB에는 남아 있고, isDeleted가 true로 변경되어 더 이상 조회되지 않습니다."
+    )
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<Void> logicalDelete(
+        @PathVariable UUID commentId,
+        @RequestHeader("Deokhugam-Request-User-ID") UUID requestUserId
+    ) {
+        commentService.deleteLogical(commentId, requestUserId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+        summary = "댓글 물리 삭제",
+        description = "본인이 작성한 댓글을 DB에서 영구적으로 삭제합니다. <br>삭제된 댓글은 복구할 수 없습니다."
+    )
+    @DeleteMapping("/{commentId}/hard")
+    public ResponseEntity<Void> physicalDelete(
+        @PathVariable UUID commentId,
+        @RequestHeader("Deokhugam-Request-User-ID") UUID requestUserId
+    ) {
+        commentService.deletePhysical(commentId, requestUserId);
+        return ResponseEntity.noContent().build();
+    }
+
 }

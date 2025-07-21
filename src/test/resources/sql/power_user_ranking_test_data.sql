@@ -7,7 +7,7 @@ VALUES
 -- 도서 등록 (리뷰에 FK 필요)
 INSERT INTO books (id, title, author, description, publisher, published_date, isbn, thumbnail_url, review_count, rating, created_at, updated_at, is_deleted)
 VALUES
-    ('00000000-0000-0000-0000-000000000001', '테스트 도서', '저자1', '설명1', '출판사1', '2023-01-01', '1234567890123', 'http://example.com/image.jpg', 2, 3.75, NOW(), NOW(), false);
+    ('00000000-0000-0000-0000-000000000001', '테스트 도서', '저자1', '설명1', '출판사1', '2023-01-01', '1234567890123', 'http://example.com/image.jpg', 2, 3.5, NOW(), NOW(), false);
 
 -- 리뷰 등록
 INSERT INTO reviews (id, book_id, user_id, book_title, book_thumbnail_url, user_nickname, content, rating, like_count, comment_count, created_at, updated_at, is_deleted)

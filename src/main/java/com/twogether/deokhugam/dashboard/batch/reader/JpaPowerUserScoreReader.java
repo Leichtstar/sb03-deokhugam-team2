@@ -37,9 +37,10 @@ public class JpaPowerUserScoreReader extends IteratorItemReader<PowerUserScoreDt
             ) DESC
         """;
 
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime start = period.getStartTime(now);
-        LocalDateTime end = period.getEndTime(now);
+        Instant now = Instant.now();
+        LocalDateTime utcNow = LocalDateTime.ofInstant(now, ZoneId.of("UTC"));
+        LocalDateTime start = period.getStartTime(utcNow);
+        LocalDateTime end = period.getEndTime(utcNow);
 
         ZoneId zoneId = ZoneId.systemDefault();
         Instant startInstant = start.atZone(zoneId).toInstant();
