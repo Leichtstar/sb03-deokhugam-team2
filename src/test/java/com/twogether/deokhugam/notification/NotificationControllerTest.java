@@ -1,15 +1,22 @@
 package com.twogether.deokhugam.notification;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.twogether.deokhugam.common.dto.CursorPageResponse;
 import com.twogether.deokhugam.notification.controller.NotificationController;
 import com.twogether.deokhugam.notification.dto.NotificationDto;
+import com.twogether.deokhugam.notification.dto.NotificationUpdateRequest;
+import com.twogether.deokhugam.notification.exception.NotificationNotFoundException;
 import com.twogether.deokhugam.notification.service.NotificationQueryService;
+import com.twogether.deokhugam.notification.service.NotificationService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -18,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -27,8 +35,14 @@ class NotificationControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @MockitoBean
     private NotificationQueryService notificationQueryService;
+
+    @MockitoBean
+    private NotificationService notificationService;
 
     @Test
     @DisplayName("알림 목록 조회")
@@ -120,5 +134,56 @@ class NotificationControllerTest {
                 .header("Deokhugam-Request-User-ID", userId.toString())
                 .param("direction", "INVALID"))
             .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("알림 읽음 처리 - 성공")
+    void 알림_읽음_처리_성공() throws Exception {
+        UUID notificationId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        LocalDateTime now = LocalDateTime.now();
+
+        NotificationDto dto = new NotificationDto(
+            notificationId,
+            userId,
+            UUID.randomUUID(),
+            "테스트 도서",
+            "알림 내용",
+            true,
+            now,
+            now
+        );
+
+        NotificationUpdateRequest request = new NotificationUpdateRequest(true);
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        when(notificationService.updateConfirmedStatus(notificationId, userId, true))
+            .thenReturn(dto);
+
+        mockMvc.perform(patch("/api/notifications/" + notificationId)
+                .header("Deokhugam-Request-User-ID", userId.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.confirmed").value(true));
+    }
+
+    @Test
+    @DisplayName("알림 읽음 처리 - 알림이 존재하지 않으면 404")
+    void 알림_읽음_실패_알림없음() throws Exception {
+        UUID notificationId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        NotificationUpdateRequest request = new NotificationUpdateRequest(true);
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        when(notificationService.updateConfirmedStatus(any(), any(), anyBoolean()))
+            .thenThrow(new NotificationNotFoundException());
+
+        mockMvc.perform(patch("/api/notifications/" + notificationId)
+                .header("Deokhugam-Request-User-ID", userId.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+            .andExpect(status().isNotFound());
     }
 }
