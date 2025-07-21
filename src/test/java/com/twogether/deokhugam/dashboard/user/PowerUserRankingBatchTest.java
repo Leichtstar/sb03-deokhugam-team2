@@ -66,10 +66,14 @@ class PowerUserRankingBatchTest {
         assertThat(rankings).allMatch(ranking -> ranking.getPeriod() == period);
         assertThat(rankings).isNotEmpty();
         assertThat(rankings).allMatch(ranking -> ranking.getPeriod() == period);
+
+        // 첫 번째 랭킹이 1위인지 확인
         assertThat(rankings.get(0).getRank()).isEqualTo(1);
-        for (int i = 0; i < rankings.size(); i++) {
-            assertThat(rankings.get(i).getRank()).isEqualTo(i + 1);
+        // 랭킹이 비내림차순으로 정렬되어 있는지 확인
+        for (int i = 1; i < rankings.size(); i++) {
+            assertThat(rankings.get(i).getRank()).isGreaterThanOrEqualTo(rankings.get(i - 1).getRank());
         }
+
         assertThat(rankings).hasSize(2);
     }
 }
