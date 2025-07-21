@@ -11,13 +11,13 @@ spring:
       enabled: true
       cron: "0 0 0 * * *"
 
-      popular-review-ranking:
-        enabled: true
-        cron: "0 5 0 * * *"
+    popular-review-ranking:
+      enabled: true
+      cron: "0 5 0 * * *"
 
-      power-user-ranking:
-        enabled: true
-        cron: "0 10 0 * * *"
+    power-user-ranking:
+      enabled: true
+      cron: "0 10 0 * * *"
     job:
       enabled: false # 애플리케이션 시작 시 배치 작업 자동 실행 방지
     jdbc:
