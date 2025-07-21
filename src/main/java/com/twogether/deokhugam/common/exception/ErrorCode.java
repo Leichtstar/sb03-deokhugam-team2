@@ -38,6 +38,7 @@ public enum ErrorCode {
     NAVER_API_CONNECTION_FAILED(HttpStatus.BAD_GATEWAY, "네이버 API 서버에 연결할 수 없습니다."),
     NAVER_API_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "네이버 API 인증에 실패했습니다."),
     NAVER_API_THUMBNAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "이미지를 찾을 수 없습니다."),
+    NAVER_OCR_ISBN_NOT_FOUND(HttpStatus.NOT_FOUND, "올바른 ISBN 값을 추출하지 못했습니다."),
 
     // Comment 관련 에러 코드
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "댓글을 찾을 수 없습니다.");

@@ -8,6 +8,7 @@ import com.twogether.deokhugam.book.entity.Book;
 import com.twogether.deokhugam.book.exception.BookNotFoundException;
 import com.twogether.deokhugam.book.exception.DuplicatedIsbnException;
 import com.twogether.deokhugam.book.repository.BookRepository;
+import com.twogether.deokhugam.review.repository.ReviewRepository;
 import com.twogether.deokhugam.storage.S3ImageStorage;
 import jakarta.annotation.Nullable;
 import java.io.IOException;
@@ -20,13 +21,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class LocalBookService implements BookService {
 
     private final BookRepository bookRepository;
+    private final ReviewRepository reviewRepository;
     private final S3ImageStorage s3ImageStorage;
 
     @Override
@@ -205,5 +209,25 @@ public class LocalBookService implements BookService {
             s3ImageStorage.deleteImage(thumbnailUrl);
         }
         bookRepository.deleteById(bookId);
+    }
+
+//    public String extractIsbnFromCover(MultipartFile file){
+//        // 1. 파일을 OCR API가 받을 수 있도록 준비 (예: 바이트 배열 또는 임시 파일)
+//        // 2. 외부 OCR API에 이미지 전송
+//        // 3. 응답 받아서 ISBN 정규식으로 파싱
+//        // 4. ISBN 리턴
+//    }
+
+
+    @Override
+    public void updateReviewStats(UUID bookId){
+        Book book = bookRepository.findById(bookId).orElseThrow(BookNotFoundException::new);
+
+        Object[] stats = (Object[]) reviewRepository.getReviewStats(bookId); // ✅ 캐스팅
+        int count = ((Number) stats[0]).intValue();
+        float average = ((Number) stats[1]).floatValue();
+
+        book.setReviewCount(count);
+        book.setRating(average);
     }
 }

@@ -2,6 +2,7 @@ package com.twogether.deokhugam.review.service;
 
 import com.twogether.deokhugam.book.entity.Book;
 import com.twogether.deokhugam.book.repository.BookRepository;
+import com.twogether.deokhugam.book.service.BookService;
 import com.twogether.deokhugam.common.dto.CursorPageResponseDto;
 import com.twogether.deokhugam.review.dto.ReviewDto;
 import com.twogether.deokhugam.review.dto.ReviewLikeDto;
@@ -45,6 +46,7 @@ public class BasicReviewService implements ReviewService{
     private final ReviewMapper reviewMapper;
     private final ReviewLikeMapper reviewLikeMapper;
     private final ReviewCursorHelper reviewCursorHelper;
+    private final BookService bookService;
 
     // 리뷰 생성
     @Override
@@ -73,7 +75,7 @@ public class BasicReviewService implements ReviewService{
                 false
         );
         reviewLikeRepository.save(reviewLike);
-
+        bookService.updateReviewStats(request.bookId());
         log.info("[BasicReviewService] 리뷰 등록 성공");
 
         return reviewMapper.toDto(review, false);
@@ -158,7 +160,6 @@ public class BasicReviewService implements ReviewService{
         boolean likeByMe = reviewLikeRepository.findByUserIdAndReviewId(requestUserId, reviewId)
                 .map(ReviewLike::isLiked)
                 .orElse(false);
-
         return reviewMapper.toDto(review, likeByMe);
     }
 
@@ -174,6 +175,7 @@ public class BasicReviewService implements ReviewService{
         review.updateIsDelete(true);
         // 댓글 논리 삭제 부분도 추가?
         reviewRepository.save(review);
+        bookService.updateReviewStats(review.getBook().getId());
 
         log.info("[BasicReviewService]: 리뷰 논리 삭제 완료");
     }
