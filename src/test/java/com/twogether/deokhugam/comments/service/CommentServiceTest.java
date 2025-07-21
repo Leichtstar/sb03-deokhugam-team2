@@ -421,6 +421,28 @@ class CommentServiceTest {
     }
 
     @Test
+    @DisplayName("댓글이 논리삭제 되어 있다면 comment count 감소 함수를 호출하지 않아야 한다.")
+    void shouldNotCall_decrementCommentCount_whenAlreadyLogicalDeleted() {
+        UUID commentId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        UUID reviewId = UUID.randomUUID();
+
+        User mockUser = mock(User.class);
+        when(mockUser.getId()).thenReturn(userId);
+
+        Comment mockComment = mock(Comment.class);
+        when(mockComment.getUser()).thenReturn(mockUser);
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(mockComment));
+        when(mockComment.getIsDeleted()).thenReturn(true);
+
+        commentService.deletePhysical(commentId, userId);
+
+        verify(reviewRepository, never()).decrementCommentCount(reviewId);
+        verify(commentRepository).deleteById(commentId);
+    }
+
+    @Test
     @DisplayName("물리삭제 - 존재하지 않는 댓글이면 예외 발생")
     void deletePhysical_notFound() {
         UUID commentId = UUID.randomUUID();
