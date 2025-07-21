@@ -1,15 +1,20 @@
 package com.twogether.deokhugam.config;
 
+import com.twogether.deokhugam.dashboard.batch.model.BookScoreDto;
+import com.twogether.deokhugam.dashboard.batch.model.PowerUserScoreDto;
 import com.twogether.deokhugam.dashboard.batch.model.ReviewScoreDto;
 import com.twogether.deokhugam.dashboard.batch.processor.BookScoreProcessor;
+import com.twogether.deokhugam.dashboard.batch.processor.PowerUserScoreProcessor;
 import com.twogether.deokhugam.dashboard.batch.processor.ReviewScoreProcessor;
 import com.twogether.deokhugam.dashboard.batch.reader.JpaBookScoreReader;
+import com.twogether.deokhugam.dashboard.batch.reader.JpaPowerUserScoreReader;
 import com.twogether.deokhugam.dashboard.batch.reader.JpaReviewScoreReader;
 import com.twogether.deokhugam.dashboard.batch.writer.PopularBookRankingWriter;
-import com.twogether.deokhugam.dashboard.batch.model.BookScoreDto;
 import com.twogether.deokhugam.dashboard.batch.writer.PopularReviewRankingWriter;
+import com.twogether.deokhugam.dashboard.batch.writer.PowerUserRankingWriter;
 import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
 import com.twogether.deokhugam.dashboard.entity.PopularReviewRanking;
+import com.twogether.deokhugam.dashboard.entity.PowerUserRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +38,7 @@ public class RankingBatchJobConfig {
     private final EntityManager em;
     private final PopularBookRankingWriter bookWriter;
     private final PopularReviewRankingWriter reviewWriter;
+    private final PowerUserRankingWriter powerUserRankingWriter;
 
     // [1] 도서 랭킹 Job
     @Bean
@@ -90,6 +96,36 @@ public class RankingBatchJobConfig {
             .reader(reader)
             .processor(processor)
             .writer(reviewWriter)
+            .build();
+    }
+
+    // [3] 파워 유저 랭킹 Job
+    @Bean
+    public Job powerUserRankingJob(JobRepository jobRepository,
+        PlatformTransactionManager transactionManager) {
+        return new JobBuilder("powerUserRankingJob", jobRepository)
+            .start(powerUserRankingStep(jobRepository, transactionManager, null))
+            .build();
+    }
+
+    @Bean
+    @JobScope
+    public Step powerUserRankingStep(JobRepository jobRepository,
+        PlatformTransactionManager transactionManager,
+        @Value("#{jobParameters['period']}") String periodKey) {
+
+        RankingPeriod period = RankingPeriod.valueOf(
+            periodKey != null ? periodKey.toUpperCase() : "DAILY"
+        );
+
+        ItemReader<PowerUserScoreDto> reader = new JpaPowerUserScoreReader(em, period);
+        ItemProcessor<PowerUserScoreDto, PowerUserRanking> processor = new PowerUserScoreProcessor(em, period);
+
+        return new StepBuilder("powerUserStep_" + period.name(), jobRepository)
+            .<PowerUserScoreDto, PowerUserRanking>chunk(100, transactionManager)
+            .reader(reader)
+            .processor(processor)
+            .writer(powerUserRankingWriter)
             .build();
     }
 }

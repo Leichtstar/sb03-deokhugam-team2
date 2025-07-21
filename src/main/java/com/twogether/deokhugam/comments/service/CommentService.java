@@ -2,10 +2,13 @@ package com.twogether.deokhugam.comments.service;
 
 import com.twogether.deokhugam.comments.dto.CommentCreateRequest;
 import com.twogether.deokhugam.comments.dto.CommentResponse;
+import com.twogether.deokhugam.comments.dto.CommentUpdateRequest;
 import com.twogether.deokhugam.comments.entity.Comment;
+import com.twogether.deokhugam.comments.exception.CommentForbiddenException;
 import com.twogether.deokhugam.comments.exception.CommentNotFoundException;
 import com.twogether.deokhugam.comments.mapper.CommentMapper;
 import com.twogether.deokhugam.comments.repository.CommentRepository;
+import com.twogether.deokhugam.notification.service.NotificationService;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.review.exception.ReviewNotFoundException;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
@@ -13,13 +16,11 @@ import com.twogether.deokhugam.user.entity.User;
 import com.twogether.deokhugam.user.exception.UserNotFoundException;
 import com.twogether.deokhugam.user.repository.UserRepository;
 import jakarta.validation.Valid;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-
-import java.util.NoSuchElementException;
-import java.util.UUID;
 
 /**
  * 댓글 도메인의 비즈니스 로직을 담당.
@@ -33,6 +34,7 @@ public class CommentService {
     private final CommentMapper commentMapper;
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     /**
      * 댓글 등록.
@@ -47,6 +49,12 @@ public class CommentService {
             .orElseThrow(() -> new UserNotFoundException());
         Comment entity = new Comment(user, review, request.content());
         Comment saved = commentRepository.save(entity);
+
+        // 알림 생성 조건 추가 (자기 댓글은 제외)
+        if (!user.getId().equals(review.getUser().getId())) {
+            notificationService.createCommentNotification(user, review, saved.getContent());
+        }
+
         return commentMapper.toResponse(saved);
     }
 
@@ -57,4 +65,41 @@ public class CommentService {
             .orElseThrow(CommentNotFoundException::new);
         return commentMapper.toResponse(comment);
     }
+
+    @Transactional
+    public CommentResponse updateComment(UUID commentId, UUID userId,CommentUpdateRequest request) {
+        Comment comment = commentRepository.findById(commentId)
+            .filter(c -> !c.getIsDeleted())
+            .orElseThrow(CommentNotFoundException::new);
+
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new CommentForbiddenException(); // 403 Forbidden 커스텀 예외
+        }
+        comment.editContent(request.content());
+        return commentMapper.toResponse(comment);
+    }
+
+    @Transactional
+    public void deleteLogical(UUID commentId, UUID requestUserId) {
+        Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(CommentNotFoundException::new);
+        if (!comment.getUser().getId().equals(requestUserId)) {
+            throw new CommentForbiddenException();
+        }
+        if (Boolean.TRUE.equals(comment.getIsDeleted())) {
+            throw new IllegalStateException("이미 삭제된 댓글입니다.");
+        }
+        commentRepository.logicalDeleteById(commentId);
+    }
+
+    @Transactional
+    public void deletePhysical(UUID commentId, UUID requestUserId) {
+        Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(CommentNotFoundException::new);
+        if (!comment.getUser().getId().equals(requestUserId)) {
+            throw new CommentForbiddenException();
+        }
+        commentRepository.deleteById(commentId);
+    }
+
 }

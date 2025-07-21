@@ -14,6 +14,13 @@ public record ReviewScoreDto(
     long likeCount,
     long commentCount
 ) {
+
+    /**
+     * 파워 유저 점수 계산을 위한 가중치
+     * - 좋아요 수: 30%
+     * - 댓글 수: 70%
+     */
+
     private static final double LIKE_COUNT_WEIGHT = 0.3;
     private static final double COMMENT_COUNT_WEIGHT = 0.7;
 
