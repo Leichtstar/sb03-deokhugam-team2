@@ -30,7 +30,7 @@ WORKDIR /app
 ENV JVM_OPTS=""
 
 # 빌드 스테이지에서 jar 파일만 복사
-COPY --from=builder /app/build/libs/Deokhugam-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=builder /app/build/libs/*.jar app.jar
 
 # 8080 포트 노출
 EXPOSE 8080
