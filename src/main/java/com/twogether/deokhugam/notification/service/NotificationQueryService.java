@@ -6,6 +6,7 @@ import com.twogether.deokhugam.notification.entity.Notification;
 import com.twogether.deokhugam.notification.mapper.NotificationMapper;
 import com.twogether.deokhugam.notification.repository.NotificationRepository;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -37,8 +38,8 @@ public class NotificationQueryService {
         if (cursor != null && !cursor.isBlank()) {
             try {
                 parsedCursor = LocalDateTime.parse(cursor);
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Invalid cursor format. Use ISO-8601 date-time format.");
+            } catch (DateTimeParseException e) {
+                throw new IllegalArgumentException("Invalid cursor format. Use ISO-8601 date-time format.", e);
             }
         }
 
