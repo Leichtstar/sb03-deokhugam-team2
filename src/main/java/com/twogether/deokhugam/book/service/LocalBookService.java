@@ -211,14 +211,6 @@ public class LocalBookService implements BookService {
         bookRepository.deleteById(bookId);
     }
 
-//    public String extractIsbnFromCover(MultipartFile file){
-//        // 1. 파일을 OCR API가 받을 수 있도록 준비 (예: 바이트 배열 또는 임시 파일)
-//        // 2. 외부 OCR API에 이미지 전송
-//        // 3. 응답 받아서 ISBN 정규식으로 파싱
-//        // 4. ISBN 리턴
-//    }
-
-
     @Override
     public void updateReviewStats(UUID bookId){
         Book book = bookRepository.findById(bookId).orElseThrow(BookNotFoundException::new);
