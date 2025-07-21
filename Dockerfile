@@ -7,6 +7,7 @@ WORKDIR /app
 # Gradle Wrapper 파일 먼저 복사
 COPY gradle ./gradle
 COPY gradlew ./gradlew
+RUN chmod +x gradlew
 
 # Gradle 캐시를 위한 의존성 파일 복사
 COPY build.gradle settings.gradle ./
