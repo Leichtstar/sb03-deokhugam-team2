@@ -1,10 +1,15 @@
 package com.twogether.deokhugam.notification.service;
 
+import com.twogether.deokhugam.notification.dto.NotificationDto;
 import com.twogether.deokhugam.notification.entity.Notification;
+import com.twogether.deokhugam.notification.exception.NotificationNotFoundException;
+import com.twogether.deokhugam.notification.mapper.NotificationMapper;
 import com.twogether.deokhugam.notification.repository.NotificationRepository;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.user.entity.User;
 import jakarta.transaction.Transactional;
+import java.time.Instant;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +18,7 @@ import org.springframework.stereotype.Service;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final NotificationMapper notificationMapper;
 
     /**
      * 좋아요 알림 생성
@@ -50,5 +56,19 @@ public class NotificationService {
         String content = "나의 리뷰가 인기 리뷰 순위에 진입했습니다!";
         Notification notification = Notification.of(receiver, review, content);
         notificationRepository.save(notification);
+    }
+
+    /**
+     * 알림 단건 읽음 처리
+     */
+    @Transactional
+    public NotificationDto updateConfirmedStatus(UUID notificationId, UUID userId, boolean confirmed) {
+        Notification notification = notificationRepository.findByIdAndUserId(notificationId, userId)
+            .orElseThrow(NotificationNotFoundException::new);
+
+        notification.setConfirmed(confirmed);
+        notification.setUpdatedAt(Instant.now());
+
+        return notificationMapper.toDto(notification);
     }
 }
