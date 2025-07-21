@@ -46,7 +46,6 @@ public class BasicReviewService implements ReviewService{
     private final ReviewMapper reviewMapper;
     private final ReviewLikeMapper reviewLikeMapper;
     private final ReviewCursorHelper reviewCursorHelper;
-    private final NotificationService notificationService;
 
     // 리뷰 생성
     @Override
@@ -205,11 +204,6 @@ public class BasicReviewService implements ReviewService{
 
             reviewLikeRepository.save(newReviewLike);
             reviewRepository.save(review);
-
-            // 좋아요 알림 생성 트리거
-            if (!review.getUser().getId().equals(userId)) {
-                notificationService.createLikeNotification(reviewer, review);
-            }
 
             return reviewLikeMapper.toDto(newReviewLike);
         }

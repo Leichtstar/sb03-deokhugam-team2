@@ -34,7 +34,6 @@ public class CommentService {
     private final CommentMapper commentMapper;
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
-    private final NotificationService notificationService;
 
     /**
      * 댓글 등록.
@@ -49,12 +48,6 @@ public class CommentService {
             .orElseThrow(() -> new UserNotFoundException());
         Comment entity = new Comment(user, review, request.content());
         Comment saved = commentRepository.save(entity);
-
-        // 알림 생성 조건 추가 (자기 댓글은 제외)
-        if (!user.getId().equals(review.getUser().getId())) {
-            notificationService.createCommentNotification(user, review, saved.getContent());
-        }
-
         return commentMapper.toResponse(saved);
     }
 
