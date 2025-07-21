@@ -195,15 +195,22 @@ public class BasicReviewService implements ReviewService{
 
     // 리뷰 물리 삭제
     @Override
+    @Transactional
     public void deleteReviewHard(UUID reviewId, UUID requestUserId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
+
+        Book reviewedBook = bookRepository.findById(review.getBook().getId())
+                .orElseThrow(BookNotFoundException::new);
 
         if (!review.getUser().getId().equals(requestUserId)){
             throw new ReviewNotOwnedException();
         }
 
         reviewRepository.delete(review);
+
+        bookRepository.updateBookReviewStats(reviewedBook.getId());
+        bookRepository.save(reviewedBook);
     }
 
     // 리뷰 좋아요 기능
