@@ -27,6 +27,9 @@ public enum ErrorCode {
     INVALID_RANKING_PERIOD(HttpStatus.BAD_REQUEST, "지원하지 않는 랭킹 기간입니다."),
     INVALID_DIRECTION(HttpStatus.BAD_REQUEST, "정렬 방향은 ASC 또는 DESC만 가능합니다."),
 
+    // Notification 관련 에러 코드
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "알림이 존재하지 않거나 접근 권한이 없습니다."),
+
     // Cursor 관련 에러 코드
     INVALID_CURSOR(HttpStatus.BAD_REQUEST, "커서 정보가 올바르지 않습니다."),
 

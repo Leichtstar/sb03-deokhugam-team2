@@ -1,8 +1,11 @@
 package com.twogether.deokhugam.notification.exception;
 
-public class NotificationNotFoundException extends RuntimeException {
+import com.twogether.deokhugam.common.exception.DeokhugamException;
+import com.twogether.deokhugam.common.exception.ErrorCode;
 
-    public NotificationNotFoundException(String message) {
-        super(message);
+public class NotificationNotFoundException extends DeokhugamException {
+
+    public NotificationNotFoundException() {
+        super(ErrorCode.NOTIFICATION_NOT_FOUND);
     }
 }
