@@ -16,6 +16,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 // 한 유저는 한 책에 한개의 리뷰만 가능
@@ -66,6 +67,7 @@ public class Review {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    @LastModifiedDate
     @Column(name = "updated_at")
     private Instant updatedAt;
 
@@ -89,7 +91,6 @@ public class Review {
 
     public void updateLikeCount(long likeCount){
         this.likeCount = likeCount;
-        this.updatedAt = Instant.now();
     }
 
     public void updateCommentCount(int commentCount){
@@ -109,18 +110,6 @@ public class Review {
     public void updateIsDelete(boolean isDeleted){
         if(isDeleted != this.isDeleted){
             this.isDeleted = isDeleted;
-        }
-    }
-
-    public void incrementCommentCount(){
-        this.commentCount++;
-        this.updatedAt = Instant.now();
-    }
-
-    public void decrementCommentCount() {
-        if (this.commentCount > 0) {
-            this.commentCount--;
-            this.updatedAt = Instant.now();
         }
     }
 }
