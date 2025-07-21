@@ -110,7 +110,6 @@ class NotificationServiceTest {
         // then
         assertThat(result).isEqualTo(dto);
         verify(notification).setConfirmed(true);
-        verify(notification).setUpdatedAt(any(LocalDateTime.class));
     }
 
     @Test

@@ -68,7 +68,6 @@ public class NotificationService {
             .orElseThrow(NotificationNotFoundException::new);
 
         notification.setConfirmed(confirmed);
-        notification.setUpdatedAt(LocalDateTime.now());
 
         return notificationMapper.toDto(notification);
     }
