@@ -26,8 +26,6 @@ public class ReviewMapper {
             throw new IllegalStateException("Review가 null 값인 도서나 사용자를 참조하고 있습니다.");
         }
 
-        long commentCount = reviewRepository.countCommentsByReviewId(review.getId());
-
         return new ReviewDto(
                 review.getId(),
                 book.getId(),
@@ -38,7 +36,7 @@ public class ReviewMapper {
                 review.getContent(),
                 review.getRating(),
                 review.getLikeCount(),
-                commentCount,
+                review.getCommentCount(),
                 likeByMe,
                 review.getCreatedAt(),
                 review.getUpdatedAt()

@@ -15,7 +15,12 @@ public interface ReviewRepository extends JpaRepository<Review, UUID>, ReviewRep
 
     boolean existsByUserIdAndBookIdAndIsDeletedFalse(UUID userId, UUID bookId);
 
-    @Query("SELECT COUNT(c) FROM Comment c WHERE c.review.id = :reviewId AND c.isDeleted = false")
-    long countCommentsByReviewId(@Param("reviewId") UUID reviewId);
+    @Modifying
+    @Query("UPDATE Review r SET r.commentCount = r.commentCount + 1, r.updatedAt = CURRENT_TIMESTAMP WHERE r.id = :reviewId")
+    void incrementCommentCount(@Param("reviewId") UUID reviewId);
+
+    @Modifying
+    @Query("UPDATE Review r SET r.commentCount = r.commentCount - 1, r.updatedAt = CURRENT_TIMESTAMP WHERE r.id = :reviewId")
+    void decrementCommentCount(@Param("reviewId") UUID reviewId);
 
 }
