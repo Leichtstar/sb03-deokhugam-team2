@@ -172,3 +172,10 @@ CREATE TABLE power_user_ranking (
 
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
+
+ALTER TABLE popular_book_ranking
+    ALTER COLUMN period TYPE VARCHAR;
+ALTER TABLE popular_review_ranking
+    ALTER COLUMN period TYPE VARCHAR;
+ALTER TABLE power_user_ranking
+    ALTER COLUMN period TYPE VARCHAR;
