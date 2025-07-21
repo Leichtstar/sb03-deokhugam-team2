@@ -27,10 +27,11 @@ public class NotificationQueryService {
         Integer limit,
         Sort.Direction direction
     ) {
-        int pageSize = (limit != null && limit > 0) ? limit : 20;
+        int pageSize = (limit != null && limit > 0 && limit <= 100) ? limit : 20;
         Sort.Direction sortDirection = (direction != null) ? direction : Sort.Direction.DESC;
 
-        PageRequest pageable = PageRequest.of(0, pageSize, Sort.by(sortDirection, "createdAt", "id"));
+        // 실제 데이터보다 1개 더 조회하여 다음 페이지 존재 여부 확인
+        PageRequest pageable = PageRequest.of(0, pageSize + 1, Sort.by(sortDirection, "createdAt", "id"));
 
         LocalDateTime parsedCursor = null;
         if (cursor != null && !cursor.isBlank()) {
@@ -53,7 +54,12 @@ public class NotificationQueryService {
             .map(notificationMapper::toDto)
             .toList();
 
-        boolean hasNext = content.size() == pageSize;
+        // hasNext 계산 및 결과 조정
+        boolean hasNext = content.size() > pageSize;
+        if (hasNext) {
+            content = content.subList(0, pageSize);
+        }
+
         String nextCursor = hasNext ? content.get(content.size() - 1).createdAt().toString() : null;
         LocalDateTime nextAfter = hasNext ? content.get(content.size() - 1).createdAt() : null;
 

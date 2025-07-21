@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.twogether.deokhugam.dashboard.entity.PowerUserRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PowerUserRankingRepository;
+import java.util.Comparator;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -62,6 +63,7 @@ class PowerUserRankingBatchTest {
         assertThat(execution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
 
         List<PowerUserRanking> rankings = rankingRepository.findAllByPeriod(period);
+        rankings.sort(Comparator.comparing(PowerUserRanking::getRank));
 
         assertThat(rankings).allMatch(ranking -> ranking.getPeriod() == period);
         assertThat(rankings).isNotEmpty();
