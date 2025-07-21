@@ -10,21 +10,22 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@Profile("prod")
+@ConditionalOnProperty(name = "batch.power-user-ranking.enabled", havingValue = "true")
 public class PowerUserRankingScheduler {
 
     private final JobLauncher jobLauncher;
     private final Job powerUserRankingJob;
     private final PowerUserRankingRepository powerUserRankingRepository;
 
-    @Scheduled(cron = "0 0 0 * * *") // 매일 자정
+    //@Scheduled(initialDelay = 1000, fixedDelay = Long.MAX_VALUE) // application 실행 시 즉시 배치 (테스트용)
+    @Scheduled(cron = "${batch.power-user-ranking.cron}")
     public void runRankingJob() {
         String jobName = "powerUserRankingJob";
         String requestId = UUID.randomUUID().toString();

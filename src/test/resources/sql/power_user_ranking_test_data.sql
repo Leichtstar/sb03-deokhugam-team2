@@ -13,10 +13,10 @@ VALUES
 INSERT INTO reviews (id, book_id, user_id, book_title, book_thumbnail_url, user_nickname, content, rating, like_count, comment_count, created_at, updated_at, is_deleted)
 VALUES
     ('aaaa1111-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111',
-     '테스트 도서', 'http://example.com/image.jpg', '사용자1', '리뷰 내용 1', 4, 1, 1, NOW(), NOW(), false),
+     '테스트 도서', 'http://example.com/image.jpg', '사용자1', '리뷰 내용 1', 4, 1, 0, NOW(), NOW(), false),
 
     ('aaaa1111-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', '22222222-2222-2222-2222-222222222222',
-     '테스트 도서', 'http://example.com/image.jpg', '사용자2', '리뷰 내용 2', 3, 1, 1, NOW(), NOW(), false);
+     '테스트 도서', 'http://example.com/image.jpg', '사용자2', '리뷰 내용 2', 3, 1, 0, NOW(), NOW(), false);
 
 -- 좋아요 등록
 INSERT INTO review_like (review_id, user_id, liked)
