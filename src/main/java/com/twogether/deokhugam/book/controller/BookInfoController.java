@@ -5,20 +5,23 @@ import com.twogether.deokhugam.book.dto.NaverBookDto;
 import com.twogether.deokhugam.book.exception.NaverBookException;
 import com.twogether.deokhugam.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/api/books/info")
+@RequestMapping("/api/books")
 @RequiredArgsConstructor
 public class BookInfoController {
 
     private final NaverBookClient naverBookClient;
 
-    @GetMapping
+    @GetMapping(value = "/info")
     public ResponseEntity<NaverBookDto> getBookInfo(@RequestParam("isbn") String isbn) {
         if (!isbn.matches("\\d{1,13}")) {
             throw new NaverBookException(ErrorCode.INVALID_ISBN);
@@ -27,6 +30,14 @@ public class BookInfoController {
         if (dto == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.status(HttpStatus.OK).body(dto);
+    }
+    @GetMapping(value = "/isbn/ocr")
+    public ResponseEntity<String> getIsbnFromOcr(@RequestPart(value = "image", required = false) MultipartFile bookImage){
+    if (bookImage.isEmpty() || bookImage.getSize() == 0){
+        throw new IllegalArgumentException("인식할 이미지가 없습니다.");
+    }
+    String result = naverBookClient.extractIsbnFromImage(bookImage);
+    return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 }
