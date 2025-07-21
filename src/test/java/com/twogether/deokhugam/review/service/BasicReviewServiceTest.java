@@ -430,8 +430,6 @@ public class BasicReviewServiceTest {
 
         when(bookRepository.findById(mockBookId)).thenReturn(Optional.of(mockBook));
 
-        when(mockBook.getReviewCount()).thenReturn(4);
-
         when(spyReview.getUser()).thenReturn(mockUser);
         when(mockUser.getId()).thenReturn(requestUserId);
 
@@ -440,7 +438,7 @@ public class BasicReviewServiceTest {
 
         // Then
         assertTrue(spyReview.isDeleted());
-        verify(mockBook).setReviewCount(3);
+        verify(bookRepository).updateBookReviewStats(mockBookId);
         verify(reviewRepository).save(spyReview);
         verify(bookRepository).save(mockBook);
 
@@ -474,7 +472,9 @@ public class BasicReviewServiceTest {
         });
 
         verify(mockReview, never()).updateIsDelete(true);
+        verify(bookRepository, never()).updateBookReviewStats(mockBookId);
         verify(reviewRepository, never()).save(mockReview);
+        verify(bookRepository, never()).save(mockBook);
     }
 
     @Test
