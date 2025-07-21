@@ -38,7 +38,7 @@ class NotificationQueryServiceTest {
     private NotificationMapper notificationMapper;
 
     @Test
-    void 알림_목록_조회_성공() {
+    void 알림_목록_조회_성공_after_없음() {
         // given
         UUID userId = UUID.randomUUID();
         LocalDateTime baseTime = LocalDateTime.now();
@@ -46,9 +46,7 @@ class NotificationQueryServiceTest {
 
         User user = mock(User.class);
         Review review = mock(Review.class);
-        Book book = mock(Book.class);
 
-        // 알림 엔티티 더미 생성
         List<Notification> notifications = List.of(
             Notification.builder()
                 .id(UUID.randomUUID())
@@ -58,7 +56,6 @@ class NotificationQueryServiceTest {
                 .user(user)
                 .review(review)
                 .build(),
-
             Notification.builder()
                 .id(UUID.randomUUID())
                 .content("test2")
@@ -69,21 +66,22 @@ class NotificationQueryServiceTest {
                 .build()
         );
 
-        when(notificationRepository.findByUserIdWithCursor(eq(userId), any(), any()))
+        when(notificationRepository.findByUserIdWithoutAfter(eq(userId), any()))
             .thenReturn(notifications);
-
-        // 실제 DTO 반환 (createdAt 포함)
         when(notificationMapper.toDto(any()))
-            .thenReturn(new NotificationDto(
-                UUID.randomUUID(),
-                userId,
-                UUID.randomUUID(),
-                "테스트 도서",
-                "알림 내용",
-                false,
-                baseTime.minusMinutes(1),
-                baseTime.minusMinutes(1)
-            ));
+            .thenAnswer(invocation -> {
+                Notification n = invocation.getArgument(0);
+                return new NotificationDto(
+                    n.getId(),
+                    userId,
+                    UUID.randomUUID(),
+                    "도서 제목",
+                    n.getContent(),
+                    n.isConfirmed(),
+                    n.getCreatedAt(),
+                    n.getUpdatedAt()
+                );
+            });
 
         // when
         CursorPageResponse<NotificationDto> result = notificationQueryService.getNotifications(
@@ -94,5 +92,50 @@ class NotificationQueryServiceTest {
         assertThat(result.getContent()).hasSize(2);
         assertThat(result.isHasNext()).isTrue();
         assertThat(result.getSize()).isEqualTo(2);
+    }
+
+    @Test
+    void 알림_목록_조회_성공_after_있음() {
+        // given
+        UUID userId = UUID.randomUUID();
+        LocalDateTime baseTime = LocalDateTime.now();
+        LocalDateTime after = baseTime.minusHours(1);
+        int limit = 1;
+
+        User user = mock(User.class);
+        Review review = mock(Review.class);
+
+        Notification notification = Notification.builder()
+            .id(UUID.randomUUID())
+            .content("test3")
+            .confirmed(false)
+            .createdAt(baseTime.minusMinutes(10))
+            .user(user)
+            .review(review)
+            .build();
+
+        when(notificationRepository.findByUserIdWithAfter(eq(userId), eq(after), any()))
+            .thenReturn(List.of(notification));
+        when(notificationMapper.toDto(any()))
+            .thenReturn(new NotificationDto(
+                notification.getId(),
+                userId,
+                UUID.randomUUID(),
+                "도서 제목",
+                notification.getContent(),
+                notification.isConfirmed(),
+                notification.getCreatedAt(),
+                notification.getUpdatedAt()
+            ));
+
+        // when
+        CursorPageResponse<NotificationDto> result = notificationQueryService.getNotifications(
+            userId, after.toString(), after, limit, Sort.Direction.DESC
+        );
+
+        // then
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.isHasNext()).isTrue();
+        assertThat(result.getSize()).isEqualTo(1);
     }
 }

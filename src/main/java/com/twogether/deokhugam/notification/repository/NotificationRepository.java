@@ -11,15 +11,26 @@ import org.springframework.data.repository.query.Param;
 
 public interface NotificationRepository extends JpaRepository<Notification, UUID> {
 
+    // after가 있는 경우
+    @Query("""
+        SELECT n FROM Notification n
+        WHERE n.user.id = :userId AND n.createdAt < :after
+        ORDER BY n.createdAt DESC, n.id DESC
+    """)
+    List<Notification> findByUserIdWithAfter(
+        @Param("userId") UUID userId,
+        @Param("after") LocalDateTime after,
+        Pageable pageable
+    );
+
+    // after가 없는 경우
     @Query("""
         SELECT n FROM Notification n
         WHERE n.user.id = :userId
-        AND (:after IS NULL OR n.createdAt < :after)
-        ORDER BY n.createdAt DESC
+        ORDER BY n.createdAt DESC, n.id DESC
     """)
-    List<Notification> findByUserIdWithCursor(
+    List<Notification> findByUserIdWithoutAfter(
         @Param("userId") UUID userId,
-        @Param("after") LocalDateTime after,
         Pageable pageable
     );
 }

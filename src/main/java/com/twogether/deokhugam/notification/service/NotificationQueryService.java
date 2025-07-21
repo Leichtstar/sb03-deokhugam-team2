@@ -30,7 +30,7 @@ public class NotificationQueryService {
         int pageSize = (limit != null && limit > 0) ? limit : 20;
         Sort.Direction sortDirection = (direction != null) ? direction : Sort.Direction.DESC;
 
-        PageRequest pageable = PageRequest.of(0, pageSize, Sort.by(sortDirection, "createdAt"));
+        PageRequest pageable = PageRequest.of(0, pageSize, Sort.by(sortDirection, "createdAt", "id"));
 
         LocalDateTime parsedCursor = null;
         if (cursor != null && !cursor.isBlank()) {
@@ -41,11 +41,13 @@ public class NotificationQueryService {
             }
         }
 
-        List<Notification> notifications = notificationRepository.findByUserIdWithCursor(
-            userId,
-            parsedCursor,
-            pageable
-        );
+        List<Notification> notifications;
+
+        if (parsedCursor != null) {
+            notifications = notificationRepository.findByUserIdWithAfter(userId, parsedCursor, pageable);
+        } else {
+            notifications = notificationRepository.findByUserIdWithoutAfter(userId, pageable);
+        }
 
         List<NotificationDto> content = notifications.stream()
             .map(notificationMapper::toDto)

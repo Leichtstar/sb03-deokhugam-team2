@@ -61,7 +61,7 @@ class PowerUserRankingBatchTest {
         // then
         assertThat(execution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
 
-        List<PowerUserRanking> rankings = rankingRepository.findAllByPeriodOrderByRankAsc(period);
+        List<PowerUserRanking> rankings = rankingRepository.findAllByPeriod(period);
 
         assertThat(rankings).allMatch(ranking -> ranking.getPeriod() == period);
         assertThat(rankings).isNotEmpty();
