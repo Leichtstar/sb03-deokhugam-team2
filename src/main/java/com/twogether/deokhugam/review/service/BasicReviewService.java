@@ -211,6 +211,8 @@ public class BasicReviewService implements ReviewService{
 
         bookRepository.updateBookReviewStats(reviewedBook.getId());
         bookRepository.save(reviewedBook);
+
+        log.info("[BasicReviewService]: 리뷰 물리 삭제 완료");
     }
 
     // 리뷰 좋아요 기능
