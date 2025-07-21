@@ -17,7 +17,7 @@ RUN ./gradlew dependencies
 
 # 소스 코드 복사 및 빌드
 COPY src ./src
-RUN ./gradlew build -x test
+RUN ./gradlew bootJar -x test --no-daemon
 
 
 # 런타임 스테이지
