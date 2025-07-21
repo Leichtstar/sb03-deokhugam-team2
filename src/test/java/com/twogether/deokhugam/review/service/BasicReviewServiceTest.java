@@ -477,6 +477,69 @@ public class BasicReviewServiceTest {
         verify(bookRepository, never()).save(mockBook);
     }
 
+
+    @Test
+    @DisplayName("작성자는 리뷰를 물리 삭제 할 수 있다.")
+    void shouldHardDelete_whenUserIsAuthor(){
+        // Given
+        UUID mockReviewId = UUID.randomUUID();
+        UUID requestUserId = UUID.randomUUID();
+        UUID mockBookId = UUID.randomUUID();
+
+        User mockUser = mock(User.class);
+        when(mockUser.getId()).thenReturn(requestUserId);
+
+        Book mockBook = mock(Book.class);
+        when(mockBook.getId()).thenReturn(mockBookId);
+
+        Review review = mock(Review.class);
+        when(review.getBook()).thenReturn(mockBook);
+        when(review.getUser()).thenReturn(mockUser);
+
+        when(reviewRepository.findById(mockReviewId)).thenReturn(Optional.of(review));
+        when(bookRepository.findById(mockBookId)).thenReturn(Optional.of(mockBook));
+
+        // When
+        basicReviewService.deleteReviewHard(mockReviewId, requestUserId);
+
+        // Then
+        verify(bookRepository).updateBookReviewStats(mockBookId);
+        verify(reviewRepository).delete(review);
+        verify(bookRepository).save(mockBook);
+
+    }
+
+    @Test
+    @DisplayName("작성자가 아닌 사람은 리뷰를 물리 삭제 할 수 없다.")
+    void cannotHardDelete_whenUserIsNotAuthor() {
+        // Given
+        UUID mockReviewId = UUID.randomUUID();
+        UUID mockUserId = UUID.randomUUID();
+        UUID requestUserId = UUID.randomUUID();
+        UUID mockBookId = UUID.randomUUID();
+
+        User mockUser = mock(User.class);
+        when(mockUser.getId()).thenReturn(mockUserId);
+
+        Book mockBook = mock(Book.class);
+        when(mockBook.getId()).thenReturn(mockBookId);
+
+        Review mockReview = mock(Review.class);
+        when(mockReview.getUser()).thenReturn(mockUser);
+        when(mockReview.getBook()).thenReturn(mockBook);
+
+        when(reviewRepository.findById(mockReviewId)).thenReturn(Optional.of(mockReview));
+        when(bookRepository.findById(mockBookId)).thenReturn(Optional.of(mockBook));
+
+        assertThrows(ReviewNotOwnedException.class, () -> {
+            basicReviewService.deleteReviewHard(mockReviewId, requestUserId);
+        });
+
+        verify(bookRepository, never()).updateBookReviewStats(mockBookId);
+        verify(reviewRepository, never()).delete(mockReview);
+        verify(bookRepository, never()).save(mockBook);
+    }
+
     @Test
     @DisplayName("리뷰 좋아요를 취소할 수 있어야 한다.")
     void shouldUpdate_ReviewLike_Unlike(){
