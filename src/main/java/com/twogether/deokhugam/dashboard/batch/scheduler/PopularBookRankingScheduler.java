@@ -23,6 +23,7 @@ public class PopularBookRankingScheduler {
     private final JobLauncher jobLauncher;
     private final Job popularBookRankingJob;
 
+    //@Scheduled(initialDelay = 1000, fixedDelay = Long.MAX_VALUE) // application 실행 시 즉시 배치 (테스트용)
     @Scheduled(cron = "${batch.popular-book-ranking.cron}")
     public void runRankingJob() {
         String jobName = "popularBookRankingJob";

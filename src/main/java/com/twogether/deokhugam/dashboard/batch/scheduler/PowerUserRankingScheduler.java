@@ -24,6 +24,7 @@ public class PowerUserRankingScheduler {
     private final Job powerUserRankingJob;
     private final PowerUserRankingRepository powerUserRankingRepository;
 
+    //@Scheduled(initialDelay = 1000, fixedDelay = Long.MAX_VALUE) // application 실행 시 즉시 배치 (테스트용)
     @Scheduled(cron = "${batch.power-user-ranking.cron}")
     public void runRankingJob() {
         String jobName = "powerUserRankingJob";
