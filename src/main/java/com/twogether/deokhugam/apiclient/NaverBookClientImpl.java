@@ -10,13 +10,12 @@ import com.twogether.deokhugam.common.exception.ErrorCode;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +29,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -121,8 +121,11 @@ public class NaverBookClientImpl implements NaverBookClient {
             message.put("timestamp", System.currentTimeMillis());
 
             Map<String, Object> imageMap = new HashMap<>();
-            imageMap.put("format", "jpg");
             imageMap.put("name", "image");
+            String contentType = image.getContentType();
+            String format = contentType != null && contentType.startsWith("image/") ? contentType.substring(6) : "jpg";
+            imageMap.put("format",format);
+
 
             message.put("images", List.of(imageMap));
 
@@ -140,13 +143,29 @@ public class NaverBookClientImpl implements NaverBookClient {
 
             // OCR 요청
             RestTemplate restTemplate = restTemplateBuilder.build();
-            ResponseEntity<String> response = restTemplate.postForEntity(ocrUrl, requestEntity, String.class);
-
+            ResponseEntity<String> response;
+            try {
+                response = restTemplate.postForEntity(ocrUrl, requestEntity, String.class);
+            }catch (RestClientException ex) {
+                throw new NaverBookException(ErrorCode.NAVER_API_CONNECTION_FAILED);
+            }
+            // 응답 코드 체크
+            if(response.getStatusCode().is4xxClientError()){
+                throw new NaverBookException(ErrorCode.NAVER_API_UNAUTHORIZED);
+            } else if(response.getStatusCode().is5xxServerError()){
+                throw new NaverBookException(ErrorCode.NAVER_OCR_SERVER_ERROR);
+            }
             // OCR 결과에서 ISBN 추출
-            return parseIsbnFromOcrJson(response.getBody());
+            String result = parseIsbnFromOcrJson(response.getBody());
+            if (result == null || result.isBlank()) {
+                throw new NaverBookException(ErrorCode.NAVER_OCR_ISBN_NOT_FOUND);
+            }
+            return result;
 
-        } catch (Exception e) {
-            throw new NaverBookException(ErrorCode.NAVER_API_CONNECTION_FAILED);
+        } catch (NaverBookException e) {
+            throw e;
+        } catch (Exception e){
+            throw new NaverBookException(ErrorCode.NAVER_API_UNKNOWN_ERROR);
         }
 
     }
@@ -155,33 +174,30 @@ public class NaverBookClientImpl implements NaverBookClient {
         try {
             JsonNode root = new ObjectMapper().readTree(jsonText);
             JsonNode fields = root.path("images").get(0).path("fields");
-
-            StringBuilder collected = new StringBuilder();
-            boolean isbnStarted = false;
-
-            for (JsonNode field : fields) {
+            //inferText 필드를 숫자 혹은 X인 값만 추출한 리스트 생성
+            List<String> digitFragments = new ArrayList<>();
+            for(JsonNode field : fields) {
                 String text = field.path("inferText").asText();
-
-                // "ISBN"이 포함되면 추출 시작
-                if (!isbnStarted && text.toLowerCase().contains("isbn")) {
-                    isbnStarted = true;
-                    continue;
-                }
-
-                if (isbnStarted) {
-                    // ISBN 추정 텍스트가 끝나는 조건
-                    if (text.contains("세트")) break;
-
-                    collected.append(text.replaceAll("[^0-9]", "")); // 숫자만 누적
+                String digits = text.replaceAll("[^0-9Xx]", "");//정규식으로 숫자와 X 외의 값 공백처리
+                if(!digits.isEmpty()){
+                    digitFragments.add(digits); // 추출된 숫자와 X값을 리스트에 추가
                 }
             }
+            // 추출값 직렬화하여 978/979로 시작하는 ISBN 코드 추출
+            StringBuilder buffer = new StringBuilder();
+            for(int i = 0; i < digitFragments.size(); i++){
+                buffer.setLength(0); // 초기화
 
-            // 정규식으로 ISBN 13자리 추출
-            Matcher matcher = Pattern.compile("\\d{13}").matcher(collected.toString());
-            if (matcher.find()) {
-                return matcher.group(0);
+                for (int j = i; j < digitFragments.size(); j++) {
+                    buffer.append(digitFragments.get(j));
+                    if (buffer.length() >= 13) break;
+                }
+                String candidate = buffer.toString();
+                // 13자리, 978/979 시작, 마지막 자리는 숫자 or X
+                if (candidate.matches("97[89]\\d{9}[\\dXx]")) {
+                    return candidate;
+                }
             }
-
             return null;
         } catch (Exception e) {
             throw new NaverBookException(ErrorCode.NAVER_OCR_ISBN_NOT_FOUND);
@@ -207,4 +223,15 @@ public class NaverBookClientImpl implements NaverBookClient {
             return null;
         }
     }
+
+    private boolean isValidIsbn13(String isbn) {
+        int sum = 0;
+        for (int i = 0; i < 13; i++) {
+            int digit = Character.getNumericValue(isbn.charAt(i));
+            if (digit < 0 || digit > 9) return false;
+            sum += (i % 2 == 0) ? digit : digit * 3;
+        }
+        return sum % 10 == 0;
+    }
+
 }
