@@ -354,7 +354,6 @@ class CommentServiceTest {
     }
 
 
-    @MockitoSettings(strictness = Strictness.LENIENT)
     @Test
     @DisplayName("논리삭제 - 타인 댓글이면 권한 예외 발생")
     void deleteLogical_forbidden() {
@@ -366,12 +365,11 @@ class CommentServiceTest {
 
         Comment mockComment = mock(Comment.class);
         when(mockComment.getUser()).thenReturn(mockUser);
-        when(mockComment.getIsDeleted()).thenReturn(false);
 
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(mockComment));
 
         assertThatThrownBy(() -> commentService.deleteLogical(commentId, attackerId))
-            .isInstanceOf(CommentForbiddenException.class);
+                .isInstanceOf(CommentForbiddenException.class);
     }
 
 
