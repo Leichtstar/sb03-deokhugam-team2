@@ -70,13 +70,13 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentResponse updateComment(UUID commentId, UUID userId,CommentUpdateRequest request) {
+    public CommentResponse updateComment(UUID commentId, UUID userId, CommentUpdateRequest request) {
         Comment comment = commentRepository.findById(commentId)
             .filter(c -> !c.getIsDeleted())
             .orElseThrow(CommentNotFoundException::new);
 
         if (!comment.getUser().getId().equals(userId)) {
-            throw new CommentForbiddenException(); // 403 Forbidden 커스텀 예외
+            throw new CommentForbiddenException();
         }
         comment.editContent(request.content());
         return commentMapper.toResponse(comment);
