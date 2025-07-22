@@ -16,6 +16,7 @@ import com.twogether.deokhugam.comments.dto.CommentCreateRequest;
 import com.twogether.deokhugam.comments.dto.CommentResponse;
 import com.twogether.deokhugam.comments.dto.CommentUpdateRequest;
 import com.twogether.deokhugam.comments.entity.Comment;
+import com.twogether.deokhugam.comments.exception.CommentAlreadyDeletedException;
 import com.twogether.deokhugam.comments.exception.CommentForbiddenException;
 import com.twogether.deokhugam.comments.exception.CommentNotFoundException;
 import com.twogether.deokhugam.comments.mapper.CommentMapper;
@@ -122,7 +123,7 @@ class CommentServiceTest {
         var violations = validator.validate(invalidRequest);
         assertFalse(violations.isEmpty());
         assertTrue(violations.stream()
-            .anyMatch(violation -> violation.getMessage().equals("내용은 200자를 초과할 수 없습니다.")));
+            .anyMatch(violation -> violation.getMessage().equals("댓글은 200자를 초과할 수 없습니다.")));
     }
 
     @Test
@@ -386,7 +387,7 @@ class CommentServiceTest {
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(mockComment));
 
         assertThatThrownBy(() -> commentService.deleteLogical(commentId, userId))
-            .isInstanceOf(IllegalStateException.class)
+            .isInstanceOf(CommentAlreadyDeletedException.class)
             .hasMessageContaining("이미 삭제된 댓글입니다");
     }
 

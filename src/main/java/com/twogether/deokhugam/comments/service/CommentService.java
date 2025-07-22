@@ -4,6 +4,7 @@ import com.twogether.deokhugam.comments.dto.CommentCreateRequest;
 import com.twogether.deokhugam.comments.dto.CommentResponse;
 import com.twogether.deokhugam.comments.dto.CommentUpdateRequest;
 import com.twogether.deokhugam.comments.entity.Comment;
+import com.twogether.deokhugam.comments.exception.CommentAlreadyDeletedException;
 import com.twogether.deokhugam.comments.exception.CommentForbiddenException;
 import com.twogether.deokhugam.comments.exception.CommentNotFoundException;
 import com.twogether.deokhugam.comments.mapper.CommentMapper;
@@ -19,6 +20,8 @@ import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -31,6 +34,8 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class CommentService {
 
+    private static final Logger log = LoggerFactory.getLogger(CommentService.class);
+
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
     private final ReviewRepository reviewRepository;
@@ -40,18 +45,14 @@ public class CommentService {
 
     /**
      * 댓글 등록.
-     *
-     * @param request 등록 요청 DTO
-     * @return 등록 결과 DTO
      */
     @Transactional
     public CommentResponse createComment(@Valid CommentCreateRequest request) {
-        Review review = reviewRepository.findById(request.reviewId())
-            .orElseThrow(() -> new ReviewNotFoundException(request.reviewId()));
+        log.debug("댓글 생성 요청: reviewId={}, userId={}", request.reviewId(), request.userId());
 
-        User user = userRepository.findById(request.userId())
-            .orElseThrow(() -> new UserNotFoundException());
-
+        Review review = findReviewOrThrow(request.reviewId());
+        User user = findUserOrThrow(request.userId());
+      
         Comment entity = new Comment(user, review, request.content());
         Comment saved = commentRepository.save(entity);
 
@@ -63,70 +64,122 @@ public class CommentService {
         reviewRepository.incrementCommentCount(request.reviewId());
         review.updateUpdatedAt();
         reviewRepository.save(review);
+        sendCommentNotificationIfNeeded(user, review, saved);
+
+        log.debug("댓글 생성 완료: commentId={}", saved.getId());
 
         return commentMapper.toResponse(saved);
     }
 
+    /**
+     * 댓글 상세 조회.
+     */
     @Transactional(readOnly = true)
     public CommentResponse getComment(UUID id) {
-        Comment comment = commentRepository.findById(id)
-            .filter(c -> !c.getIsDeleted())
-            .orElseThrow(CommentNotFoundException::new);
+        log.debug("댓글 조회 요청: commentId={}", id);
+        Comment comment = findActiveCommentByIdOrThrow(id);
         return commentMapper.toResponse(comment);
     }
 
+    /**
+     * 댓글 내용 수정.
+     */
     @Transactional
-    public CommentResponse updateComment(UUID commentId, UUID userId,CommentUpdateRequest request) {
-        Comment comment = commentRepository.findById(commentId)
-            .filter(c -> !c.getIsDeleted())
-            .orElseThrow(CommentNotFoundException::new);
+    public CommentResponse updateComment(UUID commentId, UUID userId, CommentUpdateRequest request) {
+        log.debug("댓글 수정 요청: commentId={}, userId={}", commentId, userId);
 
-        if (!comment.getUser().getId().equals(userId)) {
-            throw new CommentForbiddenException(); // 403 Forbidden 커스텀 예외
-        }
+        Comment comment = findActiveCommentByIdOrThrow(commentId);
+        validateCommentOwner(comment, userId);
+
         comment.editContent(request.content());
+        log.debug("댓글 수정 완료: commentId={}", commentId);
+
         return commentMapper.toResponse(comment);
     }
 
+    /**
+     * 댓글 논리적 삭제.
+     */
     @Transactional
     public void deleteLogical(UUID commentId, UUID requestUserId) {
-        Comment comment = commentRepository.findById(commentId)
-            .orElseThrow(CommentNotFoundException::new);
-        if (!comment.getUser().getId().equals(requestUserId)) {
-            throw new CommentForbiddenException();
-        }
-        if (Boolean.TRUE.equals(comment.getIsDeleted())) {
-            throw new IllegalStateException("이미 삭제된 댓글입니다.");
-        }
-        Review review = reviewRepository.findById(comment.getReview().getId())
-                .orElseThrow(() -> new ReviewNotFoundException(comment.getReview().getId()));
+        log.debug("댓글 논리적 삭제 요청: commentId={}, userId={}", commentId, requestUserId);
 
-        reviewRepository.decrementCommentCount(review.getId());
-        review.updateUpdatedAt();
-        reviewRepository.save(review);
+        Comment comment = findCommentByIdOrThrow(commentId);
+        validateCommentOwner(comment, requestUserId);
+        validateNotDeleted(comment);
 
+        reviewRepository.decrementCommentCount(comment.getReview().getId());
         commentRepository.logicalDeleteById(commentId);
+
+        log.debug("댓글 논리적 삭제 완료: commentId={}", commentId);
     }
 
+    /**
+     * 댓글 물리적 삭제.
+     */
     @Transactional
     public void deletePhysical(UUID commentId, UUID requestUserId) {
-        Comment comment = commentRepository.findById(commentId)
-            .orElseThrow(CommentNotFoundException::new);
-        if (!comment.getUser().getId().equals(requestUserId)) {
-            throw new CommentForbiddenException();
-        }
+        log.debug("댓글 물리적 삭제 요청: commentId={}, userId={}", commentId, requestUserId);
+
+        Comment comment = findCommentByIdOrThrow(commentId);
+        validateCommentOwner(comment, requestUserId);
 
         if (!comment.getIsDeleted()) {
-            // 집계에 포함되었던 댓글이므로 -1 필요
-            Review review = reviewRepository.findById(comment.getReview().getId())
-                    .orElseThrow(() -> new ReviewNotFoundException(comment.getReview().getId()));
-
-            reviewRepository.decrementCommentCount(review.getId());
-            review.updateUpdatedAt();
-            reviewRepository.save(review);
+            decrementReviewCommentCount(comment.getReview());
         }
 
         commentRepository.deleteById(commentId);
+        log.debug("댓글 물리적 삭제 완료: commentId={}", commentId);
     }
 
+    // ================= 헬퍼 메소드 =================
+
+    private Review findReviewOrThrow(UUID reviewId) {
+        return reviewRepository.findById(reviewId)
+            .orElseThrow(() -> new ReviewNotFoundException(reviewId));
+    }
+
+    private User findUserOrThrow(UUID userId) {
+        return userRepository.findById(userId)
+            .orElseThrow(() -> new UserNotFoundException());
+    }
+
+    private Comment findCommentByIdOrThrow(UUID commentId) {
+        return commentRepository.findById(commentId)
+            .orElseThrow(CommentNotFoundException::new);
+    }
+
+    private Comment findActiveCommentByIdOrThrow(UUID commentId) {
+        return commentRepository.findById(commentId)
+            .filter(c -> !c.getIsDeleted())
+            .orElseThrow(CommentNotFoundException::new);
+    }
+
+    private void validateCommentOwner(Comment comment, UUID userId) {
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new CommentForbiddenException();
+        }
+    }
+
+    private void validateNotDeleted(Comment comment) {
+        if (Boolean.TRUE.equals(comment.getIsDeleted())) {
+            throw new CommentAlreadyDeletedException("이미 삭제된 댓글입니다.");
+        }
+    }
+
+    private void incrementReviewCommentCount(Review review) {
+        if (review != null) {
+            reviewRepository.incrementCommentCount(review.getId());
+        }
+    }
+
+    private void decrementReviewCommentCount(Review review) {
+        reviewRepository.decrementCommentCount(review.getId());
+    }
+
+    private void sendCommentNotificationIfNeeded(User commenter, Review review, Comment comment) {
+        if (!commenter.getId().equals(review.getUser().getId())) {
+            notificationService.createCommentNotification(commenter, review, comment.getContent());
+        }
+    }
 }
