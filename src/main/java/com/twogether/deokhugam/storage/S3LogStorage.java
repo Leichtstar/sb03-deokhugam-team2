@@ -107,6 +107,13 @@ public class S3LogStorage {
 
             log.info("로그 파일 S3 업로드 완료 - S3 Key: {}, ETag: {}", s3Key, response.eTag());
 
+            // 업로드 성공 후 로컬 파일 삭제
+            if (logFile.delete()) {
+                log.info("업로드 완료 후 로컬 로그 파일 삭제: {}", logFilePath);
+            } else {
+                log.warn("로컬 로그 파일 삭제 실패: {}", logFilePath);
+            }
+
         } catch (Exception e) {
             log.error("S3 업로드 실패 - 파일: {}, 오류: {}", logFilePath, e.getMessage(), e);
             throw new RuntimeException("로그 파일 S3 업로드 중 오류가 발생했습니다.", e);
