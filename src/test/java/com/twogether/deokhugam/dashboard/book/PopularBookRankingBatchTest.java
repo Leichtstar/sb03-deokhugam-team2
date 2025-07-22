@@ -42,13 +42,14 @@ class PopularBookRankingBatchTest {
 
     @ParameterizedTest(name = "period={0}인 배치 Job이 성공적으로 실행되고 데이터가 저장된다")
     @EnumSource(RankingPeriod.class)
-    @Sql(scripts = "/sql/popular_book_ranking_test_data.sql")
+    @Sql(scripts = "/sql/popular_ranking_test_data.sql")
     @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
     @DisplayName("기간별 배치 Job 성공 테스트")
     void batchJob_withPeriod_shouldSucceedAndSaveData(RankingPeriod period) throws Exception {
         // given
         JobParameters params = new JobParametersBuilder()
             .addString("period", period.name())
+            .addString("now", "2025-07-22T00:00:00")
             .addLong("timestamp", System.currentTimeMillis())
             .toJobParameters();
 
