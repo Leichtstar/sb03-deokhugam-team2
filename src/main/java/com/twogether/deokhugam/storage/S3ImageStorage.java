@@ -151,6 +151,10 @@ public class S3ImageStorage {
      * @param imageUrl 삭제할 이미지의 공개 URL
      */
     public void deleteImage(String imageUrl) {
+        if(imageUrl == null || imageUrl.isBlank()) {
+            log.warn("삭제할 이미지 URL이 비어 있습니다.");
+            return;
+        }
         // URL에서 S3 key 추출
         String key = extractKeyFromUrl(imageUrl);
 
@@ -178,6 +182,10 @@ public class S3ImageStorage {
         if (!url.startsWith(baseUrl)) {
             throw new IllegalArgumentException("유효한 S3 공개 URL이 아닙니다.");
         }
-        return url.substring(baseUrl.length());
+        String key = url.substring(baseUrl.length());
+        if(key.isEmpty()){
+            throw new IllegalArgumentException("S3 key가 비어 있습니다.");
+        }
+        return key;
     }
 }
