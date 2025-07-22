@@ -22,16 +22,19 @@
       </encoder>
       <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
         <fileNamePattern>${LOG_FILE_PATH}/${LOG_FILE_NAME}.%d{yyyy-MM-dd}.log</fileNamePattern>
-        <maxHistory>30</maxHistory>
       </rollingPolicy>
     </appender>
+
+    <root>
+      <appender-ref ref="CONSOLE" />
+      <appender-ref ref="FILE"/>
+    </root>
   </springProfile>
 
-  <root>
-    <appender-ref ref="CONSOLE" />
-    <springProfile name="prod">
-      <appender-ref ref="FILE"/>
-    </springProfile>
-  </root>
+  <springProfile name="!prod">
+    <root>
+      <appender-ref ref="CONSOLE" />
+    </root>
+  </springProfile>
 
 </configuration>
