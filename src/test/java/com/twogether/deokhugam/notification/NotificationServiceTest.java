@@ -17,7 +17,6 @@ import com.twogether.deokhugam.notification.repository.NotificationRepository;
 import com.twogether.deokhugam.notification.service.NotificationService;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.user.entity.User;
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -125,5 +124,17 @@ class NotificationServiceTest {
         assertThatThrownBy(() ->
             notificationService.updateConfirmedStatus(notificationId, userId, true)
         ).isInstanceOf(NotificationNotFoundException.class);
+    }
+
+    @Test
+    void 전체_알림을_읽음_처리한다() {
+        // given
+        UUID userId = UUID.randomUUID();
+
+        // when
+        notificationService.markAllAsRead(userId);
+
+        // then
+        verify(notificationRepository, times(1)).markAllAsReadByUserId(userId);
     }
 }
