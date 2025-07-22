@@ -1,11 +1,9 @@
 package com.twogether.deokhugam.config;
 
+import com.twogether.deokhugam.notification.batch.reader.JpaNotificationReader;
 import com.twogether.deokhugam.notification.entity.Notification;
 import com.twogether.deokhugam.notification.repository.NotificationRepository;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -15,7 +13,6 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JpaPagingItemReader;
-import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -26,6 +23,7 @@ public class NotificationCleanupJobConfig {
 
     private final NotificationRepository notificationRepository;
     private final PlatformTransactionManager transactionManager;
+    private final JpaNotificationReader jpaNotificationReader;
 
     @Bean
     public Job notificationCleanupJob(JobRepository jobRepository) {
@@ -46,25 +44,11 @@ public class NotificationCleanupJobConfig {
 
     @Bean
     public JpaPagingItemReader<Notification> notificationReader() {
-        LocalDateTime cutoff = LocalDateTime.now().minus(7, ChronoUnit.DAYS);
-
-        Map<String, Object> params = new HashMap<>();
-        params.put("cutoff", cutoff);
-
-        return new JpaPagingItemReaderBuilder<Notification>()
-            .name("notificationReader")
-            .entityManagerFactory(notificationRepository.getEntityManager().getEntityManagerFactory())
-            .queryString("""
-                    SELECT n FROM Notification n
-                    WHERE n.confirmed = true AND n.updatedAt < :cutoff
-                """)
-            .parameterValues(params)
-            .pageSize(100)
-            .build();
+        return jpaNotificationReader.create();
     }
 
     @Bean
     public ItemWriter<Notification> notificationWriter() {
-        return notifications -> notificationRepository.deleteAllInBatch(notifications);
+        return notifications -> notificationRepository.deleteAllInBatch((List<Notification>) notifications);
     }
 }
