@@ -41,8 +41,19 @@ public class JpaReviewScoreReader implements ItemReader<ReviewScoreDto> {
     }
 
     private List<ReviewScoreDto> fetchReviewScores() {
-        RankingPeriod period = RankingPeriod.valueOf(periodString);
-        LocalDateTime now = LocalDateTime.parse(nowString);
+        RankingPeriod period;
+        LocalDateTime now;
+        try {
+            period = RankingPeriod.valueOf(periodString);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("잘못된 RankingPeriod 값입니다: " + periodString, e);
+        }
+        try {
+            now = LocalDateTime.parse(nowString);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("잘못된 LocalDateTime 형식입니다: " + nowString, e);
+        }
+
         LocalDateTime start = period.getStartTime(now);
         LocalDateTime end = period.getEndTime(now);
 
@@ -64,17 +75,11 @@ public class JpaReviewScoreReader implements ItemReader<ReviewScoreDto> {
             .getResultList()
             .stream()
             .map(row -> new ReviewScoreDto(
-                (UUID) row[0],                        // reviewId
-                (UUID) row[1],                        // userId
-                (String) row[2],                      // userNickname
-                (String) row[3],                      // content
-                ((Number) row[4]).doubleValue(),      // rating
-                (UUID) row[5],                        // bookId
-                (String) row[6],                      // bookTitle
-                (String) row[7],                      // bookThumbnailUrl
-                ((Number) row[8]).longValue(),        // likeCount
-                ((Number) row[9]).longValue(),        // commentCount
-                period                                // rankingPeriod
+                (UUID) row[0], (UUID) row[1], (String) row[2], (String) row[3],
+                ((Number) row[4]).doubleValue(),
+                (UUID) row[5], (String) row[6], (String) row[7],
+                ((Number) row[8]).longValue(), ((Number) row[9]).longValue(),
+                period
             ))
             .toList();
     }

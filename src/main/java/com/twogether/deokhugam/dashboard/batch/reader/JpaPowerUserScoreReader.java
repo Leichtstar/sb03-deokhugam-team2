@@ -41,8 +41,19 @@ public class JpaPowerUserScoreReader implements ItemReader<PowerUserScoreDto> {
     }
 
     private List<PowerUserScoreDto> fetchPowerUserScores() {
-        RankingPeriod period = RankingPeriod.valueOf(periodString);
-        LocalDateTime now = LocalDateTime.parse(nowString);
+        RankingPeriod period;
+        LocalDateTime now;
+        try {
+            period = RankingPeriod.valueOf(periodString);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("잘못된 RankingPeriod 값입니다: " + periodString, e);
+        }
+        try {
+            now = LocalDateTime.parse(nowString);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("잘못된 LocalDateTime 형식입니다: " + nowString, e);
+        }
+
         LocalDateTime start = period.getStartTime(now);
         LocalDateTime end = period.getEndTime(now);
 
