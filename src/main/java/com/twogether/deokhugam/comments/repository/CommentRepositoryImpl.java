@@ -27,13 +27,11 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                                    int limit,
                                    boolean asc) {
 
-        /* ---------- where ---------- */
         BooleanBuilder where = new BooleanBuilder()
             .and(COMMENT.isDeleted.isFalse())
             .and(COMMENT.review.id.eq(reviewId));
 
         if (afterCreatedAt != null) {
-            // ASC이면 gt / DESC이면 lt
             BooleanExpression cursorCmp = asc
                 ? COMMENT.createdAt.gt(afterCreatedAt)
                 : COMMENT.createdAt.lt(afterCreatedAt);
@@ -59,7 +57,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
         return query.selectFrom(COMMENT)
             .where(where)
             .orderBy(createdOrder, idOrder)
-            .limit(limit + 1)        // 다음 페이지 여부 확인용 +1
+            .limit(limit + 1)
             .fetch();
     }
 }
