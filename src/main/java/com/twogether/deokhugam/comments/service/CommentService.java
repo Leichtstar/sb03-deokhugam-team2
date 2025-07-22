@@ -64,7 +64,6 @@ public class CommentService {
         reviewRepository.incrementCommentCount(request.reviewId());
         review.updateUpdatedAt();
         reviewRepository.save(review);
-        sendCommentNotificationIfNeeded(user, review, saved);
 
         log.debug("댓글 생성 완료: commentId={}", saved.getId());
 
@@ -173,11 +172,5 @@ public class CommentService {
 
     private void decrementReviewCommentCount(Review review) {
         reviewRepository.decrementCommentCount(review.getId());
-    }
-
-    private void sendCommentNotificationIfNeeded(User commenter, Review review, Comment comment) {
-        if (!commenter.getId().equals(review.getUser().getId())) {
-            notificationService.createCommentNotification(commenter, review, comment.getContent());
-        }
     }
 }
