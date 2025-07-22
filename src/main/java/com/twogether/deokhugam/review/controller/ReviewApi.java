@@ -52,7 +52,7 @@ public interface ReviewApi {
             ),
             @ApiResponse(
                     responseCode = "500", description = "서버 내부 오류",
-                    content = @Content(schema = @Schema(implementation = ReviewDto.class))
+                    content = @Content(examples = @ExampleObject(value = "리뷰 등록 중 서버 오류가 발생했습니다."))
             )}
 
     )
@@ -82,7 +82,7 @@ public interface ReviewApi {
             ),
             @ApiResponse(
                     responseCode = "500", description = "서버 내부 오류",
-                    content = @Content(schema = @Schema(implementation = ReviewDto.class))
+                    content = @Content(examples = @ExampleObject(value = "리뷰 상세 조회 중 서버 오류가 발생했습니다."))
             )
     })
     @GetMapping("/{reviewId}")
@@ -116,7 +116,7 @@ public interface ReviewApi {
             ),
             @ApiResponse(
                     responseCode = "500", description = "서버 내부 오류",
-                    content = @Content(schema = @Schema(implementation = CursorPageResponseDto.class))
+                    content = @Content(examples = @ExampleObject(value = "리뷰 목록 조회 중 서버 오류가 발생했습니다."))
             )
     })
     @GetMapping
@@ -194,7 +194,7 @@ public interface ReviewApi {
             ),
             @ApiResponse(
                     responseCode = "500", description = "서버 내부 오류",
-                    content = @Content(schema = @Schema(implementation = ReviewDto.class))
+                    content = @Content(examples = @ExampleObject(value = "리뷰 수정 중 서버 오류가 발생했습니다."))
             )
     })
     @PatchMapping("/{reviewId}")
@@ -237,7 +237,7 @@ public interface ReviewApi {
             ),
             @ApiResponse(
                     responseCode = "500", description = "서버 내부 오류",
-                    content = @Content(examples = @ExampleObject(value = "리뷰 삭제 중 서버 오류가 발생했습니다."))
+                    content = @Content(examples = @ExampleObject(value = "리뷰 논리 삭제 중 서버 오류가 발생했습니다."))
             )
     })
     @DeleteMapping("/{reviewId}")
@@ -276,7 +276,7 @@ public interface ReviewApi {
             ),
             @ApiResponse(
                     responseCode = "500", description = "서버 내부 오류",
-                    content = @Content(examples = @ExampleObject(value = "리뷰 삭제 중 서버 오류가 발생했습니다."))
+                    content = @Content(examples = @ExampleObject(value = "리뷰 물리 삭제 중 서버 오류가 발생했습니다."))
             )
     })
     @DeleteMapping("/{reviewId}/hard")
