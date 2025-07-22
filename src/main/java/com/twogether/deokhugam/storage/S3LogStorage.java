@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -14,6 +15,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
 @Slf4j
 @Component
+@Profile("prod")
 public class S3LogStorage {
     private final S3Client s3Client;
 
