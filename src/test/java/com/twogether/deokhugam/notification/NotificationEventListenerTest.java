@@ -1,6 +1,8 @@
 package com.twogether.deokhugam.notification;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -91,5 +93,43 @@ class NotificationEventListenerTest {
 
         // then
         verify(notificationService).createRankingNotification(user, review);
+    }
+
+    @Test
+    void 댓글_작성자가_작성자_본인이면_알림이_생성되지_않는다() {
+        // given
+        UUID id = UUID.randomUUID();
+        User sameUser = mock(User.class);
+        when(sameUser.getId()).thenReturn(id);
+
+        Review review = mock(Review.class);
+        when(review.getUser()).thenReturn(sameUser);
+
+        CommentCreatedEvent event = new CommentCreatedEvent(sameUser, review, "자기 댓글");
+
+        // when
+        notificationEventListener.handle(event);
+
+        // then
+        verify(notificationService, never()).createCommentNotification(any(), any(), any());
+    }
+
+    @Test
+    void 리뷰_좋아요_작성자가_본인이면_알림이_생성되지_않는다() {
+        // given
+        UUID id = UUID.randomUUID();
+        User sameUser = mock(User.class);
+        when(sameUser.getId()).thenReturn(id);
+
+        Review review = mock(Review.class);
+        when(review.getUser()).thenReturn(sameUser);
+
+        ReviewLikedEvent event = new ReviewLikedEvent(sameUser, review);
+
+        // when
+        notificationEventListener.handle(event);
+
+        // then
+        verify(notificationService, never()).createLikeNotification(any(), any());
     }
 }
