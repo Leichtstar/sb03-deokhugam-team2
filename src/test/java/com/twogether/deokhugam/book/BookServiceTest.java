@@ -9,7 +9,7 @@ import com.twogether.deokhugam.book.dto.BookDto;
 import com.twogether.deokhugam.book.dto.request.BookCreateRequest;
 import com.twogether.deokhugam.book.entity.Book;
 import com.twogether.deokhugam.book.repository.BookRepository;
-import com.twogether.deokhugam.book.service.LocalBookService;
+import com.twogether.deokhugam.book.service.BookServiceImpl;
 import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ class BookServiceTest {
   private BookRepository bookRepository;
 
   @InjectMocks
-  private LocalBookService bookService;
+  private BookServiceImpl bookService;
 
   @Test
   @DisplayName("ISBN,썸네일 없이 도서 정보를 등록")

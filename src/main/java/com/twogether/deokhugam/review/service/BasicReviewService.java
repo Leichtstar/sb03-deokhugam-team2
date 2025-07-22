@@ -52,6 +52,8 @@ public class BasicReviewService implements ReviewService{
     private final ReviewCursorHelper reviewCursorHelper;
     // 알림용
     private final ApplicationEventPublisher eventPublisher;
+    private final BookService bookService;
+    private final NotificationService notificationService;
 
     // 리뷰 생성
     @Override
@@ -84,7 +86,6 @@ public class BasicReviewService implements ReviewService{
         bookRepository.save(reviewedBook);
 
         reviewLikeRepository.save(reviewLike);
-
         log.info("[BasicReviewService] 리뷰 등록 성공");
 
         return reviewMapper.toDto(review, false);
@@ -169,7 +170,6 @@ public class BasicReviewService implements ReviewService{
         boolean likeByMe = reviewLikeRepository.findByUserIdAndReviewId(requestUserId, reviewId)
                 .map(ReviewLike::isLiked)
                 .orElse(false);
-
         return reviewMapper.toDto(review, likeByMe);
     }
 

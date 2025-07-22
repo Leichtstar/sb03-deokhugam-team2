@@ -39,35 +39,24 @@ public class JpaBookScoreReader implements ItemReader<BookScoreDto> {
     }
 
     private List<BookScoreDto> fetchBookScores() {
-        RankingPeriod period;
-        LocalDateTime now;
-        try {
-            period = RankingPeriod.valueOf(periodString);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("잘못된 RankingPeriod 값입니다: " + periodString, e);
-        }
-        try {
-            now = LocalDateTime.parse(nowString);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("잘못된 LocalDateTime 형식입니다: " + nowString, e);
-        }
+        RankingPeriod period = RankingPeriod.valueOf(periodString);
+        LocalDateTime now = LocalDateTime.parse(nowString);
 
-        LocalDateTime start = period.getStartTime(now);
-        LocalDateTime end = period.getEndTime(now);
-
-        Instant startInstant = start.atZone(ZoneId.of("UTC")).toInstant();
-        Instant endInstant = end.atZone(ZoneId.of("UTC")).toInstant();
+        Instant start = period.getStartTime(now).atZone(ZoneId.of("UTC")).toInstant();
+        Instant end = period.getEndTime(now).atZone(ZoneId.of("UTC")).toInstant();
 
         return entityManager.createQuery("""
-            SELECT r.book.id, r.book.title, r.book.author, r.book.thumbnailUrl, COUNT(r), COALESCE(AVG(r.rating), 0)
+            SELECT b.id, b.title, b.author, b.thumbnailUrl,
+                   COUNT(r), COALESCE(AVG(r.rating), 0.0)
             FROM Review r
+            JOIN r.book b
             WHERE r.createdAt >= :start AND r.createdAt < :end
-              AND r.isDeleted = false AND r.book.isDeleted = false
-            GROUP BY r.book.id, r.book.title, r.book.author, r.book.thumbnailUrl
+              AND r.isDeleted = false AND b.isDeleted = false
+            GROUP BY b.id, b.title, b.author, b.thumbnailUrl
             ORDER BY COUNT(r) DESC, AVG(r.rating) DESC
         """, Object[].class)
-            .setParameter("start", startInstant)
-            .setParameter("end", endInstant)
+            .setParameter("start", start)
+            .setParameter("end", end)
             .setMaxResults(1000)
             .getResultList()
             .stream()

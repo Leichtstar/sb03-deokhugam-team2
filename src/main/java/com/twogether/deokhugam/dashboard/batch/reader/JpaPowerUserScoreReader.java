@@ -3,7 +3,6 @@ package com.twogether.deokhugam.dashboard.batch.reader;
 import com.twogether.deokhugam.dashboard.batch.model.PowerUserScoreDto;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -13,7 +12,6 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.support.IteratorItemReader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -41,47 +39,35 @@ public class JpaPowerUserScoreReader implements ItemReader<PowerUserScoreDto> {
     }
 
     private List<PowerUserScoreDto> fetchPowerUserScores() {
-        RankingPeriod period;
-        LocalDateTime now;
-        try {
-            period = RankingPeriod.valueOf(periodString);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("잘못된 RankingPeriod 값입니다: " + periodString, e);
-        }
-        try {
-            now = LocalDateTime.parse(nowString);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("잘못된 LocalDateTime 형식입니다: " + nowString, e);
-        }
+        RankingPeriod period = RankingPeriod.valueOf(periodString);
+        LocalDateTime now = LocalDateTime.parse(nowString);
 
-        LocalDateTime start = period.getStartTime(now);
-        LocalDateTime end = period.getEndTime(now);
-
-        Instant startInstant = start.atZone(ZoneId.of("UTC")).toInstant();
-        Instant endInstant = end.atZone(ZoneId.of("UTC")).toInstant();
+        Instant start = period.getStartTime(now).atZone(ZoneId.of("UTC")).toInstant();
+        Instant end = period.getEndTime(now).atZone(ZoneId.of("UTC")).toInstant();
 
         return entityManager.createQuery("""
-            SELECT r.user.id, r.userNickName,
-                   SUM(COALESCE(r.likeCount, 0) * 0.3 + COALESCE(r.commentCount, 0) * 0.7),
-                   SUM(COALESCE(r.likeCount, 0)),
-                   SUM(COALESCE(r.commentCount, 0))
+            SELECT u.id, u.nickname,
+                   COALESCE(SUM(COALESCE(r.likeCount, 0) * 0.3 + COALESCE(r.commentCount, 0) * 0.7), 0.0),
+                   COALESCE(SUM(COALESCE(r.likeCount, 0)), 0),
+                   COALESCE(SUM(COALESCE(r.commentCount, 0)), 0)
             FROM Review r
+            JOIN r.user u
             WHERE r.createdAt >= :start AND r.createdAt < :end
               AND r.isDeleted = false
-            GROUP BY r.user.id, r.userNickName
+            GROUP BY u.id, u.nickname
             ORDER BY 3 DESC
         """, Object[].class)
-            .setParameter("start", startInstant)
-            .setParameter("end", endInstant)
+            .setParameter("start", start)
+            .setParameter("end", end)
             .setMaxResults(1000)
             .getResultList()
             .stream()
             .map(row -> new PowerUserScoreDto(
                 (UUID) row[0],
                 (String) row[1],
-                row[2] != null ? ((Number) row[2]).doubleValue() : 0.0,
-                row[3] != null ? ((Number) row[3]).longValue() : 0L,
-                row[4] != null ? ((Number) row[4]).longValue() : 0L,
+                ((Number) row[2]).doubleValue(),
+                ((Number) row[3]).longValue(),
+                ((Number) row[4]).longValue(),
                 period
             ))
             .toList();
