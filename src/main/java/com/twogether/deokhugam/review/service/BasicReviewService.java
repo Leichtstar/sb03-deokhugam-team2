@@ -82,7 +82,6 @@ public class BasicReviewService implements ReviewService{
         bookRepository.save(reviewedBook);
 
         reviewLikeRepository.save(reviewLike);
-        bookService.updateReviewStats(request.bookId());
         log.info("[BasicReviewService] 리뷰 등록 성공");
 
         return reviewMapper.toDto(review, false);
@@ -189,7 +188,6 @@ public class BasicReviewService implements ReviewService{
         bookRepository.save(reviewedBook);
 
         reviewRepository.save(review);
-        bookService.updateReviewStats(review.getBook().getId());
 
         log.info("[BasicReviewService]: 리뷰 논리 삭제 완료");
     }

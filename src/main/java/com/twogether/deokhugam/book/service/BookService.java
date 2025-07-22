@@ -18,5 +18,4 @@ public interface BookService {
     BookDto updateBook(UUID bookId, BookUpdateRequest request, MultipartFile thumbnailImg);
     void deleteBook(UUID bookId);
     void deleteBookHard(UUID bookId);
-	void updateReviewStats(UUID bookId);
 }
