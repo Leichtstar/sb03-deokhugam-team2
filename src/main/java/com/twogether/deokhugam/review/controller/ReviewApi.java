@@ -59,7 +59,7 @@ public interface ReviewApi {
     @PostMapping
     ResponseEntity<ReviewDto> createReview(
             @Parameter(description = "리뷰 생성 정보")
-            ReviewCreateRequest request
+            @Valid @RequestBody ReviewCreateRequest request
     );
 
 
