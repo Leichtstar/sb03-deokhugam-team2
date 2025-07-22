@@ -24,7 +24,7 @@ class PowerUserScoreProcessorTest {
     @BeforeEach
     void setUp() {
         em = mock(EntityManager.class);
-        processor = new PowerUserScoreProcessor(em, RankingPeriod.DAILY);
+        processor = new PowerUserScoreProcessor(em);
     }
 
     @Test
@@ -38,9 +38,10 @@ class PowerUserScoreProcessorTest {
         PowerUserScoreDto dto = new PowerUserScoreDto(
             userId,
             "활동왕",
-            30.0, // reviewScoreSum
-            5L,   // likeCount
-            10L   // commentCount
+            30.0,
+            5L,
+            10L,
+            RankingPeriod.DAILY
         );
 
         // when
@@ -56,7 +57,7 @@ class PowerUserScoreProcessorTest {
 
         double expectedScore = 30.0 * 0.5 + 5 * 0.2 + 10 * 0.3;
         assertThat(result.getScore()).isEqualTo(expectedScore);
-        assertThat(result.getPeriod()).isEqualTo(RankingPeriod.DAILY);
+        assertThat(result.getPeriod()).isEqualTo(dto.period());
         assertThat(result.getRank()).isEqualTo(0);
         assertThat(result.getCreatedAt()).isNotNull();
     }
@@ -72,7 +73,8 @@ class PowerUserScoreProcessorTest {
             "비회원",
             20.0,
             0L,
-            0L
+            0L,
+            RankingPeriod.DAILY
         );
 
         PowerUserRanking result = processor.process(dto);

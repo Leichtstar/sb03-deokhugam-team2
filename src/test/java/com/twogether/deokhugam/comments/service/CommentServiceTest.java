@@ -2,38 +2,42 @@ package com.twogether.deokhugam.comments.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.twogether.deokhugam.comments.dto.CommentCreateRequest;
 import com.twogether.deokhugam.comments.dto.CommentResponse;
 import com.twogether.deokhugam.comments.dto.CommentUpdateRequest;
 import com.twogether.deokhugam.comments.entity.Comment;
+import com.twogether.deokhugam.comments.exception.CommentAlreadyDeletedException;
 import com.twogether.deokhugam.comments.exception.CommentForbiddenException;
 import com.twogether.deokhugam.comments.exception.CommentNotFoundException;
 import com.twogether.deokhugam.comments.mapper.CommentMapper;
 import com.twogether.deokhugam.comments.repository.CommentRepository;
+import com.twogether.deokhugam.notification.event.CommentCreatedEvent;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
 import com.twogether.deokhugam.user.entity.User;
 import com.twogether.deokhugam.user.repository.UserRepository;
 import jakarta.validation.Validator;
-
 import java.time.LocalDateTime;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,6 +57,10 @@ class CommentServiceTest {
     private UserRepository userRepository;
 
     private Validator validator;
+
+    // 알림 이벤트
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private CommentService commentService;
@@ -115,7 +123,7 @@ class CommentServiceTest {
         var violations = validator.validate(invalidRequest);
         assertFalse(violations.isEmpty());
         assertTrue(violations.stream()
-            .anyMatch(violation -> violation.getMessage().equals("내용은 200자를 초과할 수 없습니다.")));
+            .anyMatch(violation -> violation.getMessage().equals("댓글은 200자를 초과할 수 없습니다.")));
     }
 
     @Test
@@ -161,6 +169,7 @@ class CommentServiceTest {
         when(reviewRepository.findById(any())).thenReturn(Optional.of(mockReview));
         when(userRepository.findById(any())).thenReturn(Optional.of(mockUser));
         when(commentRepository.save(any(Comment.class))).thenReturn(mockComment);
+
         when(commentMapper.toResponse(any(Comment.class))).thenReturn(expectedResponse);
 
         // when
@@ -171,7 +180,9 @@ class CommentServiceTest {
         verify(reviewRepository, times(1)).findById(any());
         verify(userRepository, times(1)).findById(any());
         verify(commentRepository, times(1)).save(any(Comment.class));
+        verify(reviewRepository, times(1)).incrementCommentCount(commentCreateRequest.reviewId());
         verify(commentMapper, times(1)).toResponse(any(Comment.class));
+        verify(eventPublisher).publishEvent(any(CommentCreatedEvent.class));
     }
 
 
@@ -306,11 +317,18 @@ class CommentServiceTest {
     void deleteLogical_success() {
         UUID commentId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
+        UUID reviewId = UUID.randomUUID();
+
         User mockUser = mock(User.class);
         when(mockUser.getId()).thenReturn(userId);
 
+        Review mockReview = mock(Review.class);
+        when(mockReview.getId()).thenReturn(reviewId);
+
         Comment mockComment = mock(Comment.class);
         when(mockComment.getUser()).thenReturn(mockUser);
+        when(mockComment.getReview()).thenReturn(mockReview);
+
         when(mockComment.getIsDeleted()).thenReturn(false);
 
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(mockComment));
@@ -319,6 +337,7 @@ class CommentServiceTest {
         commentService.deleteLogical(commentId, userId);
 
         // then
+        verify(reviewRepository).decrementCommentCount(reviewId);
         verify(commentRepository).logicalDeleteById(commentId);
     }
 
@@ -334,7 +353,6 @@ class CommentServiceTest {
     }
 
 
-    @MockitoSettings(strictness = Strictness.LENIENT)
     @Test
     @DisplayName("논리삭제 - 타인 댓글이면 권한 예외 발생")
     void deleteLogical_forbidden() {
@@ -346,12 +364,11 @@ class CommentServiceTest {
 
         Comment mockComment = mock(Comment.class);
         when(mockComment.getUser()).thenReturn(mockUser);
-        when(mockComment.getIsDeleted()).thenReturn(false);
 
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(mockComment));
 
         assertThatThrownBy(() -> commentService.deleteLogical(commentId, attackerId))
-            .isInstanceOf(CommentForbiddenException.class);
+                .isInstanceOf(CommentForbiddenException.class);
     }
 
 
@@ -370,7 +387,7 @@ class CommentServiceTest {
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(mockComment));
 
         assertThatThrownBy(() -> commentService.deleteLogical(commentId, userId))
-            .isInstanceOf(IllegalStateException.class)
+            .isInstanceOf(CommentAlreadyDeletedException.class)
             .hasMessageContaining("이미 삭제된 댓글입니다");
     }
 
@@ -379,6 +396,34 @@ class CommentServiceTest {
     void deletePhysical_success() {
         UUID commentId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
+        UUID reviewId = UUID.randomUUID();
+
+        User mockUser = mock(User.class);
+        when(mockUser.getId()).thenReturn(userId);
+
+        Review mockReview = mock(Review.class);
+        when(mockReview.getId()).thenReturn(reviewId);
+
+        Comment mockComment = mock(Comment.class);
+        when(mockComment.getUser()).thenReturn(mockUser);
+        when(mockComment.getReview()).thenReturn(mockReview);
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(mockComment));
+        when(mockComment.getIsDeleted()).thenReturn(false);
+
+        commentService.deletePhysical(commentId, userId);
+
+        verify(reviewRepository).decrementCommentCount(reviewId);
+        verify(commentRepository).deleteById(commentId);
+    }
+
+    @Test
+    @DisplayName("댓글이 논리삭제 되어 있다면 comment count 감소 함수를 호출하지 않아야 한다.")
+    void shouldNotCall_decrementCommentCount_whenAlreadyLogicalDeleted() {
+        UUID commentId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        UUID reviewId = UUID.randomUUID();
+
         User mockUser = mock(User.class);
         when(mockUser.getId()).thenReturn(userId);
 
@@ -386,9 +431,11 @@ class CommentServiceTest {
         when(mockComment.getUser()).thenReturn(mockUser);
 
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(mockComment));
+        when(mockComment.getIsDeleted()).thenReturn(true);
 
         commentService.deletePhysical(commentId, userId);
 
+        verify(reviewRepository, never()).decrementCommentCount(reviewId);
         verify(commentRepository).deleteById(commentId);
     }
 

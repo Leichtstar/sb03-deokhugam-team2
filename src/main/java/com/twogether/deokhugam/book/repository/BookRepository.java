@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -201,5 +202,13 @@ public interface BookRepository extends JpaRepository<Book, UUID> {
 		Pageable pageable
 	);
 
+	@Modifying
+	@Query("""
+    UPDATE Book b SET 
+    	b.reviewCount = (SELECT COUNT(r) FROM Review r WHERE r.book.id = :bookId AND r.isDeleted = false),
+        b.rating = (SELECT COALESCE(AVG(r.rating * 1.0), 0) FROM Review r WHERE r.book.id = :bookId AND r.isDeleted = false)
+    WHERE b.id = :bookId
+""")
+	void updateBookReviewStats(@Param("bookId") UUID bookId);
 
 }

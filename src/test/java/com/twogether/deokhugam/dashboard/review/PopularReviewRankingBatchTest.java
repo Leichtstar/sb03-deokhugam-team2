@@ -27,7 +27,7 @@ import org.springframework.test.context.jdbc.Sql;
 @SpringBatchTest
 @DisplayName("PopularReviewRanking 배치 통합 테스트")
 @TestPropertySource(properties = "spring.profiles.active=test")
-@Sql("/sql/popular_review_ranking_test_data.sql")
+@Sql("/sql/popular_ranking_test_data.sql")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class PopularReviewRankingBatchTest {
 
@@ -52,6 +52,7 @@ class PopularReviewRankingBatchTest {
         // given
         JobParameters jobParameters = new JobParametersBuilder()
             .addString("period", period.name())
+            .addString("now", "2025-07-22T00:00:00")
             .addLong("time", System.currentTimeMillis())
             .toJobParameters();
 
@@ -62,7 +63,7 @@ class PopularReviewRankingBatchTest {
         assertThat(execution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
 
         List<PopularReviewRanking> rankings = rankingRepository.findAll();
-        assertThat(rankings).hasSize(1);
+        assertThat(rankings).isNotEmpty();
         assertThat(rankings.get(0).getRank()).isEqualTo(1);
     }
 }

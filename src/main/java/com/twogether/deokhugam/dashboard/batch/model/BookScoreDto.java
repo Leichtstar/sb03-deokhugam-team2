@@ -1,5 +1,6 @@
 package com.twogether.deokhugam.dashboard.batch.model;
 
+import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import java.util.UUID;
 
 public record BookScoreDto(
@@ -8,7 +9,8 @@ public record BookScoreDto(
     String author,
     String thumbnailUrl,
     long reviewCount,
-    double averageRating
+    double averageRating,
+    RankingPeriod period
 ) {
 
     /**

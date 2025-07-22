@@ -25,6 +25,9 @@ public interface ReviewService {
     // 리뷰 논리 삭제
     void deleteReviewSoft(UUID reviewId, UUID requestUserId);
 
+    // 리뷰 물리 삭제
+    void deleteReviewHard(UUID reviewId, UUID requestUserId);
+
     // 리뷰 좋아요 기능
     ReviewLikeDto reviewLike(UUID reviewId, UUID userId);
 }

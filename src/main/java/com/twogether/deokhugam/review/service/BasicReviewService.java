@@ -1,8 +1,11 @@
 package com.twogether.deokhugam.review.service;
 
 import com.twogether.deokhugam.book.entity.Book;
+import com.twogether.deokhugam.book.exception.BookNotFoundException;
 import com.twogether.deokhugam.book.repository.BookRepository;
+import com.twogether.deokhugam.book.service.BookService;
 import com.twogether.deokhugam.common.dto.CursorPageResponseDto;
+import com.twogether.deokhugam.notification.event.ReviewLikedEvent;
 import com.twogether.deokhugam.notification.service.NotificationService;
 import com.twogether.deokhugam.review.dto.ReviewDto;
 import com.twogether.deokhugam.review.dto.ReviewLikeDto;
@@ -28,6 +31,7 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -46,6 +50,9 @@ public class BasicReviewService implements ReviewService{
     private final ReviewMapper reviewMapper;
     private final ReviewLikeMapper reviewLikeMapper;
     private final ReviewCursorHelper reviewCursorHelper;
+    // 알림용
+    private final ApplicationEventPublisher eventPublisher;
+    private final BookService bookService;
     private final NotificationService notificationService;
 
     // 리뷰 생성
@@ -58,7 +65,7 @@ public class BasicReviewService implements ReviewService{
         }
 
         // 리뷰 작성하려는 책, 유저
-        Book reviewdBook = bookRepository.findById(request.bookId())
+        Book reviewedBook = bookRepository.findById(request.bookId())
                 .orElseThrow(
                         () -> new NoSuchElementException("책을 찾을 수 없습니다. " + request.bookId()));
 
@@ -66,7 +73,7 @@ public class BasicReviewService implements ReviewService{
                 .orElseThrow(
                         () -> new NoSuchElementException("사용자를 찾을 수 없습니다. " + request.userId()));
 
-        Review review = new Review(reviewdBook, reviewer, request.content(), request.rating());
+        Review review = new Review(reviewedBook, reviewer, request.content(), request.rating());
         reviewRepository.save(review);
 
         ReviewLike reviewLike = new ReviewLike(
@@ -74,8 +81,11 @@ public class BasicReviewService implements ReviewService{
                 reviewer,
                 false
         );
-        reviewLikeRepository.save(reviewLike);
 
+        bookRepository.updateBookReviewStats(request.bookId());
+        bookRepository.save(reviewedBook);
+
+        reviewLikeRepository.save(reviewLike);
         log.info("[BasicReviewService] 리뷰 등록 성공");
 
         return reviewMapper.toDto(review, false);
@@ -160,24 +170,52 @@ public class BasicReviewService implements ReviewService{
         boolean likeByMe = reviewLikeRepository.findByUserIdAndReviewId(requestUserId, reviewId)
                 .map(ReviewLike::isLiked)
                 .orElse(false);
-
         return reviewMapper.toDto(review, likeByMe);
     }
 
     // 리뷰 논리 삭제
     @Override
+    @Transactional
     public void deleteReviewSoft(UUID reviewId, UUID requestUserId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
+
+        Book reviewedBook = bookRepository.findById(review.getBook().getId())
+                .orElseThrow(BookNotFoundException::new);
 
         if (!review.getUser().getId().equals(requestUserId)){
             throw new ReviewNotOwnedException();
         }
         review.updateIsDelete(true);
-        // 댓글 논리 삭제 부분도 추가?
+
+        bookRepository.updateBookReviewStats(reviewedBook.getId());
+        bookRepository.save(reviewedBook);
+
         reviewRepository.save(review);
 
         log.info("[BasicReviewService]: 리뷰 논리 삭제 완료");
+    }
+
+    // 리뷰 물리 삭제
+    @Override
+    @Transactional
+    public void deleteReviewHard(UUID reviewId, UUID requestUserId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ReviewNotFoundException(reviewId));
+
+        Book reviewedBook = bookRepository.findById(review.getBook().getId())
+                .orElseThrow(BookNotFoundException::new);
+
+        if (!review.getUser().getId().equals(requestUserId)){
+            throw new ReviewNotOwnedException();
+        }
+
+        reviewRepository.delete(review);
+
+        bookRepository.updateBookReviewStats(reviewedBook.getId());
+        bookRepository.save(reviewedBook);
+
+        log.info("[BasicReviewService]: 리뷰 물리 삭제 완료");
     }
 
     // 리뷰 좋아요 기능
@@ -206,10 +244,8 @@ public class BasicReviewService implements ReviewService{
             reviewLikeRepository.save(newReviewLike);
             reviewRepository.save(review);
 
-            // 좋아요 알림 생성 트리거
-            if (!review.getUser().getId().equals(userId)) {
-                notificationService.createLikeNotification(reviewer, review);
-            }
+            // 리뷰 이벤트 발행
+            eventPublisher.publishEvent(new ReviewLikedEvent(reviewer, review));
 
             return reviewLikeMapper.toDto(newReviewLike);
         }
@@ -228,6 +264,9 @@ public class BasicReviewService implements ReviewService{
                 // 좋아요가 false 라면
                 reviewLike.updateLike(true);
                 review.updateLikeCount(review.getLikeCount() + 1);
+
+                // 리뷰 이벤트 발행
+                eventPublisher.publishEvent(new ReviewLikedEvent(reviewLike.getUser(), review));
             }
 
             reviewLikeRepository.save(reviewLike);

@@ -28,7 +28,7 @@ import org.springframework.test.context.jdbc.Sql;
 @SpringBatchTest
 @DisplayName("PowerUserRanking 배치 통합 테스트")
 @TestPropertySource(properties = "spring.profiles.active=test")
-@Sql("/sql/power_user_ranking_test_data.sql")
+@Sql("/sql/popular_ranking_test_data.sql")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class PowerUserRankingBatchTest {
 
@@ -53,6 +53,7 @@ class PowerUserRankingBatchTest {
         // given
         JobParameters jobParameters = new JobParametersBuilder()
             .addString("period", period.name())
+            .addString("now", "2025-07-22T00:00:00")
             .addLong("time", System.currentTimeMillis())
             .toJobParameters();
 
@@ -65,17 +66,21 @@ class PowerUserRankingBatchTest {
         List<PowerUserRanking> rankings = rankingRepository.findAllByPeriod(period);
         rankings.sort(Comparator.comparing(PowerUserRanking::getRank));
 
-        assertThat(rankings).allMatch(ranking -> ranking.getPeriod() == period);
         assertThat(rankings).isNotEmpty();
         assertThat(rankings).allMatch(ranking -> ranking.getPeriod() == period);
-
-        // 첫 번째 랭킹이 1위인지 확인
         assertThat(rankings.get(0).getRank()).isEqualTo(1);
-        // 랭킹이 비내림차순으로 정렬되어 있는지 확인
         for (int i = 1; i < rankings.size(); i++) {
             assertThat(rankings.get(i).getRank()).isGreaterThanOrEqualTo(rankings.get(i - 1).getRank());
         }
 
-        assertThat(rankings).hasSize(2);
+        if (period == RankingPeriod.DAILY) {
+            assertThat(rankings).hasSize(1);
+        } else if (period == RankingPeriod.WEEKLY) {
+            assertThat(rankings).hasSize(1);
+        } else if (period == RankingPeriod.MONTHLY) {
+            assertThat(rankings).hasSize(2);
+        } else if (period == RankingPeriod.ALL_TIME) {
+            assertThat(rankings).hasSize(3);
+        }
     }
 }

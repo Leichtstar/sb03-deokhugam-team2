@@ -2,6 +2,7 @@ package com.twogether.deokhugam.comments.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Column;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -11,11 +12,12 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.user.entity.User;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(    name = "comments",
@@ -24,6 +26,7 @@ import java.util.UUID;
         @Index(name = "idx_comments_createdAt_id",       columnList = "created_at, id")
     }
 )
+@EntityListeners(AuditingEntityListener.class)
 public class Comment {
     @Id
     @GeneratedValue
@@ -41,12 +44,12 @@ public class Comment {
     @Column(length = 200, nullable = false)
     private String content;
 
+    @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
-    @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
-    @UpdateTimestamp
     private LocalDateTime updatedAt;
 
     @Column(name = "is_deleted", nullable = false)
@@ -63,12 +66,10 @@ public class Comment {
 
     public void editContent(String newContent) {
         this.content = newContent;
-        this.updatedAt = LocalDateTime.now();
     }
 
     public void delete() {
         this.isDeleted = true;
-        this.updatedAt = LocalDateTime.now();
     }
 
     public UUID getId() { return id; }

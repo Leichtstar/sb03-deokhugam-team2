@@ -70,4 +70,12 @@ public class Notification {
     public void confirm() {
         this.confirmed = true;
     }
+
+    public void setConfirmed(boolean confirmed) {
+        this.confirmed = confirmed;
+    }
+
+    protected void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }

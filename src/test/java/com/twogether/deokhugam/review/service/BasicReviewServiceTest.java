@@ -49,6 +49,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -79,6 +80,10 @@ public class BasicReviewServiceTest {
 
     @Mock
     private ReviewCursorHelper reviewCursorHelper;
+
+    // 알림 이벤트
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
    @InjectMocks
    private BasicReviewService basicReviewService;
@@ -164,7 +169,10 @@ public class BasicReviewServiceTest {
 
         // Then
         assertEquals(expectedDto, result);
+
         verify(reviewRepository).save(any(Review.class));
+        verify(bookRepository).updateBookReviewStats(bookId);
+        verify(bookRepository).save(any(Book.class));
         verify(reviewLikeRepository).save(any(ReviewLike.class));
     }
 
@@ -411,14 +419,22 @@ public class BasicReviewServiceTest {
     void shouldSoftDelete_whenUserIsAuthor(){
         // Given
         User mockUser = mock(User.class);
+        Book mockBook = mock(Book.class);
 
         UUID mockReviewId = UUID.randomUUID();
         UUID requestUserId = UUID.randomUUID();
+        UUID mockBookId = UUID.randomUUID();
 
-        Review deletedReview = new Review(testBook, testUser, "논리 삭제된 리뷰", 5);
+        Review deletedReview = new Review(mockBook, testUser, "논리 삭제된 리뷰", 5);
         Review spyReview = spy(deletedReview); // 실제 동작하는 spy 객체
 
         when(reviewRepository.findById(mockReviewId)).thenReturn(Optional.of(spyReview));
+
+        when(spyReview.getBook()).thenReturn(mockBook);
+        when(mockBook.getId()).thenReturn(mockBookId);
+
+        when(bookRepository.findById(mockBookId)).thenReturn(Optional.of(mockBook));
+
         when(spyReview.getUser()).thenReturn(mockUser);
         when(mockUser.getId()).thenReturn(requestUserId);
 
@@ -427,7 +443,9 @@ public class BasicReviewServiceTest {
 
         // Then
         assertTrue(spyReview.isDeleted());
+        verify(bookRepository).updateBookReviewStats(mockBookId);
         verify(reviewRepository).save(spyReview);
+        verify(bookRepository).save(mockBook);
 
         // mock으로 만든 Review는 가짜 객체라서 내부 필드를 변경하지 않음
     }
@@ -438,21 +456,93 @@ public class BasicReviewServiceTest {
         // Given
         Review mockReview = mock(Review.class);
         User mockUser = mock(User.class);
+        Book mockBook = mock(Book.class);
 
         UUID mockReviewId = UUID.randomUUID();
         UUID mockUserId = UUID.randomUUID();
         UUID requestUserId = UUID.randomUUID();
+        UUID mockBookId = UUID.randomUUID();
 
         when(reviewRepository.findById(mockReviewId)).thenReturn(Optional.of(mockReview));
         when(mockReview.getUser()).thenReturn(mockUser);
         when(mockUser.getId()).thenReturn(mockUserId);
+
+        when(mockReview.getBook()).thenReturn(mockBook);
+        when(mockBook.getId()).thenReturn(mockBookId);
+
+        when(bookRepository.findById(mockBookId)).thenReturn(Optional.of(mockBook));
 
         assertThrows(ReviewNotOwnedException.class, () -> {
             basicReviewService.deleteReviewSoft(mockReviewId, requestUserId);
         });
 
         verify(mockReview, never()).updateIsDelete(true);
+        verify(bookRepository, never()).updateBookReviewStats(mockBookId);
         verify(reviewRepository, never()).save(mockReview);
+        verify(bookRepository, never()).save(mockBook);
+    }
+
+
+    @Test
+    @DisplayName("작성자는 리뷰를 물리 삭제 할 수 있다.")
+    void shouldHardDelete_whenUserIsAuthor(){
+        // Given
+        UUID mockReviewId = UUID.randomUUID();
+        UUID requestUserId = UUID.randomUUID();
+        UUID mockBookId = UUID.randomUUID();
+
+        User mockUser = mock(User.class);
+        when(mockUser.getId()).thenReturn(requestUserId);
+
+        Book mockBook = mock(Book.class);
+        when(mockBook.getId()).thenReturn(mockBookId);
+
+        Review review = mock(Review.class);
+        when(review.getBook()).thenReturn(mockBook);
+        when(review.getUser()).thenReturn(mockUser);
+
+        when(reviewRepository.findById(mockReviewId)).thenReturn(Optional.of(review));
+        when(bookRepository.findById(mockBookId)).thenReturn(Optional.of(mockBook));
+
+        // When
+        basicReviewService.deleteReviewHard(mockReviewId, requestUserId);
+
+        // Then
+        verify(bookRepository).updateBookReviewStats(mockBookId);
+        verify(reviewRepository).delete(review);
+        verify(bookRepository).save(mockBook);
+
+    }
+
+    @Test
+    @DisplayName("작성자가 아닌 사람은 리뷰를 물리 삭제 할 수 없다.")
+    void cannotHardDelete_whenUserIsNotAuthor() {
+        // Given
+        UUID mockReviewId = UUID.randomUUID();
+        UUID mockUserId = UUID.randomUUID();
+        UUID requestUserId = UUID.randomUUID();
+        UUID mockBookId = UUID.randomUUID();
+
+        User mockUser = mock(User.class);
+        when(mockUser.getId()).thenReturn(mockUserId);
+
+        Book mockBook = mock(Book.class);
+        when(mockBook.getId()).thenReturn(mockBookId);
+
+        Review mockReview = mock(Review.class);
+        when(mockReview.getUser()).thenReturn(mockUser);
+        when(mockReview.getBook()).thenReturn(mockBook);
+
+        when(reviewRepository.findById(mockReviewId)).thenReturn(Optional.of(mockReview));
+        when(bookRepository.findById(mockBookId)).thenReturn(Optional.of(mockBook));
+
+        assertThrows(ReviewNotOwnedException.class, () -> {
+            basicReviewService.deleteReviewHard(mockReviewId, requestUserId);
+        });
+
+        verify(bookRepository, never()).updateBookReviewStats(mockBookId);
+        verify(reviewRepository, never()).delete(mockReview);
+        verify(bookRepository, never()).save(mockBook);
     }
 
     @Test

@@ -10,7 +10,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -68,6 +67,7 @@ public class Review {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    @LastModifiedDate
     @Column(name = "updated_at")
     private Instant updatedAt;
 
@@ -91,6 +91,9 @@ public class Review {
 
     public void updateLikeCount(long likeCount){
         this.likeCount = likeCount;
+    }
+
+    public void updateUpdatedAt(){
         this.updatedAt = Instant.now();
     }
 
@@ -109,5 +112,4 @@ public class Review {
             this.isDeleted = isDeleted;
         }
     }
-
 }

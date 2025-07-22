@@ -3,52 +3,78 @@ package com.twogether.deokhugam.dashboard.batch.reader;
 import com.twogether.deokhugam.dashboard.batch.model.ReviewScoreDto;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Iterator;
 import java.util.List;
-import org.springframework.batch.item.support.IteratorItemReader;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.ItemReader;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-public class JpaReviewScoreReader extends IteratorItemReader<ReviewScoreDto> {
+@StepScope
+@Component
+@RequiredArgsConstructor
+public class JpaReviewScoreReader implements ItemReader<ReviewScoreDto> {
 
-    public JpaReviewScoreReader(EntityManager em, RankingPeriod period) {
-        super(fetchReviewScores(em, period));
+    private final EntityManager entityManager;
+
+    @Value("#{jobParameters['period']}")
+    private String periodString;
+
+    @Value("#{jobParameters['now']}")
+    private String nowString;
+
+    private Iterator<ReviewScoreDto> reviewIterator;
+
+    @Override
+    public ReviewScoreDto read() {
+        if (reviewIterator == null) {
+            reviewIterator = fetchReviewScores().iterator();
+        }
+        return reviewIterator.hasNext() ? reviewIterator.next() : null;
     }
 
-    private static List<ReviewScoreDto> fetchReviewScores(EntityManager em, RankingPeriod period) {
-        String jpql = """
-            SELECT new com.twogether.deokhugam.dashboard.batch.model.ReviewScoreDto(
-                r.id,
-                r.user.id,
-                r.userNickName,
-                r.content,
-                r.rating,
-                r.book.id,
-                r.bookTitle,
-                r.bookThumbnailUrl,
-                COALESCE(r.likeCount, 0),
-                COALESCE(r.commentCount, 0)
-            )
+    private List<ReviewScoreDto> fetchReviewScores() {
+        RankingPeriod period = RankingPeriod.valueOf(periodString);
+        LocalDateTime now = LocalDateTime.parse(nowString);
+
+        Instant start = period.getStartTime(now).atZone(ZoneId.of("UTC")).toInstant();
+        Instant end = period.getEndTime(now).atZone(ZoneId.of("UTC")).toInstant();
+
+        return entityManager.createQuery("""
+            SELECT r.id, u.id, u.nickname, r.content,
+                   COALESCE(r.rating, 0.0),
+                   b.id, b.title, b.thumbnailUrl,
+                   COALESCE(r.likeCount, 0), COALESCE(r.commentCount, 0)
             FROM Review r
-            WHERE r.createdAt >= :start
-              AND r.createdAt < :end
+            JOIN r.user u
+            JOIN r.book b
+            WHERE r.createdAt >= :start AND r.createdAt < :end
               AND r.isDeleted = false
             ORDER BY COALESCE(r.likeCount, 0) DESC, COALESCE(r.commentCount, 0) DESC
-        """;
-
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime start = period.getStartTime(now);
-        LocalDateTime end = period.getEndTime(now);
-
-        Instant startInstant = start.atZone(ZoneId.of("UTC")).toInstant();
-        Instant endInstant = end.atZone(ZoneId.of("UTC")).toInstant();
-
-        TypedQuery<ReviewScoreDto> query = em.createQuery(jpql, ReviewScoreDto.class);
-        query.setParameter("start", startInstant);
-        query.setParameter("end", endInstant);
-        query.setMaxResults(1000);
-
-        return query.getResultList();
+        """, Object[].class)
+            .setParameter("start", start)
+            .setParameter("end", end)
+            .setMaxResults(1000)
+            .getResultList()
+            .stream()
+            .map(row -> new ReviewScoreDto(
+                (UUID) row[0],
+                (UUID) row[1],
+                (String) row[2],
+                (String) row[3],
+                ((Number) row[4]).doubleValue(),
+                (UUID) row[5],
+                (String) row[6],
+                (String) row[7],
+                ((Number) row[8]).longValue(),
+                ((Number) row[9]).longValue(),
+                period
+            ))
+            .toList();
     }
 }

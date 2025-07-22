@@ -11,13 +11,9 @@ import org.springframework.batch.item.ItemProcessor;
 public class PowerUserScoreProcessor implements ItemProcessor<PowerUserScoreDto, PowerUserRanking> {
 
     private final EntityManager em;
-    private final RankingPeriod period;
 
-    public PowerUserScoreProcessor(EntityManager em, RankingPeriod period) {
-        if (em == null) throw new IllegalArgumentException("EntityManager는 null일 수 없습니다.");
-        if (period == null) throw new IllegalArgumentException("RankingPeriod는 null일 수 없습니다.");
+    public PowerUserScoreProcessor(EntityManager em) {
         this.em = em;
-        this.period = period;
     }
 
     @Override
@@ -28,7 +24,7 @@ public class PowerUserScoreProcessor implements ItemProcessor<PowerUserScoreDto,
         return PowerUserRanking.builder()
             .user(user)
             .nickname(dto.nickname())
-            .period(period)
+            .period(dto.period())
             .score(dto.calculateScore())
             .reviewScoreSum(dto.reviewScoreSum())
             .likeCount(dto.likeCount())
