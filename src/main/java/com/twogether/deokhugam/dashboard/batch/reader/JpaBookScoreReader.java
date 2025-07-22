@@ -77,7 +77,7 @@ public class JpaBookScoreReader implements ItemReader<BookScoreDto> {
                 (String) row[2],
                 (String) row[3],
                 (Long) row[4],
-                (Double) row[5],
+                ((Number) row[5]).doubleValue(),
                 period
             ))
             .toList();
