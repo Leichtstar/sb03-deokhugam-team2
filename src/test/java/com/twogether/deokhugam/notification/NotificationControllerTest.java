@@ -3,6 +3,7 @@ package com.twogether.deokhugam.notification;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -185,5 +186,19 @@ class NotificationControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
             .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("전체 알림 읽음 처리 - 성공")
+    void 전체_알림_읽음_처리_성공() throws Exception {
+        // given
+        UUID userId = UUID.randomUUID();
+
+        // when & then
+        mockMvc.perform(patch("/api/notifications/read-all")
+                .header("Deokhugam-Request-User-ID", userId.toString()))
+            .andExpect(status().isNoContent());
+
+        verify(notificationService).markAllAsRead(userId);
     }
 }
