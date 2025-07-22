@@ -93,8 +93,8 @@ public class Review {
         this.likeCount = likeCount;
     }
 
-    public void updateCommentCount(int commentCount){
-        this.commentCount = commentCount;
+    public void updateUpdatedAt(){
+        this.updatedAt = Instant.now();
     }
 
     public void updateReview(String content, int rating){

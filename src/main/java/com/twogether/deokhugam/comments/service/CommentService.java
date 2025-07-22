@@ -46,12 +46,16 @@ public class CommentService {
     public CommentResponse createComment(@Valid CommentCreateRequest request) {
         Review review = reviewRepository.findById(request.reviewId())
             .orElseThrow(() -> new ReviewNotFoundException(request.reviewId()));
+
         User user = userRepository.findById(request.userId())
             .orElseThrow(() -> new UserNotFoundException());
+
         Comment entity = new Comment(user, review, request.content());
         Comment saved = commentRepository.save(entity);
 
         reviewRepository.incrementCommentCount(request.reviewId());
+        review.updateUpdatedAt();
+        reviewRepository.save(review);
 
         // 알림 생성 조건 추가 (자기 댓글은 제외)
         if (!user.getId().equals(review.getUser().getId())) {
@@ -92,7 +96,12 @@ public class CommentService {
         if (Boolean.TRUE.equals(comment.getIsDeleted())) {
             throw new IllegalStateException("이미 삭제된 댓글입니다.");
         }
-        reviewRepository.decrementCommentCount(comment.getReview().getId());
+        Review review = reviewRepository.findById(comment.getReview().getId())
+                .orElseThrow(() -> new ReviewNotFoundException(comment.getReview().getId()));
+
+        reviewRepository.decrementCommentCount(review.getId());
+        review.updateUpdatedAt();
+        reviewRepository.save(review);
 
         commentRepository.logicalDeleteById(commentId);
     }
@@ -107,7 +116,12 @@ public class CommentService {
 
         if (!comment.getIsDeleted()) {
             // 집계에 포함되었던 댓글이므로 -1 필요
-            reviewRepository.decrementCommentCount(comment.getReview().getId());
+            Review review = reviewRepository.findById(comment.getReview().getId())
+                    .orElseThrow(() -> new ReviewNotFoundException(comment.getReview().getId()));
+
+            reviewRepository.decrementCommentCount(review.getId());
+            review.updateUpdatedAt();
+            reviewRepository.save(review);
         }
 
         commentRepository.deleteById(commentId);
