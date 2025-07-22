@@ -40,7 +40,8 @@ class NotificationCleanupJobTest {
         List<Notification> remaining = notificationRepository.findAll();
         assertThat(remaining)
             .hasSize(1)
-            .extracting(Notification::getContent)
-            .containsExactly("최근 알림");
+            .extracting(n -> n.getId().toString())
+            .containsExactly("44444444-4444-4444-4444-000000000002");
+
     }
 }
