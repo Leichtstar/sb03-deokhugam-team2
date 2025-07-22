@@ -2,6 +2,7 @@ package com.twogether.deokhugam.review.controller;
 
 import com.twogether.deokhugam.common.dto.CursorPageResponseDto;
 import com.twogether.deokhugam.review.dto.ReviewDto;
+import com.twogether.deokhugam.review.dto.ReviewLikeDto;
 import com.twogether.deokhugam.review.dto.request.ReviewCreateRequest;
 import com.twogether.deokhugam.review.dto.request.ReviewUpdateRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -292,6 +293,44 @@ public interface ReviewApi {
                     name = "Deokhugam-Request-User-ID",
                     description = "요청자 ID",
                     required = true,
+                    example = "123e4567-e89b-12d3-a456-426614174000"
+            )
+            @RequestHeader("Deokhugam-Request-User-ID") UUID requestUserId
+    );
+
+    // 리뷰 좋아요 스위치
+    @Operation(
+            summary = "리뷰 좋아요",
+            description = "리뷰에 좋아요를 추가하거나 취소합니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200", description = "리뷰 좋아요 성공",
+                    content = @Content(schema = @Schema(implementation = ReviewLikeDto.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400", description = "잘못된 요청 (요청자 ID 누락)",
+                    content = @Content(examples = @ExampleObject(value = "좋아요 요청에는 요청자 ID가 필요합니다."))
+            ),
+            @ApiResponse(
+                    responseCode = "404", description = "리뷰 정보 없음",
+                    content = @Content(examples = @ExampleObject(value = "좋아요하려는 리뷰가 존재하지 않습니다."))
+            ),
+            @ApiResponse(
+                    responseCode = "500", description = "서버 내부 오류",
+                    content = @Content(examples = @ExampleObject(value = "리뷰 좋아요 처리 중 서버 오류가 발생했습니다."))
+            )
+    })
+    @PostMapping("/{reviewId}/like")
+    ResponseEntity<ReviewLikeDto> likeReview(
+            @Parameter(
+                    name = "reviewId", description = "리뷰 ID", required = true,
+                    example = "123e4567-e89b-12d3-a456-426614174000"
+            )
+            @PathVariable UUID reviewId,
+
+            @Parameter(
+                    name = "Deokhugam-Request-User-ID", description = "요청자 ID", required = true,
                     example = "123e4567-e89b-12d3-a456-426614174000"
             )
             @RequestHeader("Deokhugam-Request-User-ID") UUID requestUserId
