@@ -64,11 +64,6 @@ public class CommentService {
         review.updateUpdatedAt();
         reviewRepository.save(review);
 
-        // 알림 생성 조건 추가 (자기 댓글은 제외)
-        if (!user.getId().equals(review.getUser().getId())) {
-            notificationService.createCommentNotification(user, review, saved.getContent());
-        }
-
         return commentMapper.toResponse(saved);
     }
 
