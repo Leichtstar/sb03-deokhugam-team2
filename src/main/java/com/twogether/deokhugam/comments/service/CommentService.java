@@ -157,9 +157,7 @@ public class CommentService {
     }
 
     private void incrementReviewCommentCount(Review review) {
-        if (review != null) {
-            reviewRepository.incrementCommentCount(review.getId());
-        }
+        reviewRepository.incrementCommentCount(review.getId());
     }
 
     private void decrementReviewCommentCount(Review review) {
