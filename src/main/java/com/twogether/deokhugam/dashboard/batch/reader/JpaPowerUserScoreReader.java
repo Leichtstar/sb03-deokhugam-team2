@@ -77,8 +77,12 @@ public class JpaPowerUserScoreReader implements ItemReader<PowerUserScoreDto> {
             .getResultList()
             .stream()
             .map(row -> new PowerUserScoreDto(
-                (UUID) row[0], (String) row[1], (Double) row[2],
-                (Long) row[3], (Long) row[4], period
+                (UUID) row[0],
+                (String) row[1],
+                row[2] != null ? ((Number) row[2]).doubleValue() : 0.0,
+                row[3] != null ? ((Number) row[3]).longValue() : 0L,
+                row[4] != null ? ((Number) row[4]).longValue() : 0L,
+                period
             ))
             .toList();
     }
