@@ -146,4 +146,46 @@ public class S3ImageStorage {
         // https://버킷명.s3.리전.amazonaws.com/파일경로
         return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, region, s3Key);
     }
+    /**
+     * S3에 업로드된 이미지 삭제
+     * @param imageUrl 삭제할 이미지의 공개 URL
+     */
+    public void deleteImage(String imageUrl) {
+        if(imageUrl == null || imageUrl.isBlank()) {
+            log.warn("삭제할 이미지 URL이 비어 있습니다.");
+            return;
+        }
+        // URL에서 S3 key 추출
+        String key = extractKeyFromUrl(imageUrl);
+
+        log.info("이미지 삭제 시작 - S3 Key: {}", key);
+
+        try {
+            s3Client.deleteObject(builder -> builder
+                .bucket(bucketName)
+                .key(key)
+                .build()
+            );
+            log.info("이미지 삭제 완료 - S3 Key: {}", key);
+        } catch (Exception e) {
+            log.error("이미지 삭제 실패 - S3 Key: {}, 오류: {}", key, e.getMessage());
+            throw new RuntimeException("이미지 삭제 중 오류가 발생했습니다.", e);
+        }
+    }
+    /**
+     * 공개 URL에서 S3 key 경로 추출
+     * 예: https://bucket-name.s3.region.amazonaws.com/folder/filename.jpg
+     * → folder/filename.jpg
+     */
+    private String extractKeyFromUrl(String url) {
+        String baseUrl = String.format("https://%s.s3.%s.amazonaws.com/", bucketName, region);
+        if (!url.startsWith(baseUrl)) {
+            throw new IllegalArgumentException("유효한 S3 공개 URL이 아닙니다.");
+        }
+        String key = url.substring(baseUrl.length());
+        if(key.isEmpty()){
+            throw new IllegalArgumentException("S3 key가 비어 있습니다.");
+        }
+        return key;
+    }
 }

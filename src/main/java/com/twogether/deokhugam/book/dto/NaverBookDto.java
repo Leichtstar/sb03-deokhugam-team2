@@ -9,5 +9,5 @@ public record NaverBookDto(
     String publisher,
     LocalDate publishedDate,
     String isbn,
-    String thumbnailImage //Base64로 인코딩
+    String thumbnailImage
 ) {}
