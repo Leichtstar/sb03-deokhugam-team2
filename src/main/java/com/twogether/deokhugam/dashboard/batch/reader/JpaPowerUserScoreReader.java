@@ -61,7 +61,7 @@ public class JpaPowerUserScoreReader implements ItemReader<PowerUserScoreDto> {
         Instant endInstant = end.atZone(ZoneId.of("UTC")).toInstant();
 
         return entityManager.createQuery("""
-            SELECT r.user.id, r.userNickName,
+            SELECT r.user.id, r.user.nickname,
                    SUM(COALESCE(r.likeCount, 0) * 0.3 + COALESCE(r.commentCount, 0) * 0.7),
                    SUM(COALESCE(r.likeCount, 0)),
                    SUM(COALESCE(r.commentCount, 0))
