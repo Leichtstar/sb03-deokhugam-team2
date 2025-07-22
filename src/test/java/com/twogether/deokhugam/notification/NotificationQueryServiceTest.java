@@ -126,16 +126,19 @@ class NotificationQueryServiceTest {
         when(notificationRepository.findByUserIdWithAfter(eq(userId), eq(after), any()))
             .thenReturn(List.of(notification, anotherNotification));
         when(notificationMapper.toDto(any()))
-            .thenReturn(new NotificationDto(
-                notification.getId(),
-                userId,
-                UUID.randomUUID(),
-                "도서 제목",
-                notification.getContent(),
-                notification.isConfirmed(),
-                notification.getCreatedAt(),
-                notification.getUpdatedAt()
-            ));
+            .thenAnswer(invocation -> {
+                Notification n = invocation.getArgument(0);
+                return new NotificationDto(
+                    n.getId(),
+                    userId,
+                    UUID.randomUUID(),
+                    "도서 제목",
+                    n.getContent(),
+                    n.isConfirmed(),
+                    n.getCreatedAt(),
+                    n.getUpdatedAt()
+                );
+            });
 
         // when
         CursorPageResponse<NotificationDto> result = notificationQueryService.getNotifications(
