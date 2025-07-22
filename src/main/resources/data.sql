@@ -34,8 +34,8 @@ INSERT INTO books (
           '2015-08-29',
           '9781782166603',
           'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/edeadfb7_20250717_110323.jpg',
-          4,
-          3.0,
+          2,
+          2.9,
           '2025-05-27T08:31:24.917368Z',
           '2025-07-09T07:19:36.966712Z',
           false
@@ -49,8 +49,8 @@ INSERT INTO books (
           '2019-01-29',
           '9791161752488',
           'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/0e59b4f6_20250717_110335.jpg',
-          6,
-          3.1666666666666665,
+          2,
+          3.45,
           '2025-05-27T08:31:26.247252Z',
           '2025-07-10T12:49:54.725009Z'
           ,
@@ -65,8 +65,8 @@ INSERT INTO books (
           '2013-01-18',
           '9781849518260',
           'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/f01c391a_20250717_110353.jpg',
-          4,
-          4.25,
+          3,
+          3.5,
           '2025-05-27T08:31:27.311648Z',
           '2025-07-09T07:21:23.415431Z'
           ,
@@ -81,8 +81,8 @@ INSERT INTO books (
           '2017-09-01',
           '9781785888854',
           'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/f018b5f6_20250717_110403.jpg',
-          3,
-          2.6666666666666665,
+          1,
+          3.2,
           '2025-05-27T08:31:26.816702Z',
           '2025-05-27T08:31:32.112443Z'
           ,
@@ -97,8 +97,8 @@ INSERT INTO books (
           '2016-09-30',
           '9788966261949',
           'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/e5a28807_20250717_110410.jpg',
-          5,
-          3.8,
+          2,
+          4.8,
           '2025-05-27T08:31:24.512976Z',
           '2025-06-02T09:07:47.008435Z'
           ,
@@ -113,8 +113,8 @@ INSERT INTO books (
           '2015-07-28',
           '9788960777330',
           'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/245a6839_20250717_110416.jpg',
-          3,
-          1.0,
+          1,
+          4.5,
           '2025-05-27T08:31:24.381293Z',
           '2025-06-10T09:16:29.796920Z'
           ,
@@ -129,8 +129,8 @@ INSERT INTO books (
           '2016-04-15',
           '9791158390327',
           'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/e2cb217a_20250717_110421.jpg',
-          1,
-          2.0,
+          2,
+          3.2,
           '2025-05-27T08:31:25.758920Z',
           '2025-05-27T08:31:31.193945Z'
           ,
@@ -145,8 +145,8 @@ INSERT INTO books (
           '2008-02-21',
           '9780596007430',
           'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/0366ad3d_20250717_110427.jpg',
-          1,
-          3.0,
+          4,
+          3.075,
           '2025-05-27T08:31:22.813741Z',
           '2025-05-27T08:31:28.549231Z'
           ,
@@ -161,8 +161,8 @@ INSERT INTO books (
           '2024-05-28',
           '9788966264407',
           'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/5e74ede7_20250717_110431.jpg',
-          6,
-          2.6666666666666665,
+          0,
+          0.0,
           '2025-05-27T08:31:25.904661Z',
           '2025-05-30T06:02:04.261680Z'
           ,
@@ -177,8 +177,8 @@ INSERT INTO books (
           '2020-12-08',
           '9781617297045',
           'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/e888af8b_20250717_112630.jpg',
-          3,
-          2.3333333333333335,
+          0,
+          0.0,
           '2025-05-27T08:31:24.772402Z',
           '2025-05-27T08:31:30.508868Z'
           ,
@@ -193,8 +193,8 @@ INSERT INTO books (
           '2019-07-03',
           '9791160508383',
           'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/1daa168c_20250717_110458.jpg',
-          5,
-          2.12,
+          0,
+          0.0,
           '2025-05-27T08:31:26.959072Z',
           '2025-05-29T06:41:25.559205Z'
           ,
@@ -209,8 +209,8 @@ INSERT INTO books (
           '2018-01-24',
           '9781484230145',
           'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/572efa21_20250717_110540.jpg',
-          1,
-          3.0,
+          0,
+          0.0,
           '2025-05-27T08:31:22.093853Z',
           '2025-05-27T08:31:28.268582Z'
           ,
@@ -225,8 +225,8 @@ INSERT INTO books (
           '2021-02-01',
           '9791162243862',
           'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/242bcb0c_20250717_110547.jpg',
-          3,
-          3.0,
+          0,
+          0.0,
           '2025-05-27T08:31:27.450430Z',
           '2025-05-27T08:31:32.640344Z'
           ,
@@ -241,8 +241,8 @@ INSERT INTO books (
           '2018-07-31',
           '9781788995979',
           'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/4e17c379_20250717_110553.jpg',
-          2,
-          2.5,
+          0,
+          0.0,
           '2025-05-27T08:31:25.503536Z',
           '2025-05-27T08:31:31.109668Z'
           ,
@@ -257,8 +257,8 @@ INSERT INTO books (
           '2016-06-15',
           '9791185890531',
           'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/ae9e402c_20250717_110603.jpg',
-          2,
-          3.0,
+          0,
+          0.0,
           '2025-05-27T08:31:23.547837Z',
           '2025-05-27T08:31:29.053642Z'
           ,
@@ -273,8 +273,8 @@ INSERT INTO books (
           '2016-07-20',
           '9788968488207',
           'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/0c161775_20250717_110608.jpg',
-          3,
-          3.0,
+          0,
+          0.0,
           '2025-05-27T08:31:27.171238Z',
           '2025-05-27T08:31:32.424096Z'
           ,
@@ -289,8 +289,8 @@ INSERT INTO books (
           '2013-12-24',
           '9788966260959',
           'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/1ffcd3f9_20250717_110614.jpg',
-          2,
-          1.0,
+          0,
+          0.0,
           '2025-05-27T08:31:25.203005Z',
           '2025-05-27T08:31:30.895430Z'
           ,
@@ -305,8 +305,8 @@ INSERT INTO books (
           '2019-11-29',
           '9788965402602',
           'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/af4b5e3f_20250717_110621.jpg',
-          4,
-          3.75,
+          0,
+          0.0,
           '2025-05-27T08:31:26.552450Z',
           '2025-06-14T08:43:07.851895Z'
           ,
@@ -321,8 +321,8 @@ INSERT INTO books (
           '2021-07-26',
           '9791191600124',
           'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/48c7ba4f_20250717_110627.jpg',
-          2,
-          3.5,
+          0,
+          0.0,
           '2025-05-27T08:31:27.734722Z',
           '2025-05-27T08:31:32.865581Z'
           ,
@@ -337,8 +337,8 @@ INSERT INTO books (
           '2020-05-14',
           '9791190665186',
           'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/8a46700f_20250717_110632.jpg',
-          5,
-          1.6,
+          0,
+          0.0,
           '2025-05-27T08:31:23.390892Z',
           '2025-05-27T08:31:28.924461Z'
           ,
@@ -353,8 +353,8 @@ INSERT INTO books (
           '2012-02-10',
           '9788994506074',
           'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/0fd9358e_20250717_110558.jpg',
-          11,
-          2.8181818181818183,
+          0,
+          0.0,
           '2025-05-27T08:31:27.576596Z',
           '2025-07-09T05:52:08.075923Z'
           ,
@@ -385,8 +385,8 @@ INSERT INTO books (
           '2022-02-24',
           '9788966263363',
           'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/64b641f7_20250717_110644.jpg',
-          2,
-          1.5,
+          0,
+          0.0,
           '2025-05-27T08:31:23.195954Z',
           '2025-05-27T08:31:28.650144Z'
           ,
@@ -401,14 +401,13 @@ INSERT INTO books (
           '2023-03-09',
           '9788966263912',
           'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/dbcfa679_20250717_110649.jpg',
-          5,
-          2.6,
+          0,
+          0.0,
           '2025-05-27T08:31:23.719570Z',
           '2025-06-04T05:08:07.405193Z'
           ,
           false
       );
-
 
 -- 리뷰 더미 데이터
 INSERT INTO reviews (
@@ -435,7 +434,7 @@ INSERT INTO reviews (
           '내용이 깊이 있고 설명이 상세합니다.',
           2.5,
           9,
-          5,
+          2,
           '2025-07-07T05:00:00Z',
           false
       ),
@@ -463,7 +462,7 @@ INSERT INTO reviews (
           '예제가 친절해서 이해하기 쉬웠습니다.',
           2.1,
           5,
-          5,
+          1,
           '2025-07-02T06:00:00Z',
           false
       ),
@@ -477,7 +476,7 @@ INSERT INTO reviews (
           '내용이 깊이 있고 설명이 상세합니다.',
           4.1,
           4,
-          2,
+          3,
           '2025-06-10T07:00:00Z',
           false
       ),
@@ -505,7 +504,7 @@ INSERT INTO reviews (
           '훌륭한 입문서입니다.',
           1.9,
           0,
-          4,
+          0,
           '2025-06-29T07:00:00Z',
           false
       ),
@@ -519,7 +518,7 @@ INSERT INTO reviews (
           '내용이 깊이 있고 설명이 상세합니다.',
           1.9,
           1,
-          4,
+          0,
           '2025-06-29T23:00:00Z',
           false
       ),
@@ -533,7 +532,7 @@ INSERT INTO reviews (
           '내용이 실용적이고 구성도 좋네요.',
           3.7,
           0,
-          3,
+          0,
           '2025-06-22T10:00:00Z',
           false
       ),
@@ -547,7 +546,7 @@ INSERT INTO reviews (
           '예제가 친절해서 이해하기 쉬웠습니다.',
           5.0,
           1,
-          4,
+          1,
           '2025-06-24T09:00:00Z',
           false
       ),
@@ -561,7 +560,7 @@ INSERT INTO reviews (
           '초보자에게 강력 추천합니다!',
           1.9,
           2,
-          2,
+          0,
           '2025-06-26T07:00:00Z',
           false
       ),
@@ -575,7 +574,7 @@ INSERT INTO reviews (
           '내용이 깊이 있고 설명이 상세합니다.',
           4.6,
           6,
-          5,
+          2,
           '2025-06-16T01:00:00Z',
           false
       ),
@@ -589,7 +588,7 @@ INSERT INTO reviews (
           '초보자에게 강력 추천합니다!',
           4.8,
           0,
-          4,
+          0,
           '2025-06-25T04:00:00Z',
           false
       ),
@@ -603,7 +602,7 @@ INSERT INTO reviews (
           '훌륭한 입문서입니다.',
           3.2,
           8,
-          4,
+          1,
           '2025-07-01T23:00:00Z',
           false
       ),
@@ -617,7 +616,7 @@ INSERT INTO reviews (
           '예제가 친절해서 이해하기 쉬웠습니다.',
           4.5,
           6,
-          0,
+          2,
           '2025-07-08T08:00:00Z',
           false
       ),
@@ -631,7 +630,7 @@ INSERT INTO reviews (
           '내용이 깊이 있고 설명이 상세합니다.',
           4.5,
           1,
-          5,
+          0,
           '2025-07-05T10:00:00Z',
           false
       ),
@@ -645,7 +644,7 @@ INSERT INTO reviews (
           '예제가 친절해서 이해하기 쉬웠습니다.',
           4.2,
           6,
-          2,
+          1,
           '2025-06-25T03:00:00Z',
           false
       ),
@@ -659,7 +658,148 @@ INSERT INTO reviews (
           '예제가 친절해서 이해하기 쉬웠습니다.',
           3.9,
           9,
-          5,
+          0,
           '2025-07-08T00:00:00Z',
           false
       );
+
+-- 댓글 더미 데이터
+INSERT INTO comments (
+                      id, user_id, review_id, content, created_at, updated_at, is_deleted
+) VALUES
+       ('c0000001-0000-0000-0000-000000000001', '550e8400-e29b-41d4-a716-446655440005', 'b9810ba1-cdce-44b1-81df-73b8324b1f1d', '네티 성능이 정말 좋다고 하던데 맞나요?', '2025-07-09T15:00:00.000Z', '2025-07-09T15:00:00.000Z', false),
+       ('c0000001-0000-0000-0000-000000000002', '550e8400-e29b-41d4-a716-446655440006', 'b9810ba1-cdce-44b1-81df-73b8324b1f1d', 'JUnit 테스트 작성이 훨씬 쉬워졌어요.', '2025-07-09T15:00:00.000Z', '2025-07-09T15:00:00.000Z', false),
+       ('c0000001-0000-0000-0000-000000000003', '550e8400-e29b-41d4-a716-446655440007', '4364cc9c-ef00-4680-8e93-c8c72dc6d8a3', '저는 다른 의견인데요...', '2025-07-09T15:00:00.000Z', '2025-07-09T15:00:00.000Z', false),
+       ('c0000001-0000-0000-0000-000000000004', '550e8400-e29b-41d4-a716-446655440007', '639a6640-fe84-4c52-880c-c40a25f7f11a', '질문이 하나 있는데 답변 부탁드려요.', '2025-07-10T15:00:00.000Z', '2025-07-10T15:00:00.000Z', false),
+       ('c0000001-0000-0000-0000-000000000005', '550e8400-e29b-41d4-a716-446655440007', '639a6640-fe84-4c52-880c-c40a25f7f11a', '초보자에게는 조금 어려울 수도 있겠네요.', '2025-07-10T15:00:00.000Z', '2025-07-10T15:00:00.000Z', false),
+       ('c0000001-0000-0000-0000-000000000006', '550e8400-e29b-41d4-a716-446655440005', '639a6640-fe84-4c52-880c-c40a25f7f11a', '정말 유용한 리뷰네요! 감사합니다.', '2025-07-10T15:00:00.000Z', '2025-07-10T15:00:00.000Z', false),
+       ('c0000001-0000-0000-0000-000000000007', '550e8400-e29b-41d4-a716-446655440005', 'f395374e-1bab-43b4-802f-ea1d532c96ce', '다음 버전도 기대가 됩니다.', '2025-07-11T15:00:00.000Z', '2025-07-11T15:00:00.000Z', false),
+       ('c0000001-0000-0000-0000-000000000008', '550e8400-e29b-41d4-a716-446655440001', '32a24e37-788e-482c-ba44-7468fa369663', '저도 이 책 읽어봤는데 동감해요.', '2025-07-11T15:00:00.000Z', '2025-07-11T15:00:00.000Z', false),
+       ('c0000001-0000-0000-0000-000000000009', '550e8400-e29b-41d4-a716-446655440001', '32a24e37-788e-482c-ba44-7468fa369663', '도커 설정할 때 이 책이 많은 도움이 됐습니다.', '2025-07-11T15:00:00.000Z', '2025-07-11T15:00:00.000Z', false),
+       ('c0000001-0000-0000-0000-000000000010', '550e8400-e29b-41d4-a716-446655440003', '8a14ed7a-02fc-4ca2-b1c4-bd378ecd7d6d', '정말 유용한 리뷰네요! 감사합니다.', '2025-07-12T15:00:00.000Z', '2025-07-12T15:00:00.000Z', false),
+       ('c0000001-0000-0000-0000-000000000011', '550e8400-e29b-41d4-a716-446655440003', '73adf071-fdb6-4ade-accb-962f4dc71356', 'JUnit 테스트 작성이 훨씬 쉬워졌어요.', '2025-07-12T15:00:00.000Z', '2025-07-12T15:00:00.000Z', false),
+       ('c0000001-0000-0000-0000-000000000012', '550e8400-e29b-41d4-a716-446655440002', '73adf071-fdb6-4ade-accb-962f4dc71356', '이 부분에 대해서 더 자세히 알 수 있을까요?', '2025-07-12T15:00:00.000Z', '2025-07-12T15:00:00.000Z', false),
+       ('c0000001-0000-0000-0000-000000000013', '550e8400-e29b-41d4-a716-446655440006', '5ce242fb-5567-4c3c-b926-b0903345c507', '정말 유용한 리뷰네요! 감사합니다.', '2025-07-13T15:00:00.000Z', '2025-07-13T15:00:00.000Z', false);
+
+
+-- =============================================
+-- 인기 도서 랭킹 더미 데이터
+-- 점수 계산: (리뷰수 * 0.4) + (평점 * 0.6)
+-- =============================================
+
+-- 일간 인기 도서 (2025-07-21)
+INSERT INTO popular_book_ranking (id, book_id, period, score, review_count, rating, rank, title, author, thumbnail_url, created_at) VALUES
+('b0000001-0000-0000-0000-000000000001', '16170b65-ff18-44bc-b044-77216330b222', 'DAILY', 3.65, 4, 3.075, 1, 'JUnit Pocket Guide Paperback', 'Beck, Kent', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/0366ad3d_20250717_110427.jpg', '2025-07-21T00:00:00Z'),
+('b0000001-0000-0000-0000-000000000002', '188e0242-9675-4cb7-b7ea-7db6d090316c', 'DAILY', 3.48, 2, 4.8, 2, 'Practical 자바 유틸리티', '장윤기', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/e5a28807_20250717_110410.jpg', '2025-07-21T00:00:00Z'),
+('b0000001-0000-0000-0000-000000000003', 'd22f26e3-0ac8-41f6-8754-635563bc4f2f', 'DAILY', 3.30, 3, 3.5, 3, 'Spring Security 3.1', '', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/f01c391a_20250717_110353.jpg', '2025-07-21T00:00:00Z'),
+('b0000001-0000-0000-0000-000000000004', '8a53eb25-c201-4a48-85cf-d67048397013', 'DAILY', 2.87, 2, 3.45, 4, 'Spring Security 3/e', '믹 넛슨 & 로버트 윈치 & 피터 뮬라리엔', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/0e59b4f6_20250717_110335.jpg', '2025-07-21T00:00:00Z'),
+('b0000001-0000-0000-0000-000000000005', '010121af-666e-419a-9eb7-e04829391323', 'DAILY', 2.54, 2, 2.9, 5, 'Testing with Junit', 'Appel, Frank', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/edeadfb7_20250717_110323.jpg', '2025-07-21T00:00:00Z');
+
+-- 주간 인기 도서 (2025-07-14 ~ 2025-07-21)
+INSERT INTO popular_book_ranking (id, book_id, period, score, review_count, rating, rank, title, author, thumbnail_url, created_at) VALUES
+('b0000002-0000-0000-0000-000000000001', '16170b65-ff18-44bc-b044-77216330b222', 'WEEKLY', 3.84, 4, 3.075, 1, 'JUnit Pocket Guide Paperback', 'Beck, Kent', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/0366ad3d_20250717_110427.jpg', '2025-07-21T00:00:00Z'),
+('b0000002-0000-0000-0000-000000000002', '867afa9d-494e-499c-b5ca-30dbf3281f77', 'WEEKLY', 3.50, 1, 4.5, 2, '자바 ORM 표준 JPA 프로그래밍', '김영한', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/245a6839_20250717_110416.jpg', '2025-07-21T00:00:00Z'),
+('b0000002-0000-0000-0000-000000000003', 'd22f26e3-0ac8-41f6-8754-635563bc4f2f', 'WEEKLY', 3.30, 3, 3.5, 3, 'Spring Security 3.1', '', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/f01c391a_20250717_110353.jpg', '2025-07-21T00:00:00Z'),
+('b0000002-0000-0000-0000-000000000004', '188e0242-9675-4cb7-b7ea-7db6d090316c', 'WEEKLY', 3.28, 2, 4.8, 4, 'Practical 자바 유틸리티', '장윤기', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/e5a28807_20250717_110410.jpg', '2025-07-21T00:00:00Z'),
+('b0000002-0000-0000-0000-000000000005', 'e0419d9c-ac6f-4c4c-aabf-d4a4267e7df2', 'WEEKLY', 2.72, 1, 3.2, 5, 'Securing Docker', 'Scott Gallagher', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/f018b5f6_20250717_110403.jpg', '2025-07-21T00:00:00Z');
+
+-- 월간 인기 도서 (2025-07월)
+INSERT INTO popular_book_ranking (id, book_id, period, score, review_count, rating, rank, title, author, thumbnail_url, created_at) VALUES
+('b0000003-0000-0000-0000-000000000001', '16170b65-ff18-44bc-b044-77216330b222', 'MONTHLY', 3.84, 4, 3.075, 1, 'JUnit Pocket Guide Paperback', 'Beck, Kent', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/0366ad3d_20250717_110427.jpg', '2025-07-21T00:00:00Z'),
+('b0000003-0000-0000-0000-000000000002', 'd22f26e3-0ac8-41f6-8754-635563bc4f2f', 'MONTHLY', 3.70, 3, 3.5, 2, 'Spring Security 3.1', '', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/f01c391a_20250717_110353.jpg', '2025-07-21T00:00:00Z'),
+('b0000003-0000-0000-0000-000000000003', '867afa9d-494e-499c-b5ca-30dbf3281f77', 'MONTHLY', 3.50, 1, 4.5, 3, '자바 ORM 표준 JPA 프로그래밍', '김영한', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/245a6839_20250717_110416.jpg', '2025-07-21T00:00:00Z'),
+('b0000003-0000-0000-0000-000000000004', '188e0242-9675-4cb7-b7ea-7db6d090316c', 'MONTHLY', 3.28, 2, 4.8, 4, 'Practical 자바 유틸리티', '장윤기', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/e5a28807_20250717_110410.jpg', '2025-07-21T00:00:00Z'),
+('b0000003-0000-0000-0000-000000000005', '8a53eb25-c201-4a48-85cf-d67048397013', 'MONTHLY', 2.87, 2, 3.45, 5, 'Spring Security 3/e', '믹 넛슨 & 로버트 윈치 & 피터 뮬라리엔', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/0e59b4f6_20250717_110335.jpg', '2025-07-21T00:00:00Z');
+
+-- 역대 인기 도서
+INSERT INTO popular_book_ranking (id, book_id, period, score, review_count, rating, rank, title, author, thumbnail_url, created_at) VALUES
+('b0000004-0000-0000-0000-000000000001', '188e0242-9675-4cb7-b7ea-7db6d090316c', 'ALL_TIME', 4.08, 2, 4.8, 1, 'Practical 자바 유틸리티', '장윤기', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/e5a28807_20250717_110410.jpg', '2025-07-21T00:00:00Z'),
+('b0000004-0000-0000-0000-000000000002', '16170b65-ff18-44bc-b044-77216330b222', 'ALL_TIME', 3.84, 4, 3.075, 2, 'JUnit Pocket Guide Paperback', 'Beck, Kent', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/0366ad3d_20250717_110427.jpg', '2025-07-21T00:00:00Z'),
+('b0000004-0000-0000-0000-000000000003', 'd22f26e3-0ac8-41f6-8754-635563bc4f2f', 'ALL_TIME', 3.70, 3, 3.5, 3, 'Spring Security 3.1', '', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/f01c391a_20250717_110353.jpg', '2025-07-21T00:00:00Z'),
+('b0000004-0000-0000-0000-000000000004', '867afa9d-494e-499c-b5ca-30dbf3281f77', 'ALL_TIME', 3.50, 1, 4.5, 4, '자바 ORM 표준 JPA 프로그래밍', '김영한', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/245a6839_20250717_110416.jpg', '2025-07-21T00:00:00Z'),
+('b0000004-0000-0000-0000-000000000005', '0da6030e-fe93-493f-8562-508ac6f08bac', 'ALL_TIME', 2.72, 2, 3.2, 5, '네티 인 액션', '노먼 마우러', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/e2cb217a_20250717_110421.jpg', '2025-07-21T00:00:00Z');
+
+-- =============================================
+-- 인기 리뷰 랭킹 더미 데이터
+-- 점수 계산: (좋아요수 * 0.3) + (댓글수 * 0.7)
+-- =============================================
+
+-- 일간 인기 리뷰 (2025-07-21)
+INSERT INTO popular_review_ranking (id, review_id, period, score, like_count, comment_count, rank, user_id, user_nickname, content, rating, book_id, book_title, book_thumbnail_url, created_at) VALUES
+('a0000001-0000-0000-0000-000000000001', 'e0a36ee7-6cdf-47bb-981f-2ba32d20555b', 'DAILY', 2.7, 9, 0, 1, '550e8400-e29b-41d4-a716-446655440001', '지인', '예제가 친절해서 이해하기 쉬웠습니다.', 3.9, '010121af-666e-419a-9eb7-e04829391323', 'Testing with Junit', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/edeadfb7_20250717_110323.jpg', '2025-07-21T00:00:00Z'),
+('a0000001-0000-0000-0000-000000000002', '8a14ed7a-02fc-4ca2-b1c4-bd378ecd7d6d', 'DAILY', 2.4, 8, 1, 2, '550e8400-e29b-41d4-a716-446655440002', '유니파파', '훌륭한 입문서입니다.', 3.2, 'e0419d9c-ac6f-4c4c-aabf-d4a4267e7df2', 'Securing Docker', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/f018b5f6_20250717_110403.jpg', '2025-07-21T00:00:00Z'),
+('a0000001-0000-0000-0000-000000000003', '73adf071-fdb6-4ade-accb-962f4dc71356', 'DAILY', 3.2, 6, 2, 3, '550e8400-e29b-41d4-a716-446655440002', '유니파파', '예제가 친절해서 이해하기 쉬웠습니다.', 4.5, '867afa9d-494e-499c-b5ca-30dbf3281f77', '자바 ORM 표준 JPA 프로그래밍', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/245a6839_20250717_110416.jpg', '2025-07-21T00:00:00Z'),
+('a0000001-0000-0000-0000-000000000004', '32a24e37-788e-482c-ba44-7468fa369663', 'DAILY', 3.2, 6, 2, 4, '550e8400-e29b-41d4-a716-446655440002', '유니파파', '내용이 깊이 있고 설명이 상세합니다.', 4.6, '188e0242-9675-4cb7-b7ea-7db6d090316c', 'Practical 자바 유틸리티', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/e5a28807_20250717_110410.jpg', '2025-07-21T00:00:00Z'),
+('a0000001-0000-0000-0000-000000000005', '5ce242fb-5567-4c3c-b926-b0903345c507', 'DAILY', 2.5, 6, 1, 5, '550e8400-e29b-41d4-a716-446655440006', 'bs8841', '예제가 친절해서 이해하기 쉬웠습니다.', 4.2, '16170b65-ff18-44bc-b044-77216330b222', 'JUnit Pocket Guide Paperback', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/0366ad3d_20250717_110427.jpg', '2025-07-21T00:00:00Z');
+
+-- 주간 인기 리뷰 (2025-07-14 ~ 2025-07-21)
+INSERT INTO popular_review_ranking (id, review_id, period, score, like_count, comment_count, rank, user_id, user_nickname, content, rating, book_id, book_title, book_thumbnail_url, created_at) VALUES
+('a0000002-0000-0000-0000-000000000001', 'b9810ba1-cdce-44b1-81df-73b8324b1f1d', 'WEEKLY', 4.1, 9, 2, 1, '550e8400-e29b-41d4-a716-446655440007', 'okodee', '내용이 깊이 있고 설명이 상세합니다.', 2.5, '16170b65-ff18-44bc-b044-77216330b222', 'JUnit Pocket Guide Paperback', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/0366ad3d_20250717_110427.jpg', '2025-07-21T00:00:00Z'),
+('a0000002-0000-0000-0000-000000000002', '73adf071-fdb6-4ade-accb-962f4dc71356', 'WEEKLY', 3.2, 6, 2, 2, '550e8400-e29b-41d4-a716-446655440002', '유니파파', '예제가 친절해서 이해하기 쉬웠습니다.', 4.5, '867afa9d-494e-499c-b5ca-30dbf3281f77', '자바 ORM 표준 JPA 프로그래밍', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/245a6839_20250717_110416.jpg', '2025-07-21T00:00:00Z'),
+('a0000002-0000-0000-0000-000000000003', '32a24e37-788e-482c-ba44-7468fa369663', 'WEEKLY', 3.2, 6, 2, 3, '550e8400-e29b-41d4-a716-446655440002', '유니파파', '내용이 깊이 있고 설명이 상세합니다.', 4.6, '188e0242-9675-4cb7-b7ea-7db6d090316c', 'Practical 자바 유틸리티', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/e5a28807_20250717_110410.jpg', '2025-07-21T00:00:00Z'),
+('a0000002-0000-0000-0000-000000000004', 'e0a36ee7-6cdf-47bb-981f-2ba32d20555b', 'WEEKLY', 2.7, 9, 0, 4, '550e8400-e29b-41d4-a716-446655440001', '지인', '예제가 친절해서 이해하기 쉬웠습니다.', 3.9, '010121af-666e-419a-9eb7-e04829391323', 'Testing with Junit', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/edeadfb7_20250717_110323.jpg', '2025-07-21T00:00:00Z'),
+('a0000002-0000-0000-0000-000000000005', '5ce242fb-5567-4c3c-b926-b0903345c507', 'WEEKLY', 2.5, 6, 1, 5, '550e8400-e29b-41d4-a716-446655440006', 'bs8841', '예제가 친절해서 이해하기 쉬웠습니다.', 4.2, '16170b65-ff18-44bc-b044-77216330b222', 'JUnit Pocket Guide Paperback', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/0366ad3d_20250717_110427.jpg', '2025-07-21T00:00:00Z');
+
+-- 월간 인기 리뷰 (2025-07월)
+INSERT INTO popular_review_ranking (id, review_id, period, score, like_count, comment_count, rank, user_id, user_nickname, content, rating, book_id, book_title, book_thumbnail_url, created_at) VALUES
+('a0000003-0000-0000-0000-000000000001', 'b9810ba1-cdce-44b1-81df-73b8324b1f1d', 'MONTHLY', 4.1, 9, 2, 1, '550e8400-e29b-41d4-a716-446655440007', 'okodee', '내용이 깊이 있고 설명이 상세합니다.', 2.5, '16170b65-ff18-44bc-b044-77216330b222', 'JUnit Pocket Guide Paperback', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/0366ad3d_20250717_110427.jpg', '2025-07-21T00:00:00Z'),
+('a0000003-0000-0000-0000-000000000002', '73adf071-fdb6-4ade-accb-962f4dc71356', 'MONTHLY', 3.2, 6, 2, 2, '550e8400-e29b-41d4-a716-446655440002', '유니파파', '예제가 친절해서 이해하기 쉬웠습니다.', 4.5, '867afa9d-494e-499c-b5ca-30dbf3281f77', '자바 ORM 표준 JPA 프로그래밍', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/245a6839_20250717_110416.jpg', '2025-07-21T00:00:00Z'),
+('a0000003-0000-0000-0000-000000000003', '32a24e37-788e-482c-ba44-7468fa369663', 'MONTHLY', 3.2, 6, 2, 3, '550e8400-e29b-41d4-a716-446655440002', '유니파파', '내용이 깊이 있고 설명이 상세합니다.', 4.6, '188e0242-9675-4cb7-b7ea-7db6d090316c', 'Practical 자바 유틸리티', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/e5a28807_20250717_110410.jpg', '2025-07-21T00:00:00Z'),
+('a0000003-0000-0000-0000-000000000004', 'e0a36ee7-6cdf-47bb-981f-2ba32d20555b', 'MONTHLY', 2.7, 9, 0, 4, '550e8400-e29b-41d4-a716-446655440001', '지인', '예제가 친절해서 이해하기 쉬웠습니다.', 3.9, '010121af-666e-419a-9eb7-e04829391323', 'Testing with Junit', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/edeadfb7_20250717_110323.jpg', '2025-07-21T00:00:00Z'),
+('a0000003-0000-0000-0000-000000000005', '8a14ed7a-02fc-4ca2-b1c4-bd378ecd7d6d', 'MONTHLY', 2.4, 8, 1, 5, '550e8400-e29b-41d4-a716-446655440002', '유니파파', '훌륭한 입문서입니다.', 3.2, 'e0419d9c-ac6f-4c4c-aabf-d4a4267e7df2', 'Securing Docker', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/f018b5f6_20250717_110403.jpg', '2025-07-21T00:00:00Z');
+
+-- 역대 인기 리뷰
+INSERT INTO popular_review_ranking (id, review_id, period, score, like_count, comment_count, rank, user_id, user_nickname, content, rating, book_id, book_title, book_thumbnail_url, created_at) VALUES
+('a0000004-0000-0000-0000-000000000001', 'b9810ba1-cdce-44b1-81df-73b8324b1f1d', 'ALL_TIME', 4.1, 9, 2, 1, '550e8400-e29b-41d4-a716-446655440007', 'okodee', '내용이 깊이 있고 설명이 상세합니다.', 2.5, '16170b65-ff18-44bc-b044-77216330b222', 'JUnit Pocket Guide Paperback', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/0366ad3d_20250717_110427.jpg', '2025-07-21T00:00:00Z'),
+('a0000004-0000-0000-0000-000000000002', '639a6640-fe84-4c52-880c-c40a25f7f11a', 'ALL_TIME', 3.3, 4, 3, 2, '550e8400-e29b-41d4-a716-446655440006', 'bs8841', '내용이 깊이 있고 설명이 상세합니다.', 4.1, 'd22f26e3-0ac8-41f6-8754-635563bc4f2f', 'Spring Security 3.1', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/f01c391a_20250717_110353.jpg', '2025-07-21T00:00:00Z'),
+('a0000004-0000-0000-0000-000000000003', '73adf071-fdb6-4ade-accb-962f4dc71356', 'ALL_TIME', 3.2, 6, 2, 3, '550e8400-e29b-41d4-a716-446655440002', '유니파파', '예제가 친절해서 이해하기 쉬웠습니다.', 4.5, '867afa9d-494e-499c-b5ca-30dbf3281f77', '자바 ORM 표준 JPA 프로그래밍', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/245a6839_20250717_110416.jpg', '2025-07-21T00:00:00Z'),
+('a0000004-0000-0000-0000-000000000004', '32a24e37-788e-482c-ba44-7468fa369663', 'ALL_TIME', 3.2, 6, 2, 4, '550e8400-e29b-41d4-a716-446655440002', '유니파파', '내용이 깊이 있고 설명이 상세합니다.', 4.6, '188e0242-9675-4cb7-b7ea-7db6d090316c', 'Practical 자바 유틸리티', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/e5a28807_20250717_110410.jpg', '2025-07-21T00:00:00Z'),
+('a0000004-0000-0000-0000-000000000005', 'e0a36ee7-6cdf-47bb-981f-2ba32d20555b', 'ALL_TIME', 2.7, 9, 0, 5, '550e8400-e29b-41d4-a716-446655440001', '지인', '예제가 친절해서 이해하기 쉬웠습니다.', 3.9, '010121af-666e-419a-9eb7-e04829391323', 'Testing with Junit', 'https://deokhugam-twogether-bucket.s3.ap-northeast-2.amazonaws.com/bookThumbnail/edeadfb7_20250717_110323.jpg', '2025-07-21T00:00:00Z');
+
+-- =============================================
+-- 파워 유저 랭킹 더미 데이터
+-- 점수 계산: (리뷰 인기점수 합계 * 0.5) + (좋아요수 * 0.2) + (댓글수 * 0.3)
+-- =============================================
+
+-- 일간 파워 유저 (2025-07-21)
+INSERT INTO power_user_ranking (id, user_id, period, score, review_score_sum, like_count, comment_count, rank, nickname, created_at) VALUES
+('e0000001-0000-0000-0000-000000000001', '550e8400-e29b-41d4-a716-446655440002', 'DAILY', 8.65, 13.5, 25, 4, 1, '유니파파', '2025-07-21T00:00:00Z'),
+('e0000001-0000-0000-0000-000000000002', '550e8400-e29b-41d4-a716-446655440001', 'DAILY', 4.45, 5.6, 12, 2, 2, '지인', '2025-07-21T00:00:00Z'),
+('e0000001-0000-0000-0000-000000000003', '550e8400-e29b-41d4-a716-446655440007', 'DAILY', 4.15, 7.75, 9, 3, 3, 'okodee', '2025-07-21T00:00:00Z'),
+('e0000001-0000-0000-0000-000000000004', '550e8400-e29b-41d4-a716-446655440006', 'DAILY', 3.35, 6.3, 6, 4, 4, 'bs8841', '2025-07-21T00:00:00Z'),
+('e0000001-0000-0000-0000-000000000005', '550e8400-e29b-41d4-a716-446655440005', 'DAILY', 2.75, 5.0, 1, 1, 5, '알감뚱감', '2025-07-21T00:00:00Z');
+
+-- 주간 파워 유저 (2025-07-14 ~ 2025-07-21)
+INSERT INTO power_user_ranking (id, user_id, period, score, review_score_sum, like_count, comment_count, rank, nickname, created_at) VALUES
+('e0000002-0000-0000-0000-000000000001', '550e8400-e29b-41d4-a716-446655440002', 'WEEKLY', 9.25, 15.5, 28, 6, 1, '유니파파', '2025-07-21T00:00:00Z'),
+('e0000002-0000-0000-0000-000000000002', '550e8400-e29b-41d4-a716-446655440007', 'WEEKLY', 5.85, 9.75, 12, 5, 2, 'okodee', '2025-07-21T00:00:00Z'),
+('e0000002-0000-0000-0000-000000000003', '550e8400-e29b-41d4-a716-446655440001', 'WEEKLY', 4.45, 5.6, 12, 2, 3, '지인', '2025-07-21T00:00:00Z'),
+('e0000002-0000-0000-0000-000000000004', '550e8400-e29b-41d4-a716-446655440006', 'WEEKLY', 4.05, 7.1, 7, 5, 4, 'bs8841', '2025-07-21T00:00:00Z'),
+('e0000002-0000-0000-0000-000000000005', '550e8400-e29b-41d4-a716-446655440008', 'WEEKLY', 3.15, 5.4, 2, 0, 5, '이눈송', '2025-07-21T00:00:00Z');
+
+-- 월간 파워 유저 (2025-07월)
+INSERT INTO power_user_ranking (id, user_id, period, score, review_score_sum, like_count, comment_count, rank, nickname, created_at) VALUES
+('e0000003-0000-0000-0000-000000000001', '550e8400-e29b-41d4-a716-446655440002', 'MONTHLY', 12.85, 22.5, 35, 8, 1, '유니파파', '2025-07-21T00:00:00Z'),
+('e0000003-0000-0000-0000-000000000002', '550e8400-e29b-41d4-a716-446655440007', 'MONTHLY', 8.25, 14.75, 18, 7, 2, 'okodee', '2025-07-21T00:00:00Z'),
+('e0000003-0000-0000-0000-000000000003', '550e8400-e29b-41d4-a716-446655440006', 'MONTHLY', 6.85, 11.3, 13, 8, 3, 'bs8841', '2025-07-21T00:00:00Z'),
+('e0000003-0000-0000-0000-000000000004', '550e8400-e29b-41d4-a716-446655440001', 'MONTHLY', 5.25, 7.6, 15, 2, 4, '지인', '2025-07-21T00:00:00Z'),
+('e0000003-0000-0000-0000-000000000005', '550e8400-e29b-41d4-a716-446655440005', 'MONTHLY', 3.75, 6.0, 3, 2, 5, '알감뚱감', '2025-07-21T00:00:00Z');
+
+-- 역대 파워 유저
+INSERT INTO power_user_ranking (id, user_id, period, score, review_score_sum, like_count, comment_count, rank, nickname, created_at) VALUES
+('e0000004-0000-0000-0000-000000000001', '550e8400-e29b-41d4-a716-446655440002', 'ALL_TIME', 18.25, 32.5, 50, 12, 1, '유니파파', '2025-07-21T00:00:00Z'),
+('e0000004-0000-0000-0000-000000000002', '550e8400-e29b-41d4-a716-446655440007', 'ALL_TIME', 12.45, 21.75, 28, 10, 2, 'okodee', '2025-07-21T00:00:00Z'),
+('e0000004-0000-0000-0000-000000000003', '550e8400-e29b-41d4-a716-446655440006', 'ALL_TIME', 10.85, 17.3, 20, 12, 3, 'bs8841', '2025-07-21T00:00:00Z'),
+('e0000004-0000-0000-0000-000000000004', '550e8400-e29b-41d4-a716-446655440001', 'ALL_TIME', 8.25, 11.6, 22, 4, 4, '지인', '2025-07-21T00:00:00Z'),
+('e0000004-0000-0000-0000-000000000005', '550e8400-e29b-41d4-a716-446655440008', 'ALL_TIME', 6.15, 9.4, 8, 2, 5, '이눈송', '2025-07-21T00:00:00Z');
+
+/*
+대시보드 더미 데이터 설명:
+
+인기 도서 랭킹 (popular_book_ranking)
+   - DAILY, WEEKLY, MONTHLY, ALL_TIME 기간별로 5위까지 생성
+
+파워 유저 랭킹 (power_user_ranking)
+   - 유니파파가 가장 활발한 사용자로 설정
+   - 기간이 길어질수록 점수가 누적되어 증가하는 현실적인 구조
+*/

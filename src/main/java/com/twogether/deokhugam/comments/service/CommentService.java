@@ -44,6 +44,7 @@ public class CommentService {
      * @param request 등록 요청 DTO
      * @return 등록 결과 DTO
      */
+    @Transactional
     public CommentResponse createComment(@Valid CommentCreateRequest request) {
         Review review = reviewRepository.findById(request.reviewId())
             .orElseThrow(() -> new ReviewNotFoundException(request.reviewId()));
@@ -56,6 +57,13 @@ public class CommentService {
         eventPublisher.publishEvent(
             new CommentCreatedEvent(user, review, saved.getContent())
         );
+
+        reviewRepository.incrementCommentCount(request.reviewId());
+
+        // 알림 생성 조건 추가 (자기 댓글은 제외)
+        if (!user.getId().equals(review.getUser().getId())) {
+            notificationService.createCommentNotification(user, review, saved.getContent());
+        }
         return commentMapper.toResponse(saved);
     }
 
@@ -90,6 +98,8 @@ public class CommentService {
         if (Boolean.TRUE.equals(comment.getIsDeleted())) {
             throw new IllegalStateException("이미 삭제된 댓글입니다.");
         }
+        reviewRepository.decrementCommentCount(comment.getReview().getId());
+
         commentRepository.logicalDeleteById(commentId);
     }
 
@@ -100,6 +110,12 @@ public class CommentService {
         if (!comment.getUser().getId().equals(requestUserId)) {
             throw new CommentForbiddenException();
         }
+
+        if (!comment.getIsDeleted()) {
+            // 집계에 포함되었던 댓글이므로 -1 필요
+            reviewRepository.decrementCommentCount(comment.getReview().getId());
+        }
+
         commentRepository.deleteById(commentId);
     }
 
