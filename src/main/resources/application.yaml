@@ -5,25 +5,39 @@ spring:
     active: dev
   config:
     import: optional:dotenv:.env
-  #Spring Batch 설정
-  batch:
-    job:
-      enabled: false # 애플리케이션 시작 시 배치 작업 자동 실행 방지
-    jdbc:
-      initialize-schema: always # Spring Batch 관련 테이블 자동 생성
   datasource:
     driver-class-name: org.postgresql.Driver
   jpa:
     properties:
       hibernate.jdbc.time_zone: UTC # 배치에서 LocalDateTime → Instant 변환 시 UTC 기준으로 계산
+  batch:
+    job:
+      enabled: false # 애플리케이션 시작 시 배치 작업 자동 실행 방지
+    jdbc:
+      initialize-schema: always # Spring Batch 관련 테이블 자동 생성
 # 공통 로깅 설정
 logging:
   level:
     root: info
 
+# Naver API 인증값
 naver:
   api:
     client-id: ${NAVER_CLIENT_ID}
     client-secret: ${NAVER_CLIENT_SECRET}
     ocr-secret: ${NAVER_OCR_SECRET}
     ocr-url: ${NAVER_OCR_URL}
+
+#Spring Batch 설정
+batch:
+  popular-book-ranking:
+    enabled: true
+    cron: "0 0 0 * * *"
+
+  popular-review-ranking:
+    enabled: true
+    cron: "0 5 0 * * *"
+
+  power-user-ranking:
+    enabled: true
+    cron: "0 10 0 * * *"

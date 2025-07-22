@@ -10,6 +10,8 @@ import com.twogether.deokhugam.review.service.ReviewService;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties.Http;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -87,6 +89,18 @@ public class ReviewController {
             @RequestHeader(value = "Deokhugam-Request-User-ID", required = true) UUID requestUserId
     ){
         reviewService.deleteReviewSoft(reviewId, requestUserId);
+
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
+    }
+
+    @DeleteMapping(path = "/{reviewId}/hard")
+    public ResponseEntity<Void> permanentDeleteReview(
+            @PathVariable("reviewId") UUID reviewId,
+            @RequestHeader(value = "Deokhugam-Request-User-ID", required = true) UUID requestUserId
+    ){
+        reviewService.deleteReviewHard(reviewId, requestUserId);
 
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)

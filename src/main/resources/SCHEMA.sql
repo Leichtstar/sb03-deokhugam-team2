@@ -100,8 +100,7 @@ CREATE TABLE comments
     is_deleted BOOLEAN                  NOT NULL DEFAULT FALSE
 );
 
--- ENUM 타입 정의
-CREATE TYPE ranking_period AS ENUM ('DAILY', 'WEEKLY', 'MONTHLY', 'ALL_TIME');
+
 
 -- 알림 테이블 (ON DELETE CASCADE)
 CREATE TABLE notifications (
@@ -121,7 +120,7 @@ CREATE TABLE notifications (
 CREATE TABLE popular_book_ranking (
     id UUID                             PRIMARY KEY ,
     book_id UUID                        NOT NULL,
-    period ranking_period               NOT NULL,
+    period varchar(20)                  NOT NULL,
     score DOUBLE PRECISION              NOT NULL,
     review_count BIGINT                 NOT NULL,
     rating DOUBLE PRECISION             NOT NULL,
@@ -138,7 +137,7 @@ CREATE TABLE popular_book_ranking (
 CREATE TABLE popular_review_ranking (
     id UUID                             PRIMARY KEY ,
     review_id UUID                      NOT NULL,
-    period ranking_period               NOT NULL,
+    period varchar(20)                  NOT NULL,
     score DOUBLE PRECISION              NOT NULL,
     like_count BIGINT                   NOT NULL,
     comment_count BIGINT                NOT NULL,
@@ -161,7 +160,7 @@ CREATE TABLE popular_review_ranking (
 CREATE TABLE power_user_ranking (
     id UUID                             PRIMARY KEY,
     user_id UUID                        NOT NULL,
-    period ranking_period               NOT NULL,
+    period varchar(20)                  NOT NULL,
     score DOUBLE PRECISION              NOT NULL,
     review_score_sum DOUBLE PRECISION   NOT NULL,
     like_count BIGINT                   NOT NULL,

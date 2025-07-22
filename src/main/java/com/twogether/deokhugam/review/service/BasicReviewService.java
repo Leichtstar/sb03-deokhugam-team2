@@ -1,6 +1,7 @@
 package com.twogether.deokhugam.review.service;
 
 import com.twogether.deokhugam.book.entity.Book;
+import com.twogether.deokhugam.book.exception.BookNotFoundException;
 import com.twogether.deokhugam.book.repository.BookRepository;
 import com.twogether.deokhugam.book.service.BookService;
 import com.twogether.deokhugam.common.dto.CursorPageResponseDto;
@@ -60,7 +61,7 @@ public class BasicReviewService implements ReviewService{
         }
 
         // 리뷰 작성하려는 책, 유저
-        Book reviewdBook = bookRepository.findById(request.bookId())
+        Book reviewedBook = bookRepository.findById(request.bookId())
                 .orElseThrow(
                         () -> new NoSuchElementException("책을 찾을 수 없습니다. " + request.bookId()));
 
@@ -68,7 +69,7 @@ public class BasicReviewService implements ReviewService{
                 .orElseThrow(
                         () -> new NoSuchElementException("사용자를 찾을 수 없습니다. " + request.userId()));
 
-        Review review = new Review(reviewdBook, reviewer, request.content(), request.rating());
+        Review review = new Review(reviewedBook, reviewer, request.content(), request.rating());
         reviewRepository.save(review);
 
         ReviewLike reviewLike = new ReviewLike(
@@ -76,6 +77,10 @@ public class BasicReviewService implements ReviewService{
                 reviewer,
                 false
         );
+
+        bookRepository.updateBookReviewStats(request.bookId());
+        bookRepository.save(reviewedBook);
+
         reviewLikeRepository.save(reviewLike);
         bookService.updateReviewStats(request.bookId());
         log.info("[BasicReviewService] 리뷰 등록 성공");
@@ -167,19 +172,48 @@ public class BasicReviewService implements ReviewService{
 
     // 리뷰 논리 삭제
     @Override
+    @Transactional
     public void deleteReviewSoft(UUID reviewId, UUID requestUserId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
+
+        Book reviewedBook = bookRepository.findById(review.getBook().getId())
+                .orElseThrow(BookNotFoundException::new);
 
         if (!review.getUser().getId().equals(requestUserId)){
             throw new ReviewNotOwnedException();
         }
         review.updateIsDelete(true);
-        // 댓글 논리 삭제 부분도 추가?
+
+        bookRepository.updateBookReviewStats(reviewedBook.getId());
+        bookRepository.save(reviewedBook);
+
         reviewRepository.save(review);
         bookService.updateReviewStats(review.getBook().getId());
 
         log.info("[BasicReviewService]: 리뷰 논리 삭제 완료");
+    }
+
+    // 리뷰 물리 삭제
+    @Override
+    @Transactional
+    public void deleteReviewHard(UUID reviewId, UUID requestUserId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ReviewNotFoundException(reviewId));
+
+        Book reviewedBook = bookRepository.findById(review.getBook().getId())
+                .orElseThrow(BookNotFoundException::new);
+
+        if (!review.getUser().getId().equals(requestUserId)){
+            throw new ReviewNotOwnedException();
+        }
+
+        reviewRepository.delete(review);
+
+        bookRepository.updateBookReviewStats(reviewedBook.getId());
+        bookRepository.save(reviewedBook);
+
+        log.info("[BasicReviewService]: 리뷰 물리 삭제 완료");
     }
 
     // 리뷰 좋아요 기능
@@ -210,7 +244,7 @@ public class BasicReviewService implements ReviewService{
 
             // 좋아요 알림 생성 트리거
             if (!review.getUser().getId().equals(userId)) {
-            notificationService.createLikeNotification(reviewer, review);
+                notificationService.createLikeNotification(reviewer, review);
             }
 
             return reviewLikeMapper.toDto(newReviewLike);
@@ -230,13 +264,6 @@ public class BasicReviewService implements ReviewService{
                 // 좋아요가 false 라면
                 reviewLike.updateLike(true);
                 review.updateLikeCount(review.getLikeCount() + 1);
-
-                // 좋아요 알림 생성 트리거
-                if (!review.getUser().getId().equals(userId)) {
-                    User liker = userRepository.findById(userId)
-                        .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다. " + userId));
-                    notificationService.createLikeNotification(liker, review);
-                }
             }
 
             reviewLikeRepository.save(reviewLike);
