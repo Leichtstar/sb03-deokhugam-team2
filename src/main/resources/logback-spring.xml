@@ -9,8 +9,25 @@
     </encoder>
   </appender>
 
+  <!-- 파일 출력 설정 -->
+  <property name="LOG_PATTERN" value="%d{yy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %-36logger{36} [%X{jobName} | %X{rankingPeriod} | %X{requestId} | %X{requestMethod} | %X{requestUri} | %X{clientIp}] - %msg%n"/>
+  <property name="LOG_FILE_PATH" value=".logs"/>
+  <property name="LOG_FILE_NAME" value="application"/>
+
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_FILE_PATH}/${LOG_FILE_NAME}.log</file>
+    <encoder>
+      <pattern>${LOG_PATTERN}</pattern>
+    </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_PATH}/${LOG_FILE_NAME}.%d{yyyy-MM-dd}.log</fileNamePattern>
+      <maxHistory>30</maxHistory>
+    </rollingPolicy>
+  </appender>
+
   <root level="INFO">
     <appender-ref ref="CONSOLE" />
+    <appender-ref ref="FILE"/>
   </root>
 
 </configuration>
