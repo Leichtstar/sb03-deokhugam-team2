@@ -27,7 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class LocalBookService implements BookService {
+public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
     private final ReviewRepository reviewRepository;
@@ -209,17 +209,5 @@ public class LocalBookService implements BookService {
             s3ImageStorage.deleteImage(thumbnailUrl);
         }
         bookRepository.deleteById(bookId);
-    }
-
-    @Override
-    public void updateReviewStats(UUID bookId){
-        Book book = bookRepository.findById(bookId).orElseThrow(BookNotFoundException::new);
-
-        Object[] stats = (Object[]) reviewRepository.getReviewStats(bookId); // ✅ 캐스팅
-        int count = ((Number) stats[0]).intValue();
-        float average = ((Number) stats[1]).floatValue();
-
-        book.setReviewCount(count);
-        book.setRating(average);
     }
 }
