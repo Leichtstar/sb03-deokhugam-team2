@@ -25,7 +25,7 @@ public class PowerUserRankingScheduler {
     private final PowerUserRankingRepository powerUserRankingRepository;
 
     //@Scheduled(initialDelay = 1000, fixedDelay = Long.MAX_VALUE) // application 실행 시 즉시 배치 (테스트용)
-    @Scheduled(cron = "${batch.power-user-ranking.cron}")
+    @Scheduled(cron = "${batch.power-user-ranking.cron:0 10 0 * * *}")
     public void runRankingJob() {
         String jobName = "powerUserRankingJob";
         String requestId = UUID.randomUUID().toString();
