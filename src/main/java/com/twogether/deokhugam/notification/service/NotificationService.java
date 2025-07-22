@@ -71,4 +71,12 @@ public class NotificationService {
 
         return notificationMapper.toDto(notification);
     }
+
+    /**
+     * 전체 알림 읽음 처리
+     */
+    @Transactional
+    public void markAllAsRead(UUID userId) {
+        notificationRepository.markAllAsReadByUserId(userId);
+    }
 }
