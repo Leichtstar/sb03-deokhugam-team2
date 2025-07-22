@@ -2,9 +2,15 @@ package com.twogether.deokhugam.comments.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.twogether.deokhugam.comments.dto.CommentCreateRequest;
 import com.twogether.deokhugam.comments.dto.CommentResponse;
@@ -15,13 +21,12 @@ import com.twogether.deokhugam.comments.exception.CommentForbiddenException;
 import com.twogether.deokhugam.comments.exception.CommentNotFoundException;
 import com.twogether.deokhugam.comments.mapper.CommentMapper;
 import com.twogether.deokhugam.comments.repository.CommentRepository;
-import com.twogether.deokhugam.notification.service.NotificationService;
+import com.twogether.deokhugam.notification.event.CommentCreatedEvent;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
 import com.twogether.deokhugam.user.entity.User;
 import com.twogether.deokhugam.user.repository.UserRepository;
 import jakarta.validation.Validator;
-
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,8 +37,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,10 +56,11 @@ class CommentServiceTest {
     @Mock
     private UserRepository userRepository;
 
-    @Mock
-    private NotificationService notificationService;
-
     private Validator validator;
+
+    // 알림 이벤트
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private CommentService commentService;
@@ -157,20 +162,13 @@ class CommentServiceTest {
     void createComment_success() {
         // given
         User mockUser = mock(User.class);
-        User mockUser2 = mock(User.class);
         Review mockReview = mock(Review.class);
         Comment mockComment = new Comment(mockUser, mockReview, "테스트 댓글입니다.");
         CommentResponse expectedResponse = mock(CommentResponse.class);
 
-        UUID mockUserId = UUID.randomUUID();
-        UUID mockUser2Id = UUID.randomUUID();
-
         when(reviewRepository.findById(any())).thenReturn(Optional.of(mockReview));
         when(userRepository.findById(any())).thenReturn(Optional.of(mockUser));
         when(commentRepository.save(any(Comment.class))).thenReturn(mockComment);
-        when(mockUser.getId()).thenReturn(mockUserId);
-        when(mockReview.getUser()).thenReturn(mockUser2);
-        when(mockUser2.getId()).thenReturn(mockUser2Id);
 
         when(commentMapper.toResponse(any(Comment.class))).thenReturn(expectedResponse);
 
@@ -183,8 +181,8 @@ class CommentServiceTest {
         verify(userRepository, times(1)).findById(any());
         verify(commentRepository, times(1)).save(any(Comment.class));
         verify(reviewRepository, times(1)).incrementCommentCount(commentCreateRequest.reviewId());
-        verify(notificationService, times(1)).createCommentNotification(mockUser, mockReview, mockComment.getContent());
         verify(commentMapper, times(1)).toResponse(any(Comment.class));
+        verify(eventPublisher).publishEvent(any(CommentCreatedEvent.class));
     }
 
 

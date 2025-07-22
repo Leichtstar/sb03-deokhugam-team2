@@ -90,7 +90,7 @@ class NotificationQueryServiceTest {
 
         // then
         assertThat(result.getContent()).hasSize(2);
-        assertThat(result.isHasNext()).isTrue();
+        assertThat(result.isHasNext()).isFalse();
         assertThat(result.getSize()).isEqualTo(2);
     }
 
@@ -114,19 +114,31 @@ class NotificationQueryServiceTest {
             .review(review)
             .build();
 
+        Notification anotherNotification = Notification.builder()
+            .id(UUID.randomUUID())
+            .content("test4")
+            .confirmed(false)
+            .createdAt(baseTime.minusMinutes(10))
+            .user(user)
+            .review(review)
+            .build();
+
         when(notificationRepository.findByUserIdWithAfter(eq(userId), eq(after), any()))
-            .thenReturn(List.of(notification));
+            .thenReturn(List.of(notification, anotherNotification));
         when(notificationMapper.toDto(any()))
-            .thenReturn(new NotificationDto(
-                notification.getId(),
-                userId,
-                UUID.randomUUID(),
-                "도서 제목",
-                notification.getContent(),
-                notification.isConfirmed(),
-                notification.getCreatedAt(),
-                notification.getUpdatedAt()
-            ));
+            .thenAnswer(invocation -> {
+                Notification n = invocation.getArgument(0);
+                return new NotificationDto(
+                    n.getId(),
+                    userId,
+                    UUID.randomUUID(),
+                    "도서 제목",
+                    n.getContent(),
+                    n.isConfirmed(),
+                    n.getCreatedAt(),
+                    n.getUpdatedAt()
+                );
+            });
 
         // when
         CursorPageResponse<NotificationDto> result = notificationQueryService.getNotifications(

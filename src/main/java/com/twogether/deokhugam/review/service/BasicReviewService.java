@@ -5,6 +5,7 @@ import com.twogether.deokhugam.book.exception.BookNotFoundException;
 import com.twogether.deokhugam.book.repository.BookRepository;
 import com.twogether.deokhugam.book.service.BookService;
 import com.twogether.deokhugam.common.dto.CursorPageResponseDto;
+import com.twogether.deokhugam.notification.event.ReviewLikedEvent;
 import com.twogether.deokhugam.notification.service.NotificationService;
 import com.twogether.deokhugam.review.dto.ReviewDto;
 import com.twogether.deokhugam.review.dto.ReviewLikeDto;
@@ -30,6 +31,7 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -48,6 +50,8 @@ public class BasicReviewService implements ReviewService{
     private final ReviewMapper reviewMapper;
     private final ReviewLikeMapper reviewLikeMapper;
     private final ReviewCursorHelper reviewCursorHelper;
+    // 알림용
+    private final ApplicationEventPublisher eventPublisher;
     private final BookService bookService;
     private final NotificationService notificationService;
 
@@ -240,10 +244,8 @@ public class BasicReviewService implements ReviewService{
             reviewLikeRepository.save(newReviewLike);
             reviewRepository.save(review);
 
-            // 좋아요 알림 생성 트리거
-            if (!review.getUser().getId().equals(userId)) {
-                notificationService.createLikeNotification(reviewer, review);
-            }
+            // 리뷰 이벤트 발행
+            eventPublisher.publishEvent(new ReviewLikedEvent(reviewer, review));
 
             return reviewLikeMapper.toDto(newReviewLike);
         }
@@ -262,6 +264,9 @@ public class BasicReviewService implements ReviewService{
                 // 좋아요가 false 라면
                 reviewLike.updateLike(true);
                 review.updateLikeCount(review.getLikeCount() + 1);
+
+                // 리뷰 이벤트 발행
+                eventPublisher.publishEvent(new ReviewLikedEvent(reviewLike.getUser(), review));
             }
 
             reviewLikeRepository.save(reviewLike);

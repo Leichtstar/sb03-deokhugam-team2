@@ -19,7 +19,7 @@ class ReviewScoreProcessorTest {
 
     @BeforeEach
     void setUp() {
-        processor = new ReviewScoreProcessor(RankingPeriod.DAILY);
+        processor = new ReviewScoreProcessor();
     }
 
     @Test
@@ -36,14 +36,15 @@ class ReviewScoreProcessorTest {
             "이펙티브 자바",
             "http://example.com/image.jpg",
             5L,
-            15L
+            15L,
+            RankingPeriod.DAILY
         );
 
         // when
         PopularReviewRanking result = processor.process(input);
 
         // then
-        assertEquals(12.0, result.getScore(), 0.0001); // double 비교는 delta 설정
+        assertEquals(12.0, result.getScore(), 0.0001);
         assertEquals(RankingPeriod.DAILY, result.getPeriod());
         assertEquals(input.reviewId(), result.getReviewId());
         assertEquals(input.userId(), result.getUserId());
@@ -72,7 +73,8 @@ class ReviewScoreProcessorTest {
             "무제",
             "http://image.png",
             0L,
-            0L
+            0L,
+            RankingPeriod.DAILY
         );
 
         PopularReviewRanking result = processor.process(input);
