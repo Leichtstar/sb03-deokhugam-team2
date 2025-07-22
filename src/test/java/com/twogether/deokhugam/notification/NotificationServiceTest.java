@@ -1,5 +1,7 @@
 package com.twogether.deokhugam.notification;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -7,11 +9,16 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.twogether.deokhugam.notification.dto.NotificationDto;
 import com.twogether.deokhugam.notification.entity.Notification;
+import com.twogether.deokhugam.notification.exception.NotificationNotFoundException;
+import com.twogether.deokhugam.notification.mapper.NotificationMapper;
 import com.twogether.deokhugam.notification.repository.NotificationRepository;
 import com.twogether.deokhugam.notification.service.NotificationService;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.user.entity.User;
+import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +27,7 @@ class NotificationServiceTest {
 
     private NotificationService notificationService;
     private NotificationRepository notificationRepository;
+    private NotificationMapper notificationMapper;
 
     private User writer;
     private User otherUser;
@@ -28,7 +36,8 @@ class NotificationServiceTest {
     @BeforeEach
     void setUp() {
         notificationRepository = mock(NotificationRepository.class);
-        notificationService = new NotificationService(notificationRepository);
+        notificationMapper = mock(NotificationMapper.class);
+        notificationService = new NotificationService(notificationRepository, notificationMapper);
 
         // 작성자
         writer = mock(User.class);
@@ -80,5 +89,41 @@ class NotificationServiceTest {
         notificationService.createLikeNotification(writer, review);
 
         verify(notificationRepository, never()).save(any(Notification.class));
+    }
+
+    @Test
+    void 알림_확인_상태_변경_성공() {
+        // given
+        UUID notificationId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        Notification notification = mock(Notification.class);
+        NotificationDto dto = mock(NotificationDto.class);
+
+        when(notificationRepository.findByIdAndUserId(notificationId, userId))
+            .thenReturn(Optional.of(notification));
+        when(notificationMapper.toDto(notification)).thenReturn(dto);
+
+        // when
+        NotificationDto result = notificationService.updateConfirmedStatus(notificationId, userId, true);
+
+        // then
+        assertThat(result).isEqualTo(dto);
+        verify(notification).setConfirmed(true);
+    }
+
+    @Test
+    void 알림이_없으면_예외를_던진다() {
+        // given
+        UUID notificationId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        when(notificationRepository.findByIdAndUserId(notificationId, userId))
+            .thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() ->
+            notificationService.updateConfirmedStatus(notificationId, userId, true)
+        ).isInstanceOf(NotificationNotFoundException.class);
     }
 }

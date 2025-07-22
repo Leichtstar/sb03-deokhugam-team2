@@ -20,10 +20,13 @@ logging:
   level:
     root: info
 
+# Naver API 인증값
 naver:
   api:
     client-id: ${NAVER_CLIENT_ID}
     client-secret: ${NAVER_CLIENT_SECRET}
+    ocr-secret: ${NAVER_OCR_SECRET}
+    ocr-url: ${NAVER_OCR_URL}
 
 #Spring Batch 설정
 batch:

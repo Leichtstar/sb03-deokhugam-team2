@@ -8,6 +8,7 @@ import com.twogether.deokhugam.book.entity.Book;
 import com.twogether.deokhugam.book.exception.BookNotFoundException;
 import com.twogether.deokhugam.book.exception.DuplicatedIsbnException;
 import com.twogether.deokhugam.book.repository.BookRepository;
+import com.twogether.deokhugam.review.repository.ReviewRepository;
 import com.twogether.deokhugam.storage.S3ImageStorage;
 import jakarta.annotation.Nullable;
 import java.io.IOException;
@@ -20,13 +21,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
-public class LocalBookService implements BookService {
+@Transactional
+public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
+    private final ReviewRepository reviewRepository;
     private final S3ImageStorage s3ImageStorage;
 
     @Override
@@ -198,19 +202,12 @@ public class LocalBookService implements BookService {
         Book book = bookRepository.findById(bookId)
             .orElseThrow(BookNotFoundException::new);
 
-        // 썸네일 URL에서 S3 key 추출
+        // 썸네일 URL 추출
         String thumbnailUrl = book.getThumbnailUrl(); // 예: https://your-bucket.s3.amazonaws.com/book/thumbnail/abc.jpg
         if (thumbnailUrl != null && !thumbnailUrl.isBlank()) {
-            String key = extractS3KeyFromUrl(thumbnailUrl); // 예: book/thumbnail/abc.jpg
-            //s3ImageStorage.delete(key); // s3 구현체에서 delete 호출
+            //s3에서 이미지 삭제 요청
+            s3ImageStorage.deleteImage(thumbnailUrl);
         }
         bookRepository.deleteById(bookId);
-    }
-    private String extractS3KeyFromUrl(String url) {
-        int index = url.indexOf(".amazonaws.com/");
-        if (index != -1) {
-            return url.substring(index + ".amazonaws.com/".length());
-        }
-        throw new IllegalArgumentException("잘못된 S3URL 형식입니다.: " + url);
     }
 }
