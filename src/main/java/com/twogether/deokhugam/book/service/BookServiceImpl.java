@@ -27,7 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class LocalBookService implements BookService {
+public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
     private final ReviewRepository reviewRepository;
