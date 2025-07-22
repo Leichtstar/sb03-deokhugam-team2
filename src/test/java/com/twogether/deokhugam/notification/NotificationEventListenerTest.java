@@ -5,6 +5,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.twogether.deokhugam.notification.event.CommentCreatedEvent;
+import com.twogether.deokhugam.notification.event.ReviewLikedEvent;
 import com.twogether.deokhugam.notification.listener.NotificationEventListener;
 import com.twogether.deokhugam.notification.repository.NotificationRepository;
 import com.twogether.deokhugam.notification.service.NotificationService;
@@ -51,5 +52,28 @@ class NotificationEventListenerTest {
 
         // then
         verify(notificationService).createCommentNotification(commenter, review, commentContent);
+    }
+
+    @Test
+    void 리뷰_좋아요_이벤트_발생시_알림이_저장된다() {
+        // given
+        User receiver = mock(User.class);
+        UUID receiverId = UUID.randomUUID();
+        when(receiver.getId()).thenReturn(receiverId);
+
+        User liker = mock(User.class);
+        UUID likerId = UUID.randomUUID();
+        when(liker.getId()).thenReturn(likerId);
+
+        Review review = mock(Review.class);
+        when(review.getUser()).thenReturn(receiver);
+
+        ReviewLikedEvent event = new ReviewLikedEvent(liker, review);
+
+        // when
+        notificationEventListener.handle(event);
+
+        // then
+        verify(notificationService).createLikeNotification(liker, review);
     }
 }
