@@ -3,11 +3,16 @@ package com.twogether.deokhugam.review.mapper;
 import com.twogether.deokhugam.book.entity.Book;
 import com.twogether.deokhugam.review.dto.ReviewDto;
 import com.twogether.deokhugam.review.entity.Review;
+import com.twogether.deokhugam.review.repository.ReviewRepository;
 import com.twogether.deokhugam.user.entity.User;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+@RequiredArgsConstructor
 @Component
 public class ReviewMapper {
+
+    private final ReviewRepository reviewRepository;
 
     public ReviewDto toDto(Review review, boolean likeByMe){
         if (review == null){

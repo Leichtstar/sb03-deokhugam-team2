@@ -1,7 +1,9 @@
 package com.twogether.deokhugam.review.service;
 
 import com.twogether.deokhugam.book.entity.Book;
+import com.twogether.deokhugam.book.exception.BookNotFoundException;
 import com.twogether.deokhugam.book.repository.BookRepository;
+import com.twogether.deokhugam.book.service.BookService;
 import com.twogether.deokhugam.common.dto.CursorPageResponseDto;
 import com.twogether.deokhugam.notification.service.NotificationService;
 import com.twogether.deokhugam.review.dto.ReviewDto;
@@ -58,7 +60,7 @@ public class BasicReviewService implements ReviewService{
         }
 
         // 리뷰 작성하려는 책, 유저
-        Book reviewdBook = bookRepository.findById(request.bookId())
+        Book reviewedBook = bookRepository.findById(request.bookId())
                 .orElseThrow(
                         () -> new NoSuchElementException("책을 찾을 수 없습니다. " + request.bookId()));
 
@@ -66,7 +68,7 @@ public class BasicReviewService implements ReviewService{
                 .orElseThrow(
                         () -> new NoSuchElementException("사용자를 찾을 수 없습니다. " + request.userId()));
 
-        Review review = new Review(reviewdBook, reviewer, request.content(), request.rating());
+        Review review = new Review(reviewedBook, reviewer, request.content(), request.rating());
         reviewRepository.save(review);
 
         ReviewLike reviewLike = new ReviewLike(
@@ -74,6 +76,10 @@ public class BasicReviewService implements ReviewService{
                 reviewer,
                 false
         );
+
+        bookRepository.updateBookReviewStats(request.bookId());
+        bookRepository.save(reviewedBook);
+
         reviewLikeRepository.save(reviewLike);
 
         log.info("[BasicReviewService] 리뷰 등록 성공");
@@ -166,18 +172,47 @@ public class BasicReviewService implements ReviewService{
 
     // 리뷰 논리 삭제
     @Override
+    @Transactional
     public void deleteReviewSoft(UUID reviewId, UUID requestUserId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
+
+        Book reviewedBook = bookRepository.findById(review.getBook().getId())
+                .orElseThrow(BookNotFoundException::new);
 
         if (!review.getUser().getId().equals(requestUserId)){
             throw new ReviewNotOwnedException();
         }
         review.updateIsDelete(true);
-        // 댓글 논리 삭제 부분도 추가?
+
+        bookRepository.updateBookReviewStats(reviewedBook.getId());
+        bookRepository.save(reviewedBook);
+
         reviewRepository.save(review);
 
         log.info("[BasicReviewService]: 리뷰 논리 삭제 완료");
+    }
+
+    // 리뷰 물리 삭제
+    @Override
+    @Transactional
+    public void deleteReviewHard(UUID reviewId, UUID requestUserId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ReviewNotFoundException(reviewId));
+
+        Book reviewedBook = bookRepository.findById(review.getBook().getId())
+                .orElseThrow(BookNotFoundException::new);
+
+        if (!review.getUser().getId().equals(requestUserId)){
+            throw new ReviewNotOwnedException();
+        }
+
+        reviewRepository.delete(review);
+
+        bookRepository.updateBookReviewStats(reviewedBook.getId());
+        bookRepository.save(reviewedBook);
+
+        log.info("[BasicReviewService]: 리뷰 물리 삭제 완료");
     }
 
     // 리뷰 좋아요 기능
