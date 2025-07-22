@@ -47,4 +47,12 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
     WHERE n.user.id = :userId AND n.confirmed = false
     """)
     void markAllAsReadByUserId(@Param("userId") UUID userId);
+
+    @Modifying
+    @Transactional
+    @Query("""
+    DELETE FROM Notification n
+    WHERE n.confirmed = true AND n.updatedAt < :cutoff
+""")
+    void deleteOldConfirmedNotifications(@Param("cutoff") LocalDateTime cutoff);
 }
