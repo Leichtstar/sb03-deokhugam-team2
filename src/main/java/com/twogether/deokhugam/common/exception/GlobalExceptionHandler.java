@@ -1,5 +1,7 @@
 package com.twogether.deokhugam.common.exception;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -12,9 +14,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Slf4j
 @RestControllerAdvice
@@ -95,6 +99,72 @@ public class GlobalExceptionHandler {
     return ResponseEntity
             .badRequest()
             .body(errorResponse);
+  }
+
+  // 필수 요청 헤더가 누락된 경우 처리
+  @ExceptionHandler(org.springframework.web.bind.MissingRequestHeaderException.class)
+  @ResponseBody
+  public ResponseEntity<ErrorResponse> handleMissingRequestHeader(MissingRequestHeaderException e) {
+    log.warn("[GlobalExceptionHandler] MissingRequestHeaderException 발생: {}", e.getMessage(), e);
+
+    ErrorResponse errorResponse = ErrorResponse.builder()
+        .timestamp(Instant.now())
+        .code("MISSING_HEADER")
+        .message("필수 헤더가 누락되었습니다: " + e.getHeaderName())
+        .exceptionType("MissingRequestHeaderException")
+        .status(HttpStatus.BAD_REQUEST.value())
+        .build();
+
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(errorResponse);
+  }
+
+  // 잘못된 타입의 요청 파라미터가 전달된 경우 처리
+  @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
+  @ResponseBody
+  public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
+    log.warn("[GlobalExceptionHandler] MethodArgumentTypeMismatchException 발생: {}", e.getMessage(), e);
+
+    ErrorResponse errorResponse = ErrorResponse.builder()
+        .timestamp(Instant.now())
+        .code("INVALID_PARAM_TYPE")
+        .message("잘못된 파라미터 타입입니다: " + e.getName())
+        .exceptionType("MethodArgumentTypeMismatchException")
+        .status(HttpStatus.BAD_REQUEST.value())
+        .build();
+
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(errorResponse);
+  }
+
+  // ConstraintViolationException 예외 처리
+  @ExceptionHandler(ConstraintViolationException.class)
+  @ResponseBody
+  public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException e) {
+    log.warn("[GlobalExceptionHandler] ConstraintViolationException 발생: {}", e.getMessage(), e);
+
+    Map<String, Object> details = new HashMap<>();
+
+    for (ConstraintViolation<?> violation : e.getConstraintViolations()) {
+      String propertyPath = violation.getPropertyPath().toString(); // 예: "getNotifications.limit"
+      String message = violation.getMessage();                      // 예: "limit은 1 이상의 정수"
+      details.put(propertyPath, message);
+    }
+
+    ErrorResponse errorResponse = ErrorResponse.builder()
+        .timestamp(Instant.now())
+        .code("INVALID_CONSTRAINT")
+        .message("잘못된 요청입니다.")
+        .details(details)
+        .exceptionType("ConstraintViolationException")
+        .status(400)
+        .build();
+
+    return ResponseEntity
+        .badRequest()
+        .body(errorResponse);
   }
 
   // defalt 예외 처리기
