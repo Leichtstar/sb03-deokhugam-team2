@@ -1,5 +1,6 @@
 package com.twogether.deokhugam.dashboard.batch.model;
 
+import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import java.util.UUID;
 
 public record PowerUserScoreDto(
@@ -7,7 +8,8 @@ public record PowerUserScoreDto(
     String nickname,
     double reviewScoreSum,
     long likeCount,
-    long commentCount
+    long commentCount,
+    RankingPeriod period
 ) {
 
     /**

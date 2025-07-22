@@ -8,6 +8,7 @@ import com.twogether.deokhugam.comments.exception.CommentForbiddenException;
 import com.twogether.deokhugam.comments.exception.CommentNotFoundException;
 import com.twogether.deokhugam.comments.mapper.CommentMapper;
 import com.twogether.deokhugam.comments.repository.CommentRepository;
+import com.twogether.deokhugam.notification.event.CommentCreatedEvent;
 import com.twogether.deokhugam.notification.service.NotificationService;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.review.exception.ReviewNotFoundException;
@@ -18,6 +19,7 @@ import com.twogether.deokhugam.user.repository.UserRepository;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -34,6 +36,8 @@ public class CommentService {
     private final CommentMapper commentMapper;
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
+    // 알림용
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * 댓글 등록.
@@ -48,6 +52,11 @@ public class CommentService {
             .orElseThrow(() -> new UserNotFoundException());
         Comment entity = new Comment(user, review, request.content());
         Comment saved = commentRepository.save(entity);
+
+        // 알림 이벤트 발행
+        eventPublisher.publishEvent(
+            new CommentCreatedEvent(user, review, saved.getContent())
+        );
         return commentMapper.toResponse(saved);
     }
 

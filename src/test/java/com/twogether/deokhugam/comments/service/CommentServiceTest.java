@@ -34,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,6 +54,10 @@ class CommentServiceTest {
     private UserRepository userRepository;
 
     private Validator validator;
+
+    // 알림 이벤트
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private CommentService commentService;

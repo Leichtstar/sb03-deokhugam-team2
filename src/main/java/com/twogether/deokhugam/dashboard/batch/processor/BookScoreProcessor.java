@@ -11,17 +11,9 @@ import org.springframework.batch.item.ItemProcessor;
 public class BookScoreProcessor implements ItemProcessor<BookScoreDto, PopularBookRanking> {
 
     private final EntityManager em;
-    private final RankingPeriod period;
 
-    public BookScoreProcessor(EntityManager em, RankingPeriod period) {
-        if (em == null) {
-            throw new IllegalArgumentException("EntityManager는 null일 수 없습니다.");
-        }
-        if (period == null) {
-            throw new IllegalArgumentException("RankingPeriod는 null일 수 없습니다.");
-        }
+    public BookScoreProcessor(EntityManager em) {
         this.em = em;
-        this.period = period;
     }
 
     @Override
@@ -37,7 +29,7 @@ public class BookScoreProcessor implements ItemProcessor<BookScoreDto, PopularBo
             .score(dto.calculateScore())
             .reviewCount(dto.reviewCount())
             .rating(dto.averageRating())
-            .period(period)
+            .period(dto.period())
             .createdAt(LocalDateTime.now())
             .build();
     }

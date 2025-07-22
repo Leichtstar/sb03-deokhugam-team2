@@ -10,14 +10,10 @@ import org.springframework.batch.item.ItemProcessor;
 @RequiredArgsConstructor
 public class ReviewScoreProcessor implements ItemProcessor<ReviewScoreDto, PopularReviewRanking> {
 
-    private final RankingPeriod period;
-
     @Override
     public PopularReviewRanking process(ReviewScoreDto dto) {
-        double score = dto.calculateScore();
-
         return PopularReviewRanking.builder()
-            .period(period)
+            .period(dto.period())
             .reviewId(dto.reviewId())
             .userId(dto.userId())
             .userNickname(dto.userNickname())
@@ -28,7 +24,7 @@ public class ReviewScoreProcessor implements ItemProcessor<ReviewScoreDto, Popul
             .bookThumbnailUrl(dto.bookThumbnailUrl())
             .likeCount(dto.likeCount())
             .commentCount(dto.commentCount())
-            .score(score)
+            .score(dto.calculateScore())
             .rank(0)
             .createdAt(LocalDateTime.now())
             .build();

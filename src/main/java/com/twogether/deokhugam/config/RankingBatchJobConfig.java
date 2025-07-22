@@ -43,9 +43,10 @@ public class RankingBatchJobConfig {
     // [1] 도서 랭킹 Job
     @Bean
     public Job popularBookRankingJob(JobRepository jobRepository,
-        PlatformTransactionManager transactionManager) {
+        PlatformTransactionManager transactionManager,
+        JpaBookScoreReader reader) {
         return new JobBuilder("popularBookRankingJob", jobRepository)
-            .start(popularBookRankingStep(jobRepository, transactionManager, null))
+            .start(popularBookRankingStep(jobRepository, transactionManager, reader))
             .build();
     }
 
@@ -53,15 +54,10 @@ public class RankingBatchJobConfig {
     @JobScope
     public Step popularBookRankingStep(JobRepository jobRepository,
         PlatformTransactionManager transactionManager,
-        @Value("#{jobParameters['period']}") String periodKey) {
+        JpaBookScoreReader reader) {
+        ItemProcessor<BookScoreDto, PopularBookRanking> processor = new BookScoreProcessor(em);
 
-        RankingPeriod period = RankingPeriod.valueOf(
-            periodKey != null ? periodKey.toUpperCase() : "DAILY"
-        );
-        ItemReader<BookScoreDto> reader = new JpaBookScoreReader(em, period);
-        ItemProcessor<BookScoreDto, PopularBookRanking> processor = new BookScoreProcessor(em, period);
-
-        return new StepBuilder("popularBookStep_" + period.name(), jobRepository)
+        return new StepBuilder("popularBookStep", jobRepository)
             .<BookScoreDto, PopularBookRanking>chunk(100, transactionManager)
             .reader(reader)
             .processor(processor)
@@ -72,9 +68,10 @@ public class RankingBatchJobConfig {
     // [2] 리뷰 랭킹 Job
     @Bean
     public Job popularReviewRankingJob(JobRepository jobRepository,
-        PlatformTransactionManager transactionManager) {
+        PlatformTransactionManager transactionManager,
+        JpaReviewScoreReader reader) {
         return new JobBuilder("popularReviewRankingJob", jobRepository)
-            .start(popularReviewRankingStep(jobRepository, transactionManager, null))
+            .start(popularReviewRankingStep(jobRepository, transactionManager, reader))
             .build();
     }
 
@@ -82,16 +79,10 @@ public class RankingBatchJobConfig {
     @JobScope
     public Step popularReviewRankingStep(JobRepository jobRepository,
         PlatformTransactionManager transactionManager,
-        @Value("#{jobParameters['period']}") String periodKey) {
+        JpaReviewScoreReader reader) {
+        ItemProcessor<ReviewScoreDto, PopularReviewRanking> processor = new ReviewScoreProcessor();
 
-        RankingPeriod period = RankingPeriod.valueOf(
-            periodKey != null ? periodKey.toUpperCase() : "DAILY"
-        );
-
-        ItemReader<ReviewScoreDto> reader = new JpaReviewScoreReader(em, period);
-        ItemProcessor<ReviewScoreDto, PopularReviewRanking> processor = new ReviewScoreProcessor(period);
-
-        return new StepBuilder("popularReviewStep_" + period.name(), jobRepository)
+        return new StepBuilder("popularReviewStep", jobRepository)
             .<ReviewScoreDto, PopularReviewRanking>chunk(100, transactionManager)
             .reader(reader)
             .processor(processor)
@@ -102,9 +93,10 @@ public class RankingBatchJobConfig {
     // [3] 파워 유저 랭킹 Job
     @Bean
     public Job powerUserRankingJob(JobRepository jobRepository,
-        PlatformTransactionManager transactionManager) {
+        PlatformTransactionManager transactionManager,
+        JpaPowerUserScoreReader reader) {
         return new JobBuilder("powerUserRankingJob", jobRepository)
-            .start(powerUserRankingStep(jobRepository, transactionManager, null))
+            .start(powerUserRankingStep(jobRepository, transactionManager, reader))
             .build();
     }
 
@@ -112,16 +104,10 @@ public class RankingBatchJobConfig {
     @JobScope
     public Step powerUserRankingStep(JobRepository jobRepository,
         PlatformTransactionManager transactionManager,
-        @Value("#{jobParameters['period']}") String periodKey) {
+        JpaPowerUserScoreReader reader) {
+        ItemProcessor<PowerUserScoreDto, PowerUserRanking> processor = new PowerUserScoreProcessor(em);
 
-        RankingPeriod period = RankingPeriod.valueOf(
-            periodKey != null ? periodKey.toUpperCase() : "DAILY"
-        );
-
-        ItemReader<PowerUserScoreDto> reader = new JpaPowerUserScoreReader(em, period);
-        ItemProcessor<PowerUserScoreDto, PowerUserRanking> processor = new PowerUserScoreProcessor(em, period);
-
-        return new StepBuilder("powerUserStep_" + period.name(), jobRepository)
+        return new StepBuilder("powerUserStep", jobRepository)
             .<PowerUserScoreDto, PowerUserRanking>chunk(100, transactionManager)
             .reader(reader)
             .processor(processor)

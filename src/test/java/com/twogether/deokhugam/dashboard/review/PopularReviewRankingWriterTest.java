@@ -3,10 +3,13 @@ package com.twogether.deokhugam.dashboard.review;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import com.twogether.deokhugam.common.exception.DeokhugamException;
 import com.twogether.deokhugam.common.exception.ErrorCode;
@@ -15,7 +18,9 @@ import com.twogether.deokhugam.dashboard.entity.PopularReviewRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PopularReviewRankingRepository;
 import com.twogether.deokhugam.notification.service.NotificationService;
+import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
+import com.twogether.deokhugam.user.entity.User;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,21 +29,24 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.batch.item.Chunk;
+import org.springframework.context.ApplicationEventPublisher;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("PopularReviewRankingWriter 단위 테스트")
 class PopularReviewRankingWriterTest {
 
     PopularReviewRankingRepository repository;
+    ReviewRepository reviewRepository;
+    ApplicationEventPublisher eventPublisher;
     PopularReviewRankingWriter writer;
 
     @BeforeEach
     void setUp() {
         repository = mock(PopularReviewRankingRepository.class);
-        NotificationService notificationService = mock(NotificationService.class);
-        ReviewRepository reviewRepository = mock(ReviewRepository.class);
+        reviewRepository = mock(ReviewRepository.class);
+        eventPublisher = mock(ApplicationEventPublisher.class);
 
-        writer = new PopularReviewRankingWriter(repository, notificationService, reviewRepository);
+        writer = new PopularReviewRankingWriter(repository, reviewRepository, eventPublisher);
     }
 
     @Test
@@ -49,6 +57,11 @@ class PopularReviewRankingWriterTest {
         PopularReviewRanking r2 = createRanking("책2", 7.8);
         Chunk<PopularReviewRanking> chunk = new Chunk<>(List.of(r1, r2));
 
+        Review mockReview1 = mock(Review.class);
+        Review mockReview2 = mock(Review.class);
+        when(reviewRepository.findAllById(any()))
+            .thenReturn(List.of(mockReview1, mockReview2));
+
         // when
         writer.write(chunk);
 
@@ -56,6 +69,8 @@ class PopularReviewRankingWriterTest {
         assertEquals(1, r1.getRank());
         assertEquals(2, r2.getRank());
         verify(repository, times(1)).saveAll(List.of(r1, r2));
+        verify(reviewRepository, times(1)).findAllById(any());
+        verify(eventPublisher, atMost(10)).publishEvent(any());
     }
 
     @Test

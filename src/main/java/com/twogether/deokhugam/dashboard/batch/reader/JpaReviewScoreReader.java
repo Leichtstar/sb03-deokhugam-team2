@@ -7,48 +7,75 @@ import jakarta.persistence.TypedQuery;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.support.IteratorItemReader;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-public class JpaReviewScoreReader extends IteratorItemReader<ReviewScoreDto> {
+@StepScope
+@Component
+@RequiredArgsConstructor
+public class JpaReviewScoreReader implements ItemReader<ReviewScoreDto> {
 
-    public JpaReviewScoreReader(EntityManager em, RankingPeriod period) {
-        super(fetchReviewScores(em, period));
+    private final EntityManager entityManager;
+
+    @Value("#{jobParameters['period']}")
+    private String periodString;
+
+    @Value("#{jobParameters['now']}")
+    private String nowString;
+
+    private Iterator<ReviewScoreDto> reviewIterator;
+
+    @Override
+    public ReviewScoreDto read() {
+        if (reviewIterator == null) {
+            reviewIterator = fetchReviewScores().iterator();
+        }
+        return reviewIterator.hasNext() ? reviewIterator.next() : null;
     }
 
-    private static List<ReviewScoreDto> fetchReviewScores(EntityManager em, RankingPeriod period) {
-        String jpql = """
-            SELECT new com.twogether.deokhugam.dashboard.batch.model.ReviewScoreDto(
-                r.id,
-                r.user.id,
-                r.userNickName,
-                r.content,
-                r.rating,
-                r.book.id,
-                r.bookTitle,
-                r.bookThumbnailUrl,
-                COALESCE(r.likeCount, 0),
-                COALESCE(r.commentCount, 0)
-            )
-            FROM Review r
-            WHERE r.createdAt >= :start
-              AND r.createdAt < :end
-              AND r.isDeleted = false
-            ORDER BY COALESCE(r.likeCount, 0) DESC, COALESCE(r.commentCount, 0) DESC
-        """;
-
-        LocalDateTime now = LocalDateTime.now();
+    private List<ReviewScoreDto> fetchReviewScores() {
+        RankingPeriod period = RankingPeriod.valueOf(periodString);
+        LocalDateTime now = LocalDateTime.parse(nowString);
         LocalDateTime start = period.getStartTime(now);
         LocalDateTime end = period.getEndTime(now);
 
         Instant startInstant = start.atZone(ZoneId.of("UTC")).toInstant();
         Instant endInstant = end.atZone(ZoneId.of("UTC")).toInstant();
 
-        TypedQuery<ReviewScoreDto> query = em.createQuery(jpql, ReviewScoreDto.class);
-        query.setParameter("start", startInstant);
-        query.setParameter("end", endInstant);
-        query.setMaxResults(1000);
-
-        return query.getResultList();
+        return entityManager.createQuery("""
+            SELECT r.id, r.user.id, r.user.nickname, r.content, r.rating,
+                   r.book.id, r.book.title, r.book.thumbnailUrl,
+                   COALESCE(r.likeCount, 0), COALESCE(r.commentCount, 0)
+            FROM Review r
+            WHERE r.createdAt >= :start AND r.createdAt < :end
+              AND r.isDeleted = false
+            ORDER BY COALESCE(r.likeCount, 0) DESC, COALESCE(r.commentCount, 0) DESC
+        """, Object[].class)
+            .setParameter("start", startInstant)
+            .setParameter("end", endInstant)
+            .setMaxResults(1000)
+            .getResultList()
+            .stream()
+            .map(row -> new ReviewScoreDto(
+                (UUID) row[0],                        // reviewId
+                (UUID) row[1],                        // userId
+                (String) row[2],                      // userNickname
+                (String) row[3],                      // content
+                ((Number) row[4]).doubleValue(),      // rating
+                (UUID) row[5],                        // bookId
+                (String) row[6],                      // bookTitle
+                (String) row[7],                      // bookThumbnailUrl
+                ((Number) row[8]).longValue(),        // likeCount
+                ((Number) row[9]).longValue(),        // commentCount
+                period                                // rankingPeriod
+            ))
+            .toList();
     }
 }

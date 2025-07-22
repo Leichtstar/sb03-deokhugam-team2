@@ -3,49 +3,72 @@ package com.twogether.deokhugam.dashboard.batch.reader;
 import com.twogether.deokhugam.dashboard.batch.model.BookScoreDto;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.util.Iterator;
 import java.util.List;
-import org.springframework.batch.item.support.IteratorItemReader;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.ItemReader;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-public class JpaBookScoreReader extends IteratorItemReader<BookScoreDto> {
+@StepScope
+@Component
+@RequiredArgsConstructor
+public class JpaBookScoreReader implements ItemReader<BookScoreDto> {
 
-    public JpaBookScoreReader(EntityManager em, RankingPeriod period) {
-        super(fetchBookScores(em, period));
+    private final EntityManager entityManager;
+
+    @Value("#{jobParameters['period']}")
+    private String periodString;
+
+    @Value("#{jobParameters['now']}")
+    private String nowString;
+
+    private Iterator<BookScoreDto> bookIterator;
+
+    @Override
+    public BookScoreDto read() {
+        if (bookIterator == null) {
+            bookIterator = fetchBookScores().iterator();
+        }
+        return bookIterator.hasNext() ? bookIterator.next() : null;
     }
 
-    private static List<BookScoreDto> fetchBookScores(EntityManager em, RankingPeriod period) {
-        String jpql = """
-        SELECT new com.twogether.deokhugam.dashboard.batch.model.BookScoreDto(
-            r.book.id,
-            r.book.title,
-            r.book.author,
-            r.book.thumbnailUrl,
-            COUNT(r),
-            COALESCE(AVG(r.rating), 0)
-        )
-        FROM Review r
-        WHERE r.createdAt >= :start AND r.createdAt < :end AND r.isDeleted = false
-        GROUP BY r.book.id, r.book.title, r.book.author, r.book.thumbnailUrl
-        ORDER BY COUNT(r) DESC, AVG(r.rating) DESC
-        """;
-
-        LocalDateTime now = LocalDateTime.now();
+    private List<BookScoreDto> fetchBookScores() {
+        RankingPeriod period = RankingPeriod.valueOf(periodString);
+        LocalDateTime now = LocalDateTime.parse(nowString);
         LocalDateTime start = period.getStartTime(now);
         LocalDateTime end = period.getEndTime(now);
 
-        ZoneId zone = ZoneOffset.UTC;
-        Instant startInstant = start.atZone(zone).toInstant();
-        Instant endInstant = end.atZone(zone).toInstant();
+        Instant startInstant = start.atZone(ZoneId.of("UTC")).toInstant();
+        Instant endInstant = end.atZone(ZoneId.of("UTC")).toInstant();
 
-        TypedQuery<BookScoreDto> query = em.createQuery(jpql, BookScoreDto.class);
-        query.setParameter("start", startInstant);
-        query.setParameter("end", endInstant);
-        query.setMaxResults(1000);
-
-        return query.getResultList();
+        return entityManager.createQuery("""
+            SELECT r.book.id, r.book.title, r.book.author, r.book.thumbnailUrl, COUNT(r), COALESCE(AVG(r.rating), 0)
+            FROM Review r
+            WHERE r.createdAt >= :start AND r.createdAt < :end
+              AND r.isDeleted = false AND r.book.isDeleted = false
+            GROUP BY r.book.id, r.book.title, r.book.author, r.book.thumbnailUrl
+            ORDER BY COUNT(r) DESC, AVG(r.rating) DESC
+        """, Object[].class)
+            .setParameter("start", startInstant)
+            .setParameter("end", endInstant)
+            .setMaxResults(1000)
+            .getResultList()
+            .stream()
+            .map(row -> new BookScoreDto(
+                (UUID) row[0],
+                (String) row[1],
+                (String) row[2],
+                (String) row[3],
+                (Long) row[4],
+                (Double) row[5],
+                period
+            ))
+            .toList();
     }
 }
