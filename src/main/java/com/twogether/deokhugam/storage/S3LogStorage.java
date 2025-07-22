@@ -80,7 +80,7 @@ public class S3LogStorage {
         try {
             // S3에 저장할 키(경로) 생성
             // 구조: logs/년도/월/파일명
-            // 예시: logs/2025/07/deokhugam.2025-07-22.log
+            // 예시: logs/2025/07/application.2025-07-22.log
             String[] dateParts = dateString.split("-");
             String year = dateParts[0];
             String month = dateParts[1];
