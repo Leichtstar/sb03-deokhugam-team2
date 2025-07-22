@@ -50,6 +50,7 @@ public class CommentService {
 
         Review review = findReviewOrThrow(request.reviewId());
         User user = findUserOrThrow(request.userId());
+      
         Comment entity = new Comment(user, review, request.content());
         Comment saved = commentRepository.save(entity);
 
