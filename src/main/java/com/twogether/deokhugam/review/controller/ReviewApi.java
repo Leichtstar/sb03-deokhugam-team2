@@ -138,7 +138,8 @@ public interface ReviewApi {
             @RequestParam(required = false) String keyword,
             @Parameter(
                     name = "orderBy", description = "정렬 기준(createdAt | rating)",
-                    example = "createdAt"
+                    example = "createdAt",
+                    schema = @Schema(allowableValues = {"createdAt", "rating"})
             )
             @RequestParam(defaultValue = "createdAt") String orderBy,
             @Parameter(
@@ -148,9 +149,7 @@ public interface ReviewApi {
             )
             @RequestParam(defaultValue = "DESC") String direction,
             @Parameter(
-                    name = "cursor",
-                    description = "커서 페이지네이션 커서",
-                    required = false
+                    name = "cursor", description = "커서 페이지네이션 커서"
             )
             @RequestParam(required = false) String cursor,
             @Parameter(
