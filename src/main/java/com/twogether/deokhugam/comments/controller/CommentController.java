@@ -102,7 +102,7 @@ public class CommentController {
     @PatchMapping("/{commentId}")
     public ResponseEntity<CommentResponse> update(
         @PathVariable UUID commentId,
-        @RequestHeader("Deokhugam-Request-User-Id") UUID userId,
+        @RequestHeader("Deokhugam-Request-User-ID") UUID userId,
         @Valid @RequestBody CommentUpdateRequest request
     ) {
         return ResponseEntity.ok(commentService.updateComment(commentId, userId, request));
