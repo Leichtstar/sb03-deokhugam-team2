@@ -71,13 +71,4 @@ public class NotificationService {
 
         return notificationMapper.toDto(notification);
     }
-
-    @Transactional
-    public void safeCreateCommentNotification(User commenter, Review review, String commentContent) {
-        try {
-            createCommentNotification(commenter, review, commentContent);
-        } catch (Exception ignored) {
-            // 알림 생성 중 예외는 무시 (댓글 등록 흐름에 영향 없음)
-        }
-    }
 }
