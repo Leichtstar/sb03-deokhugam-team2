@@ -35,6 +35,7 @@ public enum ErrorCode {
     DUPLICATED_ISBN(HttpStatus.CONFLICT, "이미 사용된 ISBN 코드입니다."),
     INVALID_ISBN(HttpStatus.BAD_REQUEST, "잘못된 ISBN 코드입니다."),
     ISBN_NOT_FOUND(HttpStatus.NOT_FOUND, "미인증 ISBN 코드입니다."),
+    INVALID_IMAGE_FILE(HttpStatus.BAD_REQUEST, "올바른 이미지 파일이 아닙니다."),
     NAVER_API_CONNECTION_FAILED(HttpStatus.BAD_GATEWAY, "네이버 API 서버에 연결할 수 없습니다."),
     NAVER_API_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "네이버 API 인증에 실패했습니다."),
     NAVER_API_THUMBNAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "이미지를 찾을 수 없습니다."),

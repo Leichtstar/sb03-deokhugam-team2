@@ -36,9 +36,17 @@ public class BookInfoController {
     @PostMapping(value = "/isbn/ocr")
     public ResponseEntity<String> getIsbnFromOcr(@RequestPart(value = "image", required = true) MultipartFile bookImage){
     if (bookImage.isEmpty() || bookImage.getSize() == 0){
-        throw new IllegalArgumentException("인식할 이미지가 없습니다.");
+        throw new NaverBookException(ErrorCode.INVALID_IMAGE_FILE);
+    }
+    // 이미지 타입 검증
+    String contentType = bookImage.getContentType();
+    if (contentType==null || !contentType.startsWith("image/")){
+        throw new NaverBookException(ErrorCode.INVALID_IMAGE_FILE);
     }
     String result = naverBookClient.extractIsbnFromImage(bookImage);
+        if (result == null) {
+            throw new NaverBookException(ErrorCode.NAVER_OCR_ISBN_NOT_FOUND);
+        }
     return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 }
