@@ -110,7 +110,7 @@ class CommentControllerTest {
             .thenReturn(response);
 
         mockMvc.perform(patch("/api/comments/{id}", commentId)
-                .header("Deokhugam-Request-User-Id", userId)
+                .header("Deokhugam-Request-User-ID", userId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new CommentUpdateRequest("수정된 내용"))))
             .andExpect(status().isOk())
@@ -128,7 +128,7 @@ class CommentControllerTest {
             .thenThrow(new CommentNotFoundException());
 
         mockMvc.perform(patch("/api/comments/{id}", commentId)
-                .header("Deokhugam-Request-User-Id", userId)
+                .header("Deokhugam-Request-User-ID", userId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new CommentUpdateRequest("수정"))))
             .andExpect(status().isNotFound());
@@ -144,7 +144,7 @@ class CommentControllerTest {
             .thenThrow(new CommentForbiddenException());
 
         mockMvc.perform(patch("/api/comments/{id}", commentId)
-                .header("Deokhugam-Request-User-Id", userId)
+                .header("Deokhugam-Request-User-ID", userId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new CommentUpdateRequest("수정"))))
             .andExpect(status().isForbidden());
