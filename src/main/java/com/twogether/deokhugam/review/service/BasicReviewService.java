@@ -52,8 +52,6 @@ public class BasicReviewService implements ReviewService{
     private final ReviewCursorHelper reviewCursorHelper;
     // 알림용
     private final ApplicationEventPublisher eventPublisher;
-    private final BookService bookService;
-    private final NotificationService notificationService;
 
     // 리뷰 생성
     @Override
@@ -250,7 +248,7 @@ public class BasicReviewService implements ReviewService{
 
             ReviewLike reviewLike = reviewLikeRepository.findByUserIdAndReviewId(userId, reviewId)
                     .orElseThrow(
-                            () -> new ReviewLikeNotFoundException());
+                            ReviewLikeNotFoundException::new);
 
             if (reviewLike.isLiked()){
                 // 좋아요 상태가 true 라면
