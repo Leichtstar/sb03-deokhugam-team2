@@ -24,7 +24,7 @@ class BookScoreProcessorTest {
     @BeforeEach
     void setUp() {
         em = mock(EntityManager.class);
-        processor = new BookScoreProcessor(em, RankingPeriod.DAILY);
+        processor = new BookScoreProcessor(em);
     }
 
     @Test
@@ -41,7 +41,8 @@ class BookScoreProcessorTest {
             "남궁성",
             "https://image.url",
             5L,
-            4.0
+            4.0,
+            RankingPeriod.DAILY
         );
 
         // when
@@ -53,7 +54,7 @@ class BookScoreProcessorTest {
         assertThat(result.getReviewCount()).isEqualTo(5L);
         assertThat(result.getRating()).isEqualTo(4.0);
         assertThat(result.getScore()).isEqualTo(dto.calculateScore());
-        assertThat(result.getPeriod()).isEqualTo(RankingPeriod.DAILY);
+        assertThat(result.getPeriod()).isEqualTo(dto.period());
     }
 
     @Test
@@ -69,7 +70,8 @@ class BookScoreProcessorTest {
             "Robert C. Martin",
             "https://image.url",
             10L,
-            4.5
+            4.5,
+            RankingPeriod.DAILY
         );
 
         // when

@@ -32,3 +32,5 @@ naver:
   api:
     client-id: ${NAVER_CLIENT_ID:dummy-id}
     client-secret: ${NAVER_CLIENT_SECRET:dummy-secret}
+    ocr-secret: ${NAVER_OCR_SECRET:dummy-ocr-secret}
+    ocr-url: ${NAVER_OCR_URL:https://dummy-ocr-url.com}

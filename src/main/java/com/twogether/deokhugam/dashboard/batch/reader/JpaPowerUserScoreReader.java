@@ -3,54 +3,73 @@ package com.twogether.deokhugam.dashboard.batch.reader;
 import com.twogether.deokhugam.dashboard.batch.model.PowerUserScoreDto;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Iterator;
 import java.util.List;
-import org.springframework.batch.item.support.IteratorItemReader;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.ItemReader;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-public class JpaPowerUserScoreReader extends IteratorItemReader<PowerUserScoreDto> {
+@StepScope
+@Component
+@RequiredArgsConstructor
+public class JpaPowerUserScoreReader implements ItemReader<PowerUserScoreDto> {
 
-    public JpaPowerUserScoreReader(EntityManager em, RankingPeriod period) {
-        super(fetchPowerUserScores(em, period));
+    private final EntityManager entityManager;
+
+    @Value("#{jobParameters['period']}")
+    private String periodString;
+
+    @Value("#{jobParameters['now']}")
+    private String nowString;
+
+    private Iterator<PowerUserScoreDto> iterator;
+
+    @Override
+    public PowerUserScoreDto read() {
+        if (iterator == null) {
+            iterator = fetchPowerUserScores().iterator();
+        }
+        return iterator.hasNext() ? iterator.next() : null;
     }
 
-    private static List<PowerUserScoreDto> fetchPowerUserScores(EntityManager em, RankingPeriod period) {
-        String jpql = """
-            SELECT new com.twogether.deokhugam.dashboard.batch.model.PowerUserScoreDto(
-                r.user.id,
-                r.userNickName,
-                SUM(
-                    COALESCE(r.likeCount, 0) * 0.3 + COALESCE(r.commentCount, 0) * 0.7
-                ),
-                SUM(COALESCE(r.likeCount, 0)),
-                SUM(COALESCE(r.commentCount, 0))
-            )
+    private List<PowerUserScoreDto> fetchPowerUserScores() {
+        RankingPeriod period = RankingPeriod.valueOf(periodString);
+        LocalDateTime now = LocalDateTime.parse(nowString);
+
+        Instant start = period.getStartTime(now).atZone(ZoneId.of("UTC")).toInstant();
+        Instant end = period.getEndTime(now).atZone(ZoneId.of("UTC")).toInstant();
+
+        return entityManager.createQuery("""
+            SELECT u.id, u.nickname,
+                   COALESCE(SUM(COALESCE(r.likeCount, 0) * 0.3 + COALESCE(r.commentCount, 0) * 0.7), 0.0),
+                   COALESCE(SUM(COALESCE(r.likeCount, 0)), 0),
+                   COALESCE(SUM(COALESCE(r.commentCount, 0)), 0)
             FROM Review r
-            WHERE r.createdAt >= :start
-              AND r.createdAt < :end
+            JOIN r.user u
+            WHERE r.createdAt >= :start AND r.createdAt < :end
               AND r.isDeleted = false
-            GROUP BY r.user.id, r.userNickName
-            ORDER BY SUM(
-                COALESCE(r.likeCount, 0) * 0.3 + COALESCE(r.commentCount, 0) * 0.7
-            ) DESC
-        """;
-
-        Instant now = Instant.now();
-        LocalDateTime utcNow = LocalDateTime.ofInstant(now, ZoneId.of("UTC"));
-        LocalDateTime start = period.getStartTime(utcNow);
-        LocalDateTime end = period.getEndTime(utcNow);
-
-        ZoneId zoneId = ZoneId.systemDefault();
-        Instant startInstant = start.atZone(zoneId).toInstant();
-        Instant endInstant = end.atZone(zoneId).toInstant();
-
-        TypedQuery<PowerUserScoreDto> query = em.createQuery(jpql, PowerUserScoreDto.class);
-        query.setParameter("start", startInstant);
-        query.setParameter("end", endInstant);
-        query.setMaxResults(1000);
-
-        return query.getResultList();
+            GROUP BY u.id, u.nickname
+            ORDER BY 3 DESC
+        """, Object[].class)
+            .setParameter("start", start)
+            .setParameter("end", end)
+            .setMaxResults(1000)
+            .getResultList()
+            .stream()
+            .map(row -> new PowerUserScoreDto(
+                (UUID) row[0],
+                (String) row[1],
+                ((Number) row[2]).doubleValue(),
+                ((Number) row[3]).longValue(),
+                ((Number) row[4]).longValue(),
+                period
+            ))
+            .toList();
     }
 }

@@ -4,6 +4,7 @@ import com.twogether.deokhugam.common.exception.DeokhugamException;
 import com.twogether.deokhugam.common.exception.ErrorCode;
 import com.twogether.deokhugam.dashboard.entity.PopularReviewRanking;
 import com.twogether.deokhugam.dashboard.repository.PopularReviewRankingRepository;
+import com.twogether.deokhugam.notification.event.PopularReviewRankedEvent;
 import com.twogether.deokhugam.notification.service.NotificationService;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -24,8 +26,8 @@ import org.springframework.stereotype.Component;
 public class PopularReviewRankingWriter implements ItemWriter<PopularReviewRanking> {
 
     private final PopularReviewRankingRepository popularReviewRankingRepository;
-    private final NotificationService notificationService;
     private final ReviewRepository reviewRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public void write(Chunk<? extends PopularReviewRanking> items) {
@@ -75,15 +77,15 @@ public class PopularReviewRankingWriter implements ItemWriter<PopularReviewRanki
                 if (ranking.getRank() <= 10) {
                     Review review = reviewMap.get(ranking.getReviewId());
                     if (review != null) {
-                        notificationService.createRankingNotification(review.getUser(), review);
+                        eventPublisher.publishEvent(new PopularReviewRankedEvent(review.getUser(), review));
                     } else {
-                        log.warn("알림 생성 스킵: 리뷰가 존재하지 않습니다. reviewId: {}", ranking.getReviewId());
+                        log.warn("알림 이벤트 발행 스킵: 리뷰가 존재하지 않습니다. reviewId: {}", ranking.getReviewId());
                     }
                 }
             }
 
         } catch (Exception e) {
-            log.error("랭킹 알림 생성 실패 - 랭킹 저장은 성공", e);
+            log.error("랭킹 알림 이벤트 발행 실패 - 랭킹 저장은 성공", e);
             // 전체 프로세스를 중단시키지 않음
         }
     }
