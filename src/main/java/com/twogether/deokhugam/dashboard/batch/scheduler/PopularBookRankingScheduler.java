@@ -5,7 +5,9 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -43,9 +45,15 @@ public class PopularBookRankingScheduler {
                     .addString("requestId", requestId)
                     .toJobParameters();
 
-                jobLauncher.run(popularBookRankingJob, params);
+                JobExecution jobExecution = jobLauncher.run(popularBookRankingJob, params);
 
-                log.info("인기 도서 랭킹 배치 성공: period={}, requestId={}", period, requestId);
+                if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
+                    log.info("인기 도서 랭킹 배치 성공: period={}, requestId={}", period, requestId);
+                } else {
+                    log.error("인기 도서 랭킹 배치 실패: period={}, requestId={}, status={}",
+                        period, requestId, jobExecution.getStatus());
+                }
+
             } catch (Exception e) {
                 log.error("인기 도서 랭킹 배치 실패: period={}, requestId={}", period, requestId, e);
             } finally {

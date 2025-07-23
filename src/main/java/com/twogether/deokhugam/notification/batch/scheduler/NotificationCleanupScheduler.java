@@ -2,7 +2,9 @@ package com.twogether.deokhugam.notification.batch.scheduler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -28,11 +30,16 @@ public class NotificationCleanupScheduler {
                 .addLong("timestamp", System.currentTimeMillis())
                 .toJobParameters();
 
-            jobLauncher.run(notificationCleanupJob, jobParameters);
+            JobExecution execution = jobLauncher.run(notificationCleanupJob, jobParameters);
 
-            log.info("[NotificationCleanupScheduler] 읽은 알림 삭제 배치 완료");
+            if (execution.getStatus() == BatchStatus.COMPLETED) {
+                log.info("[NotificationCleanupScheduler] 읽은 알림 삭제 배치 성공");
+            } else {
+                log.error("[NotificationCleanupScheduler] 읽은 알림 삭제 배치 실패: status={}", execution.getStatus());
+            }
+
         } catch (Exception e) {
-            log.error("[NotificationCleanupScheduler] 읽은 알림 삭제 배치 실행 중 오류 발생", e);
+            log.error("[NotificationCleanupScheduler] 읽은 알림 삭제 배치 실행 중 예외 발생", e);
         }
     }
 }

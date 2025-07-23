@@ -46,8 +46,8 @@ public class JpaPowerUserScoreReader implements ItemReader<PowerUserScoreDto> {
     private List<PowerUserScoreDto> aggregatePowerUserScores() {
         RankingPeriod period = RankingPeriod.valueOf(periodString);
         LocalDateTime now = LocalDateTime.parse(nowString);
-        Instant start = period.getStartTime(now).atZone(ZoneId.of("UTC")).toInstant();
-        Instant end = period.getEndTime(now).atZone(ZoneId.of("UTC")).toInstant();
+        LocalDateTime start = period.getStartTime(now);
+        LocalDateTime end = period.getEndTime(now);
 
         // 1. 작성한 리뷰의 인기 점수
         Map<UUID, Double> reviewScoreMap = em.createQuery("""
