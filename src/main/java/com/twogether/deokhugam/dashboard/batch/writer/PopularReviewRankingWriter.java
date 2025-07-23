@@ -3,6 +3,7 @@ package com.twogether.deokhugam.dashboard.batch.writer;
 import com.twogether.deokhugam.common.exception.DeokhugamException;
 import com.twogether.deokhugam.common.exception.ErrorCode;
 import com.twogether.deokhugam.dashboard.entity.PopularReviewRanking;
+import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PopularReviewRankingRepository;
 import com.twogether.deokhugam.notification.event.PopularReviewRankedEvent;
 import com.twogether.deokhugam.notification.service.NotificationService;
@@ -39,6 +40,9 @@ public class PopularReviewRankingWriter implements ItemWriter<PopularReviewRanki
         }
 
         try {
+            RankingPeriod period = rankingList.get(0).getPeriod();
+            popularReviewRankingRepository.deleteByPeriod(period);
+
             for (int i = 0; i < rankingList.size(); i++) {
                 PopularReviewRanking current = rankingList.get(i);
 

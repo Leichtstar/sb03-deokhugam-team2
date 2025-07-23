@@ -36,6 +36,7 @@ import com.twogether.deokhugam.review.repository.ReviewRepository;
 import com.twogether.deokhugam.review.service.util.ReviewCursorHelper;
 import com.twogether.deokhugam.user.entity.User;
 import com.twogether.deokhugam.user.repository.UserRepository;
+import jakarta.validation.Validator;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -55,6 +56,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Review 단위 테스트")
@@ -88,6 +90,7 @@ public class BasicReviewServiceTest {
    @InjectMocks
    private BasicReviewService basicReviewService;
 
+    private Validator validator;
     private UUID bookId;
     private UUID userId;
     private UUID reviewId;
@@ -99,12 +102,19 @@ public class BasicReviewServiceTest {
 
     @BeforeEach
     void setup() {
+        // Validator 설정
+        LocalValidatorFactoryBean validatorFactoryBean = new LocalValidatorFactoryBean();
+        validatorFactoryBean.afterPropertiesSet();
+        validator = validatorFactoryBean.getValidator();
+
         // Mock 객체 주입 확인
         assertNotNull(reviewRepository);
         assertNotNull(userRepository);
         assertNotNull(bookRepository);
+        assertNotNull(reviewLikeRepository);
         assertNotNull(reviewMapper);
         assertNotNull(basicReviewService);
+        assertNotNull(eventPublisher);
 
         // verify 검증을 위해 ReviewCursorHelper를 진짜 객체로 대체함 (내부에는 mock된 reviewLikeRepository 주입)
         reviewCursorHelper = new ReviewCursorHelper(reviewLikeRepository);
@@ -144,6 +154,45 @@ public class BasicReviewServiceTest {
                 testUser,
                 true
         );
+    }
+
+    @Test
+    @DisplayName("리뷰 내용이 없는 경우 예외가 발생해야 한다.")
+    void shouldNotValid_whenReviewIsEmpty() {
+        // Given
+        ReviewCreateRequest invalidReviewRequest = new ReviewCreateRequest(
+                bookId,
+                userId,
+                "",
+                2
+        );
+
+        // When & Then
+        var violations = validator.validate(invalidReviewRequest);
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream()
+                .anyMatch(violation -> violation.getMessage().equals("리뷰 내용은 필수 입력 항목입니다.")));
+
+    }
+
+    @Test
+    @DisplayName("리뷰 내용이 5000자를 넘는 경우 예외가 발생해야 한다.")
+    void shouldNotValid_whenReviewContentIsOverSize() {
+        // Given
+        String tooLongContent = "a".repeat(5001);
+        ReviewCreateRequest invalidReviewRequest = new ReviewCreateRequest(
+                bookId,
+                userId,
+                tooLongContent,
+                2
+        );
+
+        // When & Then
+        var violations = validator.validate(invalidReviewRequest);
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream()
+                .anyMatch(violation -> violation.getMessage().equals("내용은 5000자를 초과할 수 없습니다.")));
+
     }
 
     @Test

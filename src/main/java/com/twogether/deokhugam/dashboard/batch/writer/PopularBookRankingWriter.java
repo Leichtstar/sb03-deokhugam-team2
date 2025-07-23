@@ -3,6 +3,7 @@ package com.twogether.deokhugam.dashboard.batch.writer;
 import com.twogether.deokhugam.common.exception.DeokhugamException;
 import com.twogether.deokhugam.common.exception.ErrorCode;
 import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
+import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PopularBookRankingRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,9 @@ public class PopularBookRankingWriter implements ItemWriter<PopularBookRanking> 
         }
 
         try {
+            RankingPeriod period = rankingList.get(0).getPeriod();
+            popularBookRankingRepository.deleteByPeriod(period);
+
             for (int i = 0; i < rankingList.size(); i++) {
                 rankingList.get(i).assignRank(i + 1);
             }
