@@ -9,7 +9,7 @@ import com.twogether.deokhugam.dashboard.dto.request.PopularRankingSearchRequest
 import com.twogether.deokhugam.dashboard.dto.response.PopularReviewDto;
 import com.twogether.deokhugam.dashboard.dto.response.QPopularReviewDto;
 import com.twogether.deokhugam.dashboard.entity.QPopularReviewRanking;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +54,7 @@ public class PopularReviewRankingCustomRepositoryImpl implements PopularReviewRa
             .fetch();
     }
 
-    private BooleanExpression ltCursor(String cursor, LocalDateTime after, String direction) {
+    private BooleanExpression ltCursor(String cursor, Instant after, String direction) {
         QPopularReviewRanking r = QPopularReviewRanking.popularReviewRanking;
         if (cursor == null || after == null) return null;
 
