@@ -17,7 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -66,8 +66,8 @@ class CommentControllerTest {
         UUID userId = UUID.randomUUID();
         String userNickname = "user1";
         UUID reviewId = UUID.randomUUID();
-        LocalDateTime createdAt = LocalDateTime.now();
-        LocalDateTime updatedAt = LocalDateTime.now();
+        Instant createdAt = Instant.now();
+        Instant updatedAt = Instant.now();
         Boolean isDeleted = false;
 
         CommentResponse dto = new CommentResponse(
@@ -103,7 +103,7 @@ class CommentControllerTest {
         UUID userId = UUID.randomUUID();
         CommentResponse response = new CommentResponse(
             commentId, "수정된 내용", userId, "user1", UUID.randomUUID(),
-            LocalDateTime.now(), LocalDateTime.now(), false
+            Instant.now(), Instant.now(), false
         );
 
         when(commentService.updateComment(eq(commentId), eq(userId), any(CommentUpdateRequest.class)))
