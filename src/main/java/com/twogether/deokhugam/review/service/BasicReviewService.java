@@ -26,6 +26,7 @@ import com.twogether.deokhugam.user.exception.UserNotFoundException;
 import com.twogether.deokhugam.user.repository.UserRepository;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -304,7 +305,8 @@ public class BasicReviewService implements ReviewService{
             updated = true;
         }
 
-        if (!review.getBookThumbnailUrl().equals(review.getBook().getThumbnailUrl())) {
+        // null-safe한 비교
+        if (!Objects.equals(review.getBookThumbnailUrl(), review.getBook().getThumbnailUrl())) {
             review.updateBookThumbnail(review.getBook().getThumbnailUrl());
             updated = true;
         }
