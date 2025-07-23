@@ -39,6 +39,7 @@ public class PopularBookRankingScheduler {
 
                 JobParameters params = new JobParametersBuilder()
                     .addString("period", period.name())
+                    .addString("now", java.time.LocalDateTime.now().toString())
                     .addString("requestId", requestId)
                     .toJobParameters();
 
