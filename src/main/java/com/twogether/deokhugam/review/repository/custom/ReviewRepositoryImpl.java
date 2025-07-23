@@ -29,7 +29,10 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
     private final JPAQueryFactory queryFactory;
     private final QReview review = QReview.review;
 
-    // 리뷰 목록 조회
+    /**
+     * 리뷰 목록 조회
+     */
+    @Override
     public Slice<Review> findReviewsWithCursor(ReviewSearchRequest request, Pageable pageable) {
 
         BooleanBuilder builder = buildSearchCondition(request);
@@ -58,7 +61,9 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
         return new SliceImpl<>(content, pageable, hasNext);
     }
 
-    // totalElement 구하기
+    /**
+     * totalElement 구하기
+     */
     @Override
     public long totalElementCount(ReviewSearchRequest request) {
 
@@ -75,7 +80,6 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
     }
 
     /**
-     *
      * @param keyword 시용자가 입력한 검색어
      * @return 도서 제목, 리뷰 작성자 닉네임, 리류 내용에 keyword가 들어가는지 여부
      */
@@ -92,7 +96,6 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
     }
 
     /**
-     *
      * @param keyword 시용자가 입력한 검색어
      * @return OR로 묶인 부분일치 조건들
      */
@@ -109,7 +112,7 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
     }
 
     /**
-     * 중복 로직 분리 메서드
+     * 조회 조건을 build에 and로 넣는 메서드
      */
     private BooleanBuilder buildSearchCondition(ReviewSearchRequest request){
         BooleanBuilder builder = new BooleanBuilder();
@@ -188,7 +191,9 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
         }
     }
 
-    // 평점 정렬 시 커서
+    /**
+     * 평점 정렬 시 커서
+     */
     private void ratingCursor(BooleanBuilder builder, Instant afterTime, String cursor, boolean isDesc){
         if (cursor == null){
             if (isDesc) {
@@ -226,7 +231,9 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
         }
     }
 
-    // 생성 시간 기준 커서 조건
+    /**
+     * 생성 시간 기준 커서 조건
+     */
     private void createdAtCursor(BooleanBuilder builder, String cursor, boolean isDesc){
         try {
             Instant cursorTime = Instant.parse(cursor);
