@@ -93,8 +93,16 @@ public class Review {
         this.likeCount = likeCount;
     }
 
-    public void updateUpdatedAt(){
-        this.updatedAt = Instant.now();
+    public void updateReviewerNickName(String newUserNickName){
+        this.userNickName = newUserNickName;
+    }
+
+    public void updateBookTitle(String newBookTitle) {
+        this.bookTitle = newBookTitle;
+    }
+
+    public void updateBookThumbnail(String newThumbnailUrl){
+        this.bookThumbnailUrl = newThumbnailUrl;
     }
 
     public void updateReview(String content, int rating){
