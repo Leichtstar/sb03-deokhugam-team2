@@ -15,6 +15,7 @@ import com.twogether.deokhugam.dashboard.entity.PowerUserRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PowerUserRankingRepository;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
