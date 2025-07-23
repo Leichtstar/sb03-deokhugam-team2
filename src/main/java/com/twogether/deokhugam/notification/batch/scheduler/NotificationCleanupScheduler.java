@@ -19,7 +19,7 @@ public class NotificationCleanupScheduler {
     private final JobLauncher jobLauncher;
     private final Job notificationCleanupJob;
 
-    @Scheduled(cron = "${batch.notification-cleanup.cron:0 0 1 * * *}")
+    @Scheduled(cron = "${batch.notification-cleanup.cron:0 15 0 * * *}")
     public void runNotificationCleanupJob() {
         try {
             log.info("[NotificationCleanupScheduler] 읽은 알림 삭제 배치 시작");
