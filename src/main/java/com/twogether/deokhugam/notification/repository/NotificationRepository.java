@@ -2,7 +2,7 @@ package com.twogether.deokhugam.notification.repository;
 
 import com.twogether.deokhugam.notification.entity.Notification;
 import jakarta.transaction.Transactional;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -22,7 +22,7 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
     """)
     List<Notification> findByUserIdWithAfter(
         @Param("userId") UUID userId,
-        @Param("after") LocalDateTime after,
+        @Param("after") Instant after,
         Pageable pageable
     );
 
@@ -42,17 +42,17 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
     @Modifying
     @Transactional
     @Query("""
-    UPDATE Notification n
-    SET n.confirmed = true
-    WHERE n.user.id = :userId AND n.confirmed = false
+        UPDATE Notification n
+        SET n.confirmed = true
+        WHERE n.user.id = :userId AND n.confirmed = false
     """)
     void markAllAsReadByUserId(@Param("userId") UUID userId);
 
     @Modifying
     @Transactional
     @Query("""
-    DELETE FROM Notification n
-    WHERE n.confirmed = true AND n.updatedAt < :cutoff
-""")
-    void deleteOldConfirmedNotifications(@Param("cutoff") LocalDateTime cutoff);
+        DELETE FROM Notification n
+        WHERE n.confirmed = true AND n.updatedAt < :cutoff
+    """)
+    void deleteOldConfirmedNotifications(@Param("cutoff") Instant cutoff);
 }
