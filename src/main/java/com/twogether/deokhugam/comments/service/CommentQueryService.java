@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
@@ -28,21 +28,21 @@ public class CommentQueryService {
     private final CommentMapper mapper;
 
     private static final int DEFAULT_SIZE = 20;
-    private static final DateTimeFormatter ISO = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    private static final DateTimeFormatter ISO = DateTimeFormatter.ISO_INSTANT;
     private static final Logger log = LoggerFactory.getLogger(CommentQueryService.class);
 
     public CursorPageResponse<CommentResponse> getComments(
         UUID reviewId,
         Direction direction,
         String cursor,
-        LocalDateTime after,
+        Instant after,
         Integer limit
     ) {
         int pageSize = (limit == null || limit < 1) ? DEFAULT_SIZE : limit;
         boolean asc = direction != null && direction.isAscending();
 
         // ──────────────── 커서 해석 ────────────────
-        LocalDateTime afterAt = null;
+        Instant afterAt = null;
         UUID afterId = null;
         if (cursor != null && !cursor.isBlank()) {
             CursorInfo info = decodeCursor(cursor);
@@ -85,13 +85,13 @@ public class CommentQueryService {
 
     // ───────────────── Cursor encode / decode helpers ─────────────────
 
-    private String encodeCursor(LocalDateTime createdAt, UUID id) {
+    private String encodeCursor(Instant createdAt, UUID id) {
         String raw = ISO.format(createdAt) + "|" + id;
         return Base64.getUrlEncoder()
             .encodeToString(raw.getBytes(StandardCharsets.UTF_8));
     }
 
-    private record CursorInfo(LocalDateTime createdAt, UUID id) {
+    private record CursorInfo(Instant createdAt, UUID id) {
     }
 
     private CursorInfo decodeCursor(String cursor) {
@@ -101,7 +101,7 @@ public class CommentQueryService {
                 StandardCharsets.UTF_8);
             String[] parts = raw.split("\\|");
             return new CursorInfo(
-                LocalDateTime.parse(parts[0], ISO),
+                Instant.parse(parts[0]),
                 UUID.fromString(parts[1])
             );
         } catch (Exception e) {
