@@ -26,11 +26,6 @@ public class ReviewMapper {
             throw new IllegalStateException("Review가 null 값인 도서나 사용자를 참조하고 있습니다.");
         }
 
-        if (!review.getUserNickName().equals(user.getNickname())){
-            review.updateReviewerNickName(user.getNickname());
-            reviewRepository.save(review);
-        }
-
         return new ReviewDto(
                 review.getId(),
                 book.getId(),

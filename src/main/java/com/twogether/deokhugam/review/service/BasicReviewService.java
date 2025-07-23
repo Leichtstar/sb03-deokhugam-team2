@@ -26,6 +26,7 @@ import com.twogether.deokhugam.user.exception.UserNotFoundException;
 import com.twogether.deokhugam.user.repository.UserRepository;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -91,11 +92,13 @@ public class BasicReviewService implements ReviewService{
      * 리뷰 상세 조회
      */
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public ReviewDto findById(UUID reviewId, UUID requestUserId){
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(
                         () -> new ReviewNotFoundException(reviewId));
+
+        syncReview(review);
 
         boolean likeByMe = reviewLikeRepository.findByUserIdAndReviewId(requestUserId, reviewId)
                     .map(ReviewLike::isLiked)
@@ -111,7 +114,7 @@ public class BasicReviewService implements ReviewService{
      * 리뷰 목록 조회
      */
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public CursorPageResponseDto<ReviewDto> findReviews(ReviewSearchRequest request) {
         // Pageable 생성
         Pageable pageable = PageRequest.of(0, request.limit());
@@ -125,9 +128,11 @@ public class BasicReviewService implements ReviewService{
         // DTO 변환
         List<ReviewDto> reviewDtos = slice.getContent().stream()
                 .map(review -> {
-                            boolean likeByMe = likeByMeMap.getOrDefault(review.getId(), false);
-                            return reviewMapper.toDto(review, likeByMe);
-                        })
+                    syncReview(review);
+
+                    boolean likeByMe = likeByMeMap.getOrDefault(review.getId(), false);
+                    return reviewMapper.toDto(review, likeByMe);
+                })
                 .toList();
 
         log.info("[BasicReviewService]: 리뷰 목록 조회 완료");
@@ -282,5 +287,34 @@ public class BasicReviewService implements ReviewService{
 
             return reviewLikeMapper.toDto(reviewLike);
         }
+    }
+
+    /**
+     *  리뷰 정보 동기화
+     */
+    private void syncReview(Review review){
+        boolean updated = false;
+
+        if (!review.getUserNickName().equals(review.getUser().getNickname())) {
+            review.updateReviewerNickName(review.getUser().getNickname());
+            updated = true;
+        }
+
+        if (!review.getBookTitle().equals(review.getBook().getTitle())) {
+            review.updateBookTitle(review.getBook().getTitle());
+            updated = true;
+        }
+
+        // null-safe한 비교
+        if (!Objects.equals(review.getBookThumbnailUrl(), review.getBook().getThumbnailUrl())) {
+            review.updateBookThumbnail(review.getBook().getThumbnailUrl());
+            updated = true;
+        }
+
+        // dirty checking으로 저장되므로 save 호출 불필요
+        if (updated) {
+            log.info("[BasicReviewService]: 리뷰 메타데이터 동기화 완료");
+        }
+
     }
 }
