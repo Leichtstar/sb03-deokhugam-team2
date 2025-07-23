@@ -14,7 +14,7 @@ import com.twogether.deokhugam.dashboard.batch.writer.PowerUserRankingWriter;
 import com.twogether.deokhugam.dashboard.entity.PowerUserRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PowerUserRankingRepository;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -105,7 +105,7 @@ class PowerUserRankingWriterTest {
             .period(RankingPeriod.DAILY)
             .score(score)
             .rank(0)
-            .createdAt(LocalDateTime.now())
+            .createdAt(Instant.now())
             .build();
     }
 }
