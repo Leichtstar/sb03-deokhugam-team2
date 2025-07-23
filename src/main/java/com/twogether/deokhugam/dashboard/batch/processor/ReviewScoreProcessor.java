@@ -2,8 +2,7 @@ package com.twogether.deokhugam.dashboard.batch.processor;
 
 import com.twogether.deokhugam.dashboard.batch.model.ReviewScoreDto;
 import com.twogether.deokhugam.dashboard.entity.PopularReviewRanking;
-import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.item.ItemProcessor;
 
@@ -26,7 +25,7 @@ public class ReviewScoreProcessor implements ItemProcessor<ReviewScoreDto, Popul
             .commentCount(dto.commentCount())
             .score(dto.calculateScore())
             .rank(0)
-            .createdAt(LocalDateTime.now())
+            .createdAt(Instant.now())
             .build();
     }
 }
