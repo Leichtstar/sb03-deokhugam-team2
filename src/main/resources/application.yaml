@@ -41,3 +41,6 @@ batch:
   power-user-ranking:
     enabled: true
     cron: "0 10 0 * * *"
+  notification-cleanup:
+    enabled: true
+    cron: "0 15 0 * * *"
