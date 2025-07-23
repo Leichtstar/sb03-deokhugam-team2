@@ -27,7 +27,7 @@ import com.twogether.deokhugam.review.repository.ReviewRepository;
 import com.twogether.deokhugam.user.entity.User;
 import com.twogether.deokhugam.user.repository.UserRepository;
 import jakarta.validation.Validator;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -197,8 +197,8 @@ class CommentServiceTest {
         UUID userId = UUID.randomUUID();
         String userNickname = "user1";
         UUID reviewId = UUID.randomUUID();
-        LocalDateTime createdAt = LocalDateTime.now();
-        LocalDateTime updatedAt = LocalDateTime.now();
+        Instant createdAt = Instant.now();
+        Instant updatedAt = Instant.now();
         Boolean isDeleted = false;
 
         Comment comment = mock(Comment.class);
@@ -211,8 +211,8 @@ class CommentServiceTest {
             userId,         // UUID userId
             userNickname,   // String userNickname
             reviewId,       // UUID reviewId
-            createdAt,      // LocalDateTime createdAt
-            updatedAt,      // LocalDateTime updatedAt
+            createdAt,      // Instant createdAt
+            updatedAt,      // Instant updatedAt
             isDeleted       // Boolean isDeleted
         );
 
