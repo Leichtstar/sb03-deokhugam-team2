@@ -14,7 +14,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, UUID>, ReviewRepositoryCustom {
 
-    boolean existsByUserIdAndBookId(UUID userId, UUID bookId);
     boolean existsByUserIdAndBookIdAndIsDeletedFalse(UUID userId, UUID bookId);
 
     @Modifying
