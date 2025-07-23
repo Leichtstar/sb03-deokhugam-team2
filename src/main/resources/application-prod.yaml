@@ -19,8 +19,11 @@ spring:
 
 logging:
   level:
-    com.sprint.mission.discodeit: info
+    com.twogether.deokhugam: info
     org.hibernate.SQL: info
+  file:
+    path: ./logs
+    name: application
 
 management:
   endpoints:
