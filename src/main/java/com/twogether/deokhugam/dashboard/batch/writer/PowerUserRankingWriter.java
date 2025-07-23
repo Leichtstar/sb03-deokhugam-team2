@@ -3,6 +3,7 @@ package com.twogether.deokhugam.dashboard.batch.writer;
 import com.twogether.deokhugam.common.exception.DeokhugamException;
 import com.twogether.deokhugam.common.exception.ErrorCode;
 import com.twogether.deokhugam.dashboard.entity.PowerUserRanking;
+import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PowerUserRankingRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,9 @@ public class PowerUserRankingWriter implements ItemWriter<PowerUserRanking> {
         }
 
         try {
+            RankingPeriod period = rankingList.get(0).getPeriod();
+            powerUserRankingRepository.deleteByPeriod(period);
+
             int currentRank = 1;
             for (int i = 0; i < rankingList.size(); i++) {
                 PowerUserRanking current = rankingList.get(i);
