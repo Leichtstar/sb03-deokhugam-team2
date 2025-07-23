@@ -18,6 +18,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.twogether.deokhugam.book.entity.Book;
+import com.twogether.deokhugam.book.exception.BookNotFoundException;
 import com.twogether.deokhugam.book.repository.BookRepository;
 import com.twogether.deokhugam.common.dto.CursorPageResponseDto;
 import com.twogether.deokhugam.review.dto.ReviewDto;
@@ -35,6 +36,7 @@ import com.twogether.deokhugam.review.repository.ReviewLikeRepository;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
 import com.twogether.deokhugam.review.service.util.ReviewCursorHelper;
 import com.twogether.deokhugam.user.entity.User;
+import com.twogether.deokhugam.user.exception.UserNotFoundException;
 import com.twogether.deokhugam.user.repository.UserRepository;
 import jakarta.validation.Validator;
 import java.time.LocalDate;
@@ -246,7 +248,7 @@ public class BasicReviewServiceTest {
         when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(NoSuchElementException.class, () -> {
+        assertThrows(BookNotFoundException.class, () -> {
             basicReviewService.create(reviewCreateRequest);
         });
 
@@ -265,7 +267,7 @@ public class BasicReviewServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(NoSuchElementException.class, () -> {
+        assertThrows(UserNotFoundException.class, () -> {
             basicReviewService.create(reviewCreateRequest);
         });
 
