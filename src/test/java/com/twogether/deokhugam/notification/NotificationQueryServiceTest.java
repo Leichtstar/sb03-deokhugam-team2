@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.twogether.deokhugam.book.entity.Book;
 import com.twogether.deokhugam.common.dto.CursorPageResponse;
 import com.twogether.deokhugam.notification.dto.NotificationDto;
 import com.twogether.deokhugam.notification.entity.Notification;
@@ -15,7 +14,8 @@ import com.twogether.deokhugam.notification.repository.NotificationRepository;
 import com.twogether.deokhugam.notification.service.NotificationQueryService;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.user.entity.User;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -41,7 +41,7 @@ class NotificationQueryServiceTest {
     void 알림_목록_조회_성공_after_없음() {
         // given
         UUID userId = UUID.randomUUID();
-        LocalDateTime baseTime = LocalDateTime.now();
+        Instant baseTime = Instant.now();
         int limit = 2;
 
         User user = mock(User.class);
@@ -52,7 +52,8 @@ class NotificationQueryServiceTest {
                 .id(UUID.randomUUID())
                 .content("test")
                 .confirmed(false)
-                .createdAt(baseTime.minusMinutes(1))
+                .createdAt(baseTime.minus(1, ChronoUnit.MINUTES))
+                .updatedAt(baseTime.minus(1, ChronoUnit.MINUTES))
                 .user(user)
                 .review(review)
                 .build(),
@@ -60,7 +61,8 @@ class NotificationQueryServiceTest {
                 .id(UUID.randomUUID())
                 .content("test2")
                 .confirmed(true)
-                .createdAt(baseTime.minusMinutes(2))
+                .createdAt(baseTime.minus(2, ChronoUnit.MINUTES))
+                .updatedAt(baseTime.minus(2, ChronoUnit.MINUTES))
                 .user(user)
                 .review(review)
                 .build()
@@ -98,8 +100,8 @@ class NotificationQueryServiceTest {
     void 알림_목록_조회_성공_after_있음() {
         // given
         UUID userId = UUID.randomUUID();
-        LocalDateTime baseTime = LocalDateTime.now();
-        LocalDateTime after = baseTime.minusHours(1);
+        Instant baseTime = Instant.now();
+        Instant after = baseTime.minus(1, ChronoUnit.HOURS);
         int limit = 1;
 
         User user = mock(User.class);
@@ -109,7 +111,8 @@ class NotificationQueryServiceTest {
             .id(UUID.randomUUID())
             .content("test3")
             .confirmed(false)
-            .createdAt(baseTime.minusMinutes(10))
+            .createdAt(baseTime.minus(10, ChronoUnit.MINUTES))
+            .updatedAt(baseTime.minus(10, ChronoUnit.MINUTES))
             .user(user)
             .review(review)
             .build();
@@ -118,7 +121,8 @@ class NotificationQueryServiceTest {
             .id(UUID.randomUUID())
             .content("test4")
             .confirmed(false)
-            .createdAt(baseTime.minusMinutes(10))
+            .createdAt(baseTime.minus(10, ChronoUnit.MINUTES))
+            .updatedAt(baseTime.minus(10, ChronoUnit.MINUTES))
             .user(user)
             .review(review)
             .build();
