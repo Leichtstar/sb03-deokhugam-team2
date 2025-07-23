@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -104,17 +105,22 @@ public class JpaPowerUserScoreReader implements ItemReader<PowerUserScoreDto> {
         userIds.addAll(commentCountMap.keySet());
 
         // 닉네임 조회
-        Map<UUID, String> nicknameMap = em.createQuery("""
-            SELECT u.id, u.nickname
-            FROM User u
-            WHERE u.id IN :userIds
-        """, Object[].class)
-            .setParameter("userIds", userIds)
-            .getResultList().stream()
-            .collect(Collectors.toMap(
-                row -> (UUID) row[0],
-                row -> (String) row[1]
-            ));
+        Map<UUID, String> nicknameMap;
+        if (userIds.isEmpty()) {
+            nicknameMap = Collections.emptyMap();
+        } else {
+            nicknameMap = em.createQuery("""
+                 SELECT u.id, u.nickname
+                 FROM User u
+                 WHERE u.id IN :userIds
+            """, Object[].class)
+                .setParameter("userIds", userIds)
+                .getResultList().stream()
+                .collect(Collectors.toMap(
+                    row -> (UUID) row[0],
+                    row -> (String) row[1]
+                ));
+        }
 
         // DTO 조립 후 정렬
         return userIds.stream()
