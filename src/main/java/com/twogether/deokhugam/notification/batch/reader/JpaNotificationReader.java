@@ -20,7 +20,10 @@ public class JpaNotificationReader {
     }
 
     public JpaPagingItemReader<Notification> create() {
-        LocalDateTime cutoff = LocalDateTime.now().minus(7, ChronoUnit.DAYS);
+        // 테스트용 15분 기준 삭제로 변경
+        LocalDateTime cutoff = LocalDateTime.now().minus(15, ChronoUnit.MINUTES);
+        // 실제 배포 환경 사용
+        //LocalDateTime cutoff = LocalDateTime.now().minus(7, ChronoUnit.DAYS);
 
         Map<String, Object> params = new HashMap<>();
         params.put("cutoff", cutoff);
