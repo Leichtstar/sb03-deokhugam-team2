@@ -32,12 +32,15 @@ naver:
 batch:
   popular-book-ranking:
     enabled: true
-    cron: "0 0 0 * * *"
+    cron: "0 */5 * * * *"
 
   popular-review-ranking:
     enabled: true
-    cron: "0 5 0 * * *"
+    cron: "0 */5 * * * *"
 
   power-user-ranking:
     enabled: true
-    cron: "0 10 0 * * *"
+    cron: "0 */5 * * * *"
+  notification-cleanup:
+    enabled: true
+    cron: "0 */15 * * * *"

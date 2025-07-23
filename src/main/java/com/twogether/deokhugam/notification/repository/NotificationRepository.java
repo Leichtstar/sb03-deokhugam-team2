@@ -1,12 +1,14 @@
 package com.twogether.deokhugam.notification.repository;
 
 import com.twogether.deokhugam.notification.entity.Notification;
+import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -36,4 +38,21 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
     );
 
     Optional<Notification> findByIdAndUserId(UUID id, UUID userId);
+
+    @Modifying
+    @Transactional
+    @Query("""
+    UPDATE Notification n
+    SET n.confirmed = true
+    WHERE n.user.id = :userId AND n.confirmed = false
+    """)
+    void markAllAsReadByUserId(@Param("userId") UUID userId);
+
+    @Modifying
+    @Transactional
+    @Query("""
+    DELETE FROM Notification n
+    WHERE n.confirmed = true AND n.updatedAt < :cutoff
+""")
+    void deleteOldConfirmedNotifications(@Param("cutoff") LocalDateTime cutoff);
 }

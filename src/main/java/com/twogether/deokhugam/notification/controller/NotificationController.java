@@ -69,4 +69,14 @@ public class NotificationController {
         );
         return ResponseEntity.ok(updated);
     }
+
+    @Operation(summary = "모든 알림 읽음 처리", description = "사용자의 모든 알림을 확인 처리합니다.")
+    @PatchMapping("/api/notifications/read-all")
+    public ResponseEntity<Void> markAllAsRead(
+        @Parameter(description = "요청자 ID", required = true)
+        @RequestHeader("Deokhugam-Request-User-ID") UUID requestUserId
+    ) {
+        notificationService.markAllAsRead(requestUserId);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -10,7 +10,6 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +23,7 @@ public class PopularReviewRankingScheduler {
     private final Job popularReviewRankingJob;
 
     //@Scheduled(initialDelay = 1000, fixedDelay = Long.MAX_VALUE) // application 실행 시 즉시 배치 (테스트용)
-    @Scheduled(cron = "${batch.popular-review-ranking.cron}")
+    @Scheduled(cron = "${batch.popular-review-ranking.cron:0 5 0 * * *}")
     public void runRankingJob() {
         String jobName = "popularReviewRankingJob";
         String requestId = UUID.randomUUID().toString();
