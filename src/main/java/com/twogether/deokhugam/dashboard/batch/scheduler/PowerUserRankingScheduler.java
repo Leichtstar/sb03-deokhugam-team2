@@ -2,6 +2,7 @@ package com.twogether.deokhugam.dashboard.batch.scheduler;
 
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PowerUserRankingRepository;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +46,7 @@ public class PowerUserRankingScheduler {
 
                 JobParameters params = new JobParametersBuilder()
                     .addString("period", period.name())
-                    .addString("now", java.time.LocalDateTime.now().toString())
+                    .addString("now", Instant.now().toString())
                     .addString("requestId", requestId)
                     .toJobParameters();
 
@@ -67,5 +68,4 @@ public class PowerUserRankingScheduler {
         }
         log.info("파워 유저 랭킹 배치 전체 완료: 성공={}, 실패={}, requestId={}", successCount, failureCount, requestId);
     }
-
 }
