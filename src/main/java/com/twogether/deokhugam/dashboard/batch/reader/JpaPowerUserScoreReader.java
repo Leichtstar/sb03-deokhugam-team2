@@ -4,8 +4,6 @@ import com.twogether.deokhugam.dashboard.batch.model.PowerUserScoreDto;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import jakarta.persistence.EntityManager;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -46,9 +44,9 @@ public class JpaPowerUserScoreReader implements ItemReader<PowerUserScoreDto> {
 
     private List<PowerUserScoreDto> aggregatePowerUserScores() {
         RankingPeriod period = RankingPeriod.valueOf(periodString);
-        LocalDateTime now = LocalDateTime.parse(nowString);
-        LocalDateTime start = period.getStartTime(now);
-        LocalDateTime end = period.getEndTime(now);
+        Instant now = Instant.parse(nowString);
+        Instant start = period.getStartTime(now);
+        Instant end = period.getEndTime(now);
 
         // 1. 작성한 리뷰의 인기 점수
         Map<UUID, Double> reviewScoreMap = em.createQuery("""
