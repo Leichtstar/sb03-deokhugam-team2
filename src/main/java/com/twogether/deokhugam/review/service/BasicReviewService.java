@@ -3,10 +3,8 @@ package com.twogether.deokhugam.review.service;
 import com.twogether.deokhugam.book.entity.Book;
 import com.twogether.deokhugam.book.exception.BookNotFoundException;
 import com.twogether.deokhugam.book.repository.BookRepository;
-import com.twogether.deokhugam.book.service.BookService;
 import com.twogether.deokhugam.common.dto.CursorPageResponseDto;
 import com.twogether.deokhugam.notification.event.ReviewLikedEvent;
-import com.twogether.deokhugam.notification.service.NotificationService;
 import com.twogether.deokhugam.review.dto.ReviewDto;
 import com.twogether.deokhugam.review.dto.ReviewLikeDto;
 import com.twogether.deokhugam.review.dto.request.ReviewCreateRequest;
@@ -53,7 +51,9 @@ public class BasicReviewService implements ReviewService{
     // 알림용
     private final ApplicationEventPublisher eventPublisher;
 
-    // 리뷰 생성
+    /**
+     * 리뷰 생성
+     */
     @Override
     @Transactional
     public ReviewDto create(ReviewCreateRequest request) {
@@ -87,7 +87,9 @@ public class BasicReviewService implements ReviewService{
         return reviewMapper.toDto(review, false);
     }
 
-    // 리뷰 상세 조회
+    /**
+     * 리뷰 상세 조회
+     */
     @Override
     @Transactional(readOnly = true)
     public ReviewDto findById(UUID reviewId, UUID requestUserId){
@@ -105,7 +107,9 @@ public class BasicReviewService implements ReviewService{
         return reviewMapper.toDto(review, likeByMe);
     }
 
-    // 리뷰 목록 조회
+    /**
+     * 리뷰 목록 조회
+     */
     @Override
     @Transactional(readOnly = true)
     public CursorPageResponseDto<ReviewDto> findReviews(ReviewSearchRequest request) {
@@ -126,6 +130,8 @@ public class BasicReviewService implements ReviewService{
                         })
                 .toList();
 
+        log.info("[BasicReviewService]: 리뷰 목록 조회 완료");
+
         // totalElement 구하기
         long totalElement = reviewRepository.totalElementCount(request);
 
@@ -135,8 +141,10 @@ public class BasicReviewService implements ReviewService{
         // after 생성
         String after = slice.hasNext() ? reviewCursorHelper.generateAfter(slice.getContent()) : null;
 
+        log.info("[BasicReviewService]: 리뷰 목록 조회 커서 생성 완료");
+
         // 반환값 생성
-        CursorPageResponseDto<ReviewDto> responseDtoTest = new CursorPageResponseDto<>(
+        return new CursorPageResponseDto<>(
                 reviewDtos,
                 nextCursor,
                 after,
@@ -144,11 +152,11 @@ public class BasicReviewService implements ReviewService{
                 totalElement,
                 slice.hasNext()
         );
-
-        return responseDtoTest;
     }
 
-    // 리뷰 수정 (리뷰 내용, 평점)
+    /**
+     * 리뷰 수정 (리뷰 내용, 별점)
+     */
     @Override
     @Transactional
     public ReviewDto updateReview(UUID reviewId, UUID requestUserId, ReviewUpdateRequest updateRequest) {
@@ -169,7 +177,9 @@ public class BasicReviewService implements ReviewService{
         return reviewMapper.toDto(review, likeByMe);
     }
 
-    // 리뷰 논리 삭제
+    /**
+     * 리뷰 논리 삭제
+     */
     @Override
     @Transactional
     public void deleteReviewSoft(UUID reviewId, UUID requestUserId) {
@@ -192,7 +202,9 @@ public class BasicReviewService implements ReviewService{
         log.info("[BasicReviewService]: 리뷰 논리 삭제 완료");
     }
 
-    // 리뷰 물리 삭제
+    /**
+     * 리뷰 물리 삭제
+     */
     @Override
     @Transactional
     public void deleteReviewHard(UUID reviewId, UUID requestUserId) {
@@ -214,7 +226,9 @@ public class BasicReviewService implements ReviewService{
         log.info("[BasicReviewService]: 리뷰 물리 삭제 완료");
     }
 
-    // 리뷰 좋아요 기능
+    /**
+     * 리뷰 좋아요 기능
+     */
     @Override
     @Transactional
     public ReviewLikeDto reviewLike(UUID reviewId, UUID userId) {
@@ -245,7 +259,6 @@ public class BasicReviewService implements ReviewService{
             return reviewLikeMapper.toDto(newReviewLike);
         }
         else{
-
             ReviewLike reviewLike = reviewLikeRepository.findByUserIdAndReviewId(userId, reviewId)
                     .orElseThrow(
                             ReviewLikeNotFoundException::new);
