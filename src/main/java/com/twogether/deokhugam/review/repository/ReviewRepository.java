@@ -24,6 +24,4 @@ public interface ReviewRepository extends JpaRepository<Review, UUID>, ReviewRep
     @Modifying
     @Query("UPDATE Review r SET r.commentCount = r.commentCount - 1 WHERE r.id = :reviewId")
     void decrementCommentCount(@Param("reviewId") UUID reviewId);
-
-
 }

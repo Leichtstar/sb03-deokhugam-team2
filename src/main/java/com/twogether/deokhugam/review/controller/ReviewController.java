@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/reviews")
 @RestController
-public class ReviewController {
+public class ReviewController implements ReviewApi {
 
     private final ReviewService reviewService;
 
@@ -82,6 +82,20 @@ public class ReviewController {
                 .body(searchResult);
     }
 
+    // 리뷰 수정
+    @PatchMapping(path = "/{reviewId}")
+    public ResponseEntity<ReviewDto> updateReview(
+            @PathVariable("reviewId") UUID reviewId,
+            @Valid @RequestBody ReviewUpdateRequest updateRequest,
+            @RequestHeader(value = "Deokhugam-Request-User-ID", required = true) UUID requestUserId
+    ){
+        ReviewDto reviewDto = reviewService.updateReview(reviewId, requestUserId, updateRequest);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(reviewDto);
+    }
+
     // 리뷰 논리 삭제
     @DeleteMapping(path = "/{reviewId}")
     public ResponseEntity<Void> deleteReview(
@@ -105,20 +119,6 @@ public class ReviewController {
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
                 .build();
-    }
-
-    // 리뷰 수정
-    @PatchMapping(path = "/{reviewId}")
-    public ResponseEntity<ReviewDto> updateReview(
-            @PathVariable("reviewId") UUID reviewId,
-            @Valid @RequestBody ReviewUpdateRequest updateRequest,
-            @RequestHeader(value = "Deokhugam-Request-User-ID", required = true) UUID requestUserId
-    ){
-        ReviewDto reviewDto = reviewService.updateReview(reviewId, requestUserId, updateRequest);
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(reviewDto);
     }
 
     // 리뷰 좋아요 스위치 요청

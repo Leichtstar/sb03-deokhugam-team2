@@ -52,7 +52,7 @@ public class CommentService {
 
         Review review = findReviewOrThrow(request.reviewId());
         User user = findUserOrThrow(request.userId());
-      
+
         Comment entity = new Comment(user, review, request.content());
         Comment saved = commentRepository.save(entity);
 
@@ -60,10 +60,7 @@ public class CommentService {
         eventPublisher.publishEvent(
             new CommentCreatedEvent(user, review, saved.getContent())
         );
-
-        reviewRepository.incrementCommentCount(request.reviewId());
-        review.updateUpdatedAt();
-        reviewRepository.save(review);
+        incrementReviewCommentCount(review);
 
         log.debug("댓글 생성 완료: commentId={}", saved.getId());
 
@@ -107,7 +104,7 @@ public class CommentService {
         validateCommentOwner(comment, requestUserId);
         validateNotDeleted(comment);
 
-        reviewRepository.decrementCommentCount(comment.getReview().getId());
+        decrementReviewCommentCount(comment.getReview());
         commentRepository.logicalDeleteById(commentId);
 
         log.debug("댓글 논리적 삭제 완료: commentId={}", commentId);

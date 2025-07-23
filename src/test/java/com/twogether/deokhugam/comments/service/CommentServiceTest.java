@@ -163,10 +163,12 @@ class CommentServiceTest {
         // given
         User mockUser = mock(User.class);
         Review mockReview = mock(Review.class);
+        when(mockReview.getId()).thenReturn(reviewId);
+
         Comment mockComment = new Comment(mockUser, mockReview, "테스트 댓글입니다.");
         CommentResponse expectedResponse = mock(CommentResponse.class);
 
-        when(reviewRepository.findById(any())).thenReturn(Optional.of(mockReview));
+        when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(mockReview));
         when(userRepository.findById(any())).thenReturn(Optional.of(mockUser));
         when(commentRepository.save(any(Comment.class))).thenReturn(mockComment);
 
@@ -180,7 +182,7 @@ class CommentServiceTest {
         verify(reviewRepository, times(1)).findById(any());
         verify(userRepository, times(1)).findById(any());
         verify(commentRepository, times(1)).save(any(Comment.class));
-        verify(reviewRepository, times(1)).incrementCommentCount(commentCreateRequest.reviewId());
+        verify(reviewRepository, times(1)).incrementCommentCount(mockReview.getId());
         verify(commentMapper, times(1)).toResponse(any(Comment.class));
         verify(eventPublisher).publishEvent(any(CommentCreatedEvent.class));
     }
