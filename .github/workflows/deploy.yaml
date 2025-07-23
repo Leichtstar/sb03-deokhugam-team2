@@ -68,18 +68,18 @@ jobs:
           # 환경 파일에 변수 저장 (다음 단계에서 사용 가능)
           echo "NEW_TASK_DEF_ARN=$NEW_TASK_DEF_ARN" >> $GITHUB_ENV
 
-      - name: ECS 서비스 중지 및 대기
-        run: |
-          aws ecs update-service \
-            --cluster ${{ vars.ECS_CLUSTER }} \
-            --service ${{ vars.ECS_SERVICE }} \
-            --desired-count 0
-          
-          aws ecs wait services-stable \
-            --cluster ${{ vars.ECS_CLUSTER }} \
-            --services ${{ vars.ECS_SERVICE }}
-          
-          sleep 30
+#      - name: ECS 서비스 중지 및 대기
+#        run: |
+#          aws ecs update-service \
+#            --cluster ${{ vars.ECS_CLUSTER }} \
+#            --service ${{ vars.ECS_SERVICE }} \
+#            --desired-count 0
+#
+#          aws ecs wait services-stable \
+#            --cluster ${{ vars.ECS_CLUSTER }} \
+#            --services ${{ vars.ECS_SERVICE }}
+#
+#          sleep 30
 
       - name: ECS 서비스 업데이트
         run: |
@@ -87,5 +87,5 @@ jobs:
             --cluster ${{ vars.ECS_CLUSTER }} \
             --service ${{ vars.ECS_SERVICE }} \
             --task-definition $NEW_TASK_DEF_ARN \
-            --desired-count 1 \
+#            --desired-count 1 \
             --force-new-deployment
