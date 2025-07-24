@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -35,7 +34,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class NaverBookClientImpl implements NaverBookClient {
 
     @Value("${naver.api.client-id}")
@@ -50,7 +48,11 @@ public class NaverBookClientImpl implements NaverBookClient {
     @Value("${naver.api.ocr-url}")
     private String ocrUrl;
 
-    private final RestTemplateBuilder restTemplateBuilder;
+    private final RestTemplate restTemplate;
+
+    public NaverBookClientImpl(RestTemplateBuilder restTemplateBuilder) {
+        this.restTemplate = restTemplateBuilder.build();
+    }
 
     @Override
     public NaverBookDto fetchInfoByIsbn(String isbn) {
@@ -65,9 +67,6 @@ public class NaverBookClientImpl implements NaverBookClient {
         headers.set("X-Naver-Client-Secret", clientSecret);
 
         HttpEntity<?> entity = new HttpEntity<>(headers);
-
-        // RestTemplate 생성
-        RestTemplate restTemplate = restTemplateBuilder.build();
 
             try {
                 ResponseEntity<NaverBookSearchResponse> response = restTemplate.exchange(
@@ -99,7 +98,7 @@ public class NaverBookClientImpl implements NaverBookClient {
     }
     private String downloadImageAsBase64(String imageUrl) {
         try {
-            ResponseEntity<byte[]> response = restTemplateBuilder.build()
+            ResponseEntity<byte[]> response = restTemplate
                 .getForEntity(imageUrl, byte[].class);
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
@@ -142,7 +141,6 @@ public class NaverBookClientImpl implements NaverBookClient {
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
             // OCR 요청
-            RestTemplate restTemplate = restTemplateBuilder.build();
             ResponseEntity<String> response;
             try {
                 response = restTemplate.postForEntity(ocrUrl, requestEntity, String.class);
@@ -235,3 +233,4 @@ public class NaverBookClientImpl implements NaverBookClient {
     }
 
 }
+
