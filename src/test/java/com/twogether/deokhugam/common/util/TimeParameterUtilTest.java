@@ -2,7 +2,10 @@ package com.twogether.deokhugam.common.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,5 +26,14 @@ class TimeParameterUtilTest {
         String now = "2025-07-24T10:00:00Z";
         Instant parsed = TimeParameterUtil.parseNowOrDefault(now);
         assertEquals(Instant.parse(now), parsed);
+    }
+
+    @Test
+    @DisplayName("TimeParameterUtil 생성자 private 강제 호출 시 예외 발생")
+    void constructor_invocation_throwsException() throws Exception {
+        Constructor<TimeParameterUtil> constructor = TimeParameterUtil.class.getDeclaredConstructor();
+        constructor.setAccessible(true); // private constructor 호출 가능하게 설정
+
+        assertThrows(InvocationTargetException.class, constructor::newInstance);
     }
 }
