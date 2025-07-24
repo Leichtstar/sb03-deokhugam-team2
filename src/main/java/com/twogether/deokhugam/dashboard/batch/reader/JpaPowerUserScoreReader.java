@@ -1,5 +1,6 @@
 package com.twogether.deokhugam.dashboard.batch.reader;
 
+import com.twogether.deokhugam.common.util.TimeParameterUtil;
 import com.twogether.deokhugam.dashboard.batch.model.PowerUserScoreDto;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import jakarta.persistence.EntityManager;
@@ -44,7 +45,7 @@ public class JpaPowerUserScoreReader implements ItemReader<PowerUserScoreDto> {
 
     private List<PowerUserScoreDto> aggregatePowerUserScores() {
         RankingPeriod period = RankingPeriod.valueOf(periodString);
-        Instant now = Instant.parse(nowString);
+        Instant now = TimeParameterUtil.parseNowOrDefault(nowString);
         Instant start = period.getStartTime(now);
         Instant end = period.getEndTime(now);
 
