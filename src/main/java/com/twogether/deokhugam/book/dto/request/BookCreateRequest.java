@@ -1,5 +1,6 @@
 package com.twogether.deokhugam.book.dto.request;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -24,6 +25,7 @@ public record BookCreateRequest(
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     LocalDate publishedDate,
 
-    @Pattern(regexp = "\\d{1,13}", message = "유효한 ISBN 형식이 아닙니다.")
+    @Pattern(regexp = "^$|(\\d{9}[\\dXx])|(\\d{13})$", message = "유효한 ISBN 형식이 아닙니다.")
+    @Nullable
     String isbn // optional
 ) {}
