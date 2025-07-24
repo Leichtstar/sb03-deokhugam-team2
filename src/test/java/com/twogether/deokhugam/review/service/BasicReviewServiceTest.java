@@ -12,7 +12,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -44,7 +43,6 @@ import com.twogether.deokhugam.user.repository.UserRepository;
 import jakarta.validation.Validator;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,7 +50,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mapstruct.AnnotateWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -219,13 +216,13 @@ public class BasicReviewServiceTest {
     }
 
     @Test
-    @DisplayName("리뷰의 평점은 1점 미만일 수 없다.")
+    @DisplayName("리뷰의 평점은 5점을 초과할 수 없다.")
     void shouldFailValidation_whenRatingIsBiggerThanFive() {
         // Given
         ReviewCreateRequest invalidReviewRequest = new ReviewCreateRequest(
                 bookId,
                 userId,
-                "1점 보다 작은 평점",
+                "5점보다 큰 평점",
                 7
         );
 
