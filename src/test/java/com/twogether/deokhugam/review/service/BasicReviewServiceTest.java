@@ -11,6 +11,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -808,4 +810,175 @@ public class BasicReviewServiceTest {
         verify(reviewLikeMapper).toDto(any(ReviewLike.class));
     }
 
+    @Nested
+    @DisplayName("리뷰 서비스의 syncReview() 메서드 브랜치 테스트")
+    class SyncReviewBranchTest {
+
+        @Test
+        @DisplayName("리뷰 조회 시 사용자 닉네임이 변경된 경우 동기화")
+        void findById_WhenUserNicknameChanged_ShouldSyncNickname() {
+            // when
+            String oldNickname = "oldNick";
+            String newNickname = "newNick";
+
+            // 기대하는 Dto
+            ReviewDto expectedDto = new ReviewDto(
+                    testReview.getId(),
+                    testBook.getId(),
+                    testBook.getTitle(),
+                    testBook.getThumbnailUrl(),
+                    testUser.getId(),
+                    testUser.getNickname(),
+                    testReview.getContent(),
+                    testReview.getRating(),
+                    testReview.getLikeCount(),
+                    testReview.getCommentCount(),
+                    true, // likedByMe
+                    testReview.getCreatedAt(),
+                    testReview.getUpdatedAt()
+            );
+
+            // Mock 객체들 생성
+            Review mockReview = mock(Review.class);
+            User mockUser = mock(User.class);
+            Book mockBook = mock(Book.class);
+
+            // Mock 설정 (닉네임이 다른 경우)
+            when(mockReview.getUserNickName()).thenReturn(oldNickname);
+            when(mockReview.getUser()).thenReturn(mockUser);
+            when(mockUser.getNickname()).thenReturn(newNickname);
+
+            // 책 제목과 썸네일은 동일하게 설정 (다른 브랜치는 실행되지 않도록)
+            when(mockReview.getBookTitle()).thenReturn("sameTitle");
+            when(mockReview.getBook()).thenReturn(mockBook);
+            when(mockBook.getTitle()).thenReturn("sameTitle");
+            when(mockReview.getBookThumbnailUrl()).thenReturn("sameThumbnail");
+            when(mockBook.getThumbnailUrl()).thenReturn("sameThumbnail");
+
+            // Repository와 Mapper 설정
+            when(reviewRepository.findById(eq(reviewId))).thenReturn(Optional.of(mockReview));
+            when(reviewLikeRepository.findByUserIdAndReviewId(eq(userId), eq(reviewId)))
+                    .thenReturn(Optional.empty());
+            when(reviewMapper.toDto(any(Review.class), anyBoolean())).thenReturn(expectedDto);
+
+            // then
+            basicReviewService.findById(reviewId, userId);
+
+            // verify
+            verify(mockReview).updateReviewerNickName(eq(newNickname));
+            verify(mockReview, never()).updateBookTitle(any());
+            verify(mockReview, never()).updateBookThumbnail(any());
+        }
+
+        @Test
+        @DisplayName("리뷰 조회 시 책 제목이 변경된 경우 동기화")
+        void findById_WhenBookTitleChanged_ShouldSyncTitle() {
+            // when
+            String oldTitle = "Old Title";
+            String newTitle = "New Title";
+
+            // 기대하는 Dto
+            ReviewDto expectedDto = new ReviewDto(
+                    testReview.getId(),
+                    testBook.getId(),
+                    testBook.getTitle(),
+                    testBook.getThumbnailUrl(),
+                    testUser.getId(),
+                    testUser.getNickname(),
+                    testReview.getContent(),
+                    testReview.getRating(),
+                    testReview.getLikeCount(),
+                    testReview.getCommentCount(),
+                    true, // likedByMe
+                    testReview.getCreatedAt(),
+                    testReview.getUpdatedAt()
+            );
+
+            // Mock 객체들 생성
+            Review mockReview = mock(Review.class);
+            User mockUser = mock(User.class);
+            Book mockBook = mock(Book.class);
+
+            // Mock 설정 (책 제목이 다른 경우)
+            when(mockReview.getBookTitle()).thenReturn(oldTitle);
+            when(mockReview.getBook()).thenReturn(mockBook);
+            when(mockBook.getTitle()).thenReturn(newTitle);
+
+            // 닉네임과 썸네일은 동일하게 설정
+            when(mockReview.getUserNickName()).thenReturn("sameNick");
+            when(mockReview.getUser()).thenReturn(mockUser);
+            when(mockUser.getNickname()).thenReturn("sameNick");
+            when(mockReview.getBookThumbnailUrl()).thenReturn("sameThumbnail");
+            when(mockBook.getThumbnailUrl()).thenReturn("sameThumbnail");
+
+            // Repository와 Mapper 설정
+            when(reviewRepository.findById(eq(reviewId))).thenReturn(Optional.of(mockReview));
+            when(reviewLikeRepository.findByUserIdAndReviewId(eq(userId), eq(reviewId)))
+                    .thenReturn(Optional.empty());
+            when(reviewMapper.toDto(any(Review.class), anyBoolean())).thenReturn(expectedDto);
+
+            // then
+            basicReviewService.findById(reviewId, userId);
+
+            // verify
+            verify(mockReview).updateBookTitle(eq(newTitle)); // 책 제목 업데이트 호출 확인
+            verify(mockReview, never()).updateReviewerNickName(any());
+            verify(mockReview, never()).updateBookThumbnail(any());
+        }
+
+        @Test
+        @DisplayName("리뷰 조회 시 썸네일이 null에서 값으로 변경된 경우 동기화")
+        void findById_WhenThumbnailFromNullToValue_ShouldSyncThumbnail() {
+            // when
+            String newThumbnailUrl = "http://new-thumbnail.jpg";
+
+            // 기대하는 Dto
+            ReviewDto expectedDto = new ReviewDto(
+                    testReview.getId(),
+                    testBook.getId(),
+                    testBook.getTitle(),
+                    testBook.getThumbnailUrl(),
+                    testUser.getId(),
+                    testUser.getNickname(),
+                    testReview.getContent(),
+                    testReview.getRating(),
+                    testReview.getLikeCount(),
+                    testReview.getCommentCount(),
+                    true, // likedByMe
+                    testReview.getCreatedAt(),
+                    testReview.getUpdatedAt()
+            );
+
+            // Mock 객체들 생성
+            Review mockReview = mock(Review.class);
+            User mockUser = mock(User.class);
+            Book mockBook = mock(Book.class);
+
+            // Mock 설정 (썸네일이 null에서 값으로 변경)
+            when(mockReview.getBookThumbnailUrl()).thenReturn(null);
+            when(mockReview.getBook()).thenReturn(mockBook);
+            when(mockBook.getThumbnailUrl()).thenReturn(newThumbnailUrl);
+
+            // 닉네임과 책 제목은 동일하게 설정
+            when(mockReview.getUserNickName()).thenReturn("sameNick");
+            when(mockReview.getUser()).thenReturn(mockUser);
+            when(mockUser.getNickname()).thenReturn("sameNick");
+            when(mockReview.getBookTitle()).thenReturn("sameTitle");
+            when(mockBook.getTitle()).thenReturn("sameTitle");
+
+            // Repository와 Mapper 설정
+            when(reviewRepository.findById(eq(reviewId))).thenReturn(Optional.of(mockReview));
+            when(reviewLikeRepository.findByUserIdAndReviewId(eq(userId), eq(reviewId)))
+                    .thenReturn(Optional.empty());
+            when(reviewMapper.toDto(any(Review.class), anyBoolean())).thenReturn(expectedDto);
+
+            // then
+            basicReviewService.findById(reviewId, userId);
+
+            // verify
+            verify(mockReview).updateBookThumbnail(eq(newThumbnailUrl));
+            verify(mockReview, never()).updateReviewerNickName(any());
+            verify(mockReview, never()).updateBookTitle(any());
+        }
+    }
 }
