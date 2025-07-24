@@ -24,7 +24,7 @@ public class BookInfoController {
 
     @GetMapping(value = "/info")
     public ResponseEntity<NaverBookDto> getBookInfo(@RequestParam("isbn") String isbn) {
-        if (!isbn.matches("\\d{1,13}")) {
+        if (!isbn.matches("^$|(\\d{9}[\\dXx])|(\\d{13})$")) {
             throw new NaverBookException(ErrorCode.INVALID_ISBN);
         }
         NaverBookDto dto = naverBookClient.fetchInfoByIsbn(isbn);

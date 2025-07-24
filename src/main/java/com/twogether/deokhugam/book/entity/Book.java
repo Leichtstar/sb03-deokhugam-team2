@@ -74,6 +74,18 @@ public class Book {
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
 
+    public Book(UUID id, String title, String author, String description, String publisher,
+        LocalDate publishedDate) {
+        this.id = id;
+        this.title = title;
+        this.author = author;
+        this.description = description;
+        this.publisher = publisher;
+        this.publishedDate = publishedDate;
+        this.rating = 0F;
+        this.reviewCount = 0;
+    }
+
     public Book(String title, String author, String description, String publisher, LocalDate publishedDate) {
         this.title = title;
         this.author = author;
