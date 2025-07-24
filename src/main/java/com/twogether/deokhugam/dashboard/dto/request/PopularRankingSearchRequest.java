@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -43,10 +43,10 @@ public class PopularRankingSearchRequest {
 
     @Schema(
         description = "보조 커서(createdAt)",
-        example = "2025-07-15T00:00:00"
+        example = "2025-07-15T00:00:00Z"
     )
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    private LocalDateTime after;
+    private Instant after;
 
     @Min(1)
     @Max(50)

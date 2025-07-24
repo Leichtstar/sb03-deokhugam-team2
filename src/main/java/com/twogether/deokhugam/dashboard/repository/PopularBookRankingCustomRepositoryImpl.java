@@ -8,7 +8,7 @@ import com.twogether.deokhugam.dashboard.dto.request.PopularRankingSearchRequest
 import com.twogether.deokhugam.dashboard.dto.response.PopularBookDto;
 import com.twogether.deokhugam.dashboard.dto.response.QPopularBookDto;
 import com.twogether.deokhugam.dashboard.entity.QPopularBookRanking;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -50,7 +50,7 @@ public class PopularBookRankingCustomRepositoryImpl implements PopularBookRankin
             .fetch();
     }
 
-    private BooleanExpression ltCursor(Integer cursor, LocalDateTime after, String direction) {
+    private BooleanExpression ltCursor(Integer cursor, Instant after, String direction) {
         QPopularBookRanking r = QPopularBookRanking.popularBookRanking;
         if (cursor == null || after == null) return null;
 
@@ -75,5 +75,4 @@ public class PopularBookRankingCustomRepositoryImpl implements PopularBookRankin
             r.createdAt.asc()
         };
     }
-
 }

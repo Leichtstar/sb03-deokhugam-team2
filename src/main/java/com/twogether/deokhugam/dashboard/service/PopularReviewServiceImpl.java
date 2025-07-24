@@ -6,7 +6,7 @@ import com.twogether.deokhugam.common.exception.ErrorCode;
 import com.twogether.deokhugam.dashboard.dto.request.PopularRankingSearchRequest;
 import com.twogether.deokhugam.dashboard.dto.response.PopularReviewDto;
 import com.twogether.deokhugam.dashboard.repository.PopularReviewRankingRepository;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +21,7 @@ public class PopularReviewServiceImpl implements PopularReviewService {
     private final PopularReviewRankingRepository popularReviewRankingRepository;
 
     @Override
-    public CursorPageResponse<PopularReviewDto> getPopularReviews(
-        PopularRankingSearchRequest request) {
+    public CursorPageResponse<PopularReviewDto> getPopularReviews(PopularRankingSearchRequest request) {
         validateRequest(request);
         Pageable pageable = PageRequest.of(0, request.getLimit());
 
@@ -31,12 +30,12 @@ public class PopularReviewServiceImpl implements PopularReviewService {
 
         boolean hasNext = content.size() == request.getLimit();
         String nextCursor = null;
-        LocalDateTime nextAfter = null;
+        Instant nextAfter = null;
 
         if (hasNext) {
             var last = content.get(content.size() - 1);
             nextCursor = last.id().toString();
-            nextAfter = last.createdAt();
+            nextAfter = last.createdAt(); // Instant 기준
         }
 
         return new CursorPageResponse<>(content, nextCursor, nextAfter, request.getLimit(), hasNext);

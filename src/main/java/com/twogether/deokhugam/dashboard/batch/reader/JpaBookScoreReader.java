@@ -1,11 +1,10 @@
 package com.twogether.deokhugam.dashboard.batch.reader;
 
+import com.twogether.deokhugam.common.util.TimeParameterUtil;
 import com.twogether.deokhugam.dashboard.batch.model.BookScoreDto;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import jakarta.persistence.EntityManager;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -40,10 +39,10 @@ public class JpaBookScoreReader implements ItemReader<BookScoreDto> {
 
     private List<BookScoreDto> fetchBookScores() {
         RankingPeriod period = RankingPeriod.valueOf(periodString);
-        LocalDateTime now = LocalDateTime.parse(nowString);
+        Instant now = TimeParameterUtil.parseNowOrDefault(nowString);
 
-        Instant start = period.getStartTime(now).atZone(ZoneId.of("UTC")).toInstant();
-        Instant end = period.getEndTime(now).atZone(ZoneId.of("UTC")).toInstant();
+        Instant start = period.getStartTime(now);
+        Instant end = period.getEndTime(now);
 
         return entityManager.createQuery("""
             SELECT b.id, b.title, b.author, b.thumbnailUrl,

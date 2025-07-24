@@ -3,9 +3,8 @@ package com.twogether.deokhugam.dashboard.batch.processor;
 import com.twogether.deokhugam.book.entity.Book;
 import com.twogether.deokhugam.dashboard.batch.model.BookScoreDto;
 import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
-import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import jakarta.persistence.EntityManager;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import org.springframework.batch.item.ItemProcessor;
 
 public class BookScoreProcessor implements ItemProcessor<BookScoreDto, PopularBookRanking> {
@@ -30,7 +29,7 @@ public class BookScoreProcessor implements ItemProcessor<BookScoreDto, PopularBo
             .reviewCount(dto.reviewCount())
             .rating(dto.averageRating())
             .period(dto.period())
-            .createdAt(LocalDateTime.now())
+            .createdAt(Instant.now())
             .build();
     }
 }

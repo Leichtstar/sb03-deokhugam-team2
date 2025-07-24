@@ -9,7 +9,7 @@ import com.twogether.deokhugam.comments.entity.Comment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,7 +22,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
 
     @Override
     public List<Comment> findSlice(UUID reviewId,
-                                   LocalDateTime afterCreatedAt,
+                                   Instant afterCreatedAt,
                                    UUID afterId,
                                    int limit,
                                    boolean asc) {

@@ -14,7 +14,7 @@ import com.twogether.deokhugam.dashboard.dto.request.PopularRankingSearchRequest
 import com.twogether.deokhugam.dashboard.dto.response.PopularReviewDto;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PopularReviewRankingRepository;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -147,7 +147,7 @@ class PopularReviewServiceTest {
             "이 책은 정말 훌륭해요.",
             5.0,
             RankingPeriod.DAILY,
-            LocalDateTime.now(),
+            Instant.now(),
             1,
             100.0,
             10,

@@ -15,8 +15,8 @@ import com.twogether.deokhugam.dashboard.batch.writer.PowerUserRankingWriter;
 import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
 import com.twogether.deokhugam.dashboard.entity.PopularReviewRanking;
 import com.twogether.deokhugam.dashboard.entity.PowerUserRanking;
-import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import jakarta.persistence.EntityManager;
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -25,7 +25,6 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -69,9 +68,10 @@ public class RankingBatchJobConfig {
     @Bean
     public Job popularReviewRankingJob(JobRepository jobRepository,
         PlatformTransactionManager transactionManager,
-        JpaReviewScoreReader reader) {
+        JpaReviewScoreReader reader,
+        ItemProcessor<ReviewScoreDto, PopularReviewRanking> reviewScoreProcessor) {
         return new JobBuilder("popularReviewRankingJob", jobRepository)
-            .start(popularReviewRankingStep(jobRepository, transactionManager, reader))
+            .start(popularReviewRankingStep(jobRepository, transactionManager, reader, reviewScoreProcessor))
             .build();
     }
 
@@ -79,24 +79,32 @@ public class RankingBatchJobConfig {
     @JobScope
     public Step popularReviewRankingStep(JobRepository jobRepository,
         PlatformTransactionManager transactionManager,
-        JpaReviewScoreReader reader) {
-        ItemProcessor<ReviewScoreDto, PopularReviewRanking> processor = new ReviewScoreProcessor();
-
+        JpaReviewScoreReader reader,
+        ItemProcessor<ReviewScoreDto, PopularReviewRanking> reviewScoreProcessor) {
         return new StepBuilder("popularReviewStep", jobRepository)
             .<ReviewScoreDto, PopularReviewRanking>chunk(100, transactionManager)
             .reader(reader)
-            .processor(processor)
+            .processor(reviewScoreProcessor)
             .writer(reviewWriter)
             .build();
+    }
+
+    @Bean
+    @JobScope
+    public ItemProcessor<ReviewScoreDto, PopularReviewRanking> reviewScoreProcessor(
+        @Value("#{jobParameters['now']}") String now
+    ) {
+        return new ReviewScoreProcessor(Instant.parse(now));
     }
 
     // [3] 파워 유저 랭킹 Job
     @Bean
     public Job powerUserRankingJob(JobRepository jobRepository,
         PlatformTransactionManager transactionManager,
-        JpaPowerUserScoreReader reader) {
+        JpaPowerUserScoreReader reader,
+        ItemProcessor<PowerUserScoreDto, PowerUserRanking> powerUserScoreProcessor) {
         return new JobBuilder("powerUserRankingJob", jobRepository)
-            .start(powerUserRankingStep(jobRepository, transactionManager, reader))
+            .start(powerUserRankingStep(jobRepository, transactionManager, reader, powerUserScoreProcessor))
             .build();
     }
 
@@ -104,14 +112,21 @@ public class RankingBatchJobConfig {
     @JobScope
     public Step powerUserRankingStep(JobRepository jobRepository,
         PlatformTransactionManager transactionManager,
-        JpaPowerUserScoreReader reader) {
-        ItemProcessor<PowerUserScoreDto, PowerUserRanking> processor = new PowerUserScoreProcessor(em);
-
+        JpaPowerUserScoreReader reader,
+        ItemProcessor<PowerUserScoreDto, PowerUserRanking> powerUserScoreProcessor) {
         return new StepBuilder("powerUserStep", jobRepository)
             .<PowerUserScoreDto, PowerUserRanking>chunk(100, transactionManager)
             .reader(reader)
-            .processor(processor)
+            .processor(powerUserScoreProcessor)
             .writer(powerUserRankingWriter)
             .build();
+    }
+
+    @Bean
+    @JobScope
+    public ItemProcessor<PowerUserScoreDto, PowerUserRanking> powerUserScoreProcessor(
+        @Value("#{jobParameters['now']}") String now
+    ) {
+        return new PowerUserScoreProcessor(em, Instant.parse(now));
     }
 }

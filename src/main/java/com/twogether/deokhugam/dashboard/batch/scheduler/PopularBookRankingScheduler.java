@@ -1,6 +1,7 @@
 package com.twogether.deokhugam.dashboard.batch.scheduler;
 
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,6 @@ public class PopularBookRankingScheduler {
 
         for (RankingPeriod period : RankingPeriod.values()) {
             try {
-                // MDC 로그 컨텍스트 설정
                 MDC.put("jobName", jobName);
                 MDC.put("rankingPeriod", period.name());
                 MDC.put("requestId", requestId);
@@ -41,7 +41,7 @@ public class PopularBookRankingScheduler {
 
                 JobParameters params = new JobParametersBuilder()
                     .addString("period", period.name())
-                    .addString("now", java.time.LocalDateTime.now().toString())
+                    .addString("now", Instant.now().toString())
                     .addString("requestId", requestId)
                     .toJobParameters();
 
@@ -57,7 +57,6 @@ public class PopularBookRankingScheduler {
             } catch (Exception e) {
                 log.error("인기 도서 랭킹 배치 실패: period={}, requestId={}", period, requestId, e);
             } finally {
-                // 컨텍스트 제거
                 MDC.clear();
             }
         }

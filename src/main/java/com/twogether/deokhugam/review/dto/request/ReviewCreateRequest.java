@@ -19,7 +19,7 @@ public record ReviewCreateRequest(
         @Size(max = 5000, message = "내용은 5000자를 초과할 수 없습니다.")
         String content,
 
-        @Min(value = 1, message = "리뷰 평점은 최소 1점 이상이어야 합니다.")
-        @Max(value = 5, message = "리뷰 평점은 최대 5점 이하이어야 합니다.")
+        @Min(value = 1, message = "리뷰 평점은 1점 이상이어야 합니다.")
+        @Max(value = 5, message = "리뷰 평점은 5점 이하이어야 합니다.")
         int rating
 ) { }

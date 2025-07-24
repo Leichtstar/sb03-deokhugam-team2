@@ -1,5 +1,6 @@
 package com.twogether.deokhugam.common.dto;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Getter;
@@ -11,12 +12,12 @@ public class CursorPageResponse<T> {
 
     private List<T> content;
     private String nextCursor;
-    private LocalDateTime nextAfter;
+    private Instant nextAfter;
     private int size;
     private long totalElements;
     private boolean hasNext;
 
-    public CursorPageResponse(List<T> content, String nextCursor, LocalDateTime nextAfter, int size, boolean hasNext) {
+    public CursorPageResponse(List<T> content, String nextCursor, Instant nextAfter, int size, boolean hasNext) {
         this.content = content;
         this.nextCursor = nextCursor;
         this.nextAfter = nextAfter;

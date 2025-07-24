@@ -18,7 +18,7 @@ import com.twogether.deokhugam.notification.dto.NotificationUpdateRequest;
 import com.twogether.deokhugam.notification.exception.NotificationNotFoundException;
 import com.twogether.deokhugam.notification.service.NotificationQueryService;
 import com.twogether.deokhugam.notification.service.NotificationService;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -65,7 +65,7 @@ class NotificationControllerTest {
     void 알림_목록_조회_성공_커서파라미터_포함() throws Exception {
         // given
         UUID userId = UUID.randomUUID();
-        LocalDateTime time = LocalDateTime.now();
+        Instant time = Instant.now();
 
         NotificationDto dto = new NotificationDto(
             UUID.randomUUID(),
@@ -80,19 +80,19 @@ class NotificationControllerTest {
 
         CursorPageResponse<NotificationDto> mockResponse = new CursorPageResponse<>(
             List.of(dto),
-            time.minusMinutes(1).toString(),
-            time.minusMinutes(1),
+            time.minusSeconds(60).toString(),
+            time.minusSeconds(60),
             1,
             true
         );
 
-        String cursor = time.minusMinutes(5).toString();
-        String after = time.minusMinutes(10).toString();
+        String cursor = time.minusSeconds(300).toString();
+        String after = time.minusSeconds(600).toString();
 
         when(notificationQueryService.getNotifications(
             eq(userId),
             eq(cursor),
-            eq(LocalDateTime.parse(after)),
+            eq(Instant.parse(after)),
             eq(10),
             eq(Sort.Direction.DESC)
         )).thenReturn(mockResponse);
@@ -142,7 +142,7 @@ class NotificationControllerTest {
     void 알림_읽음_처리_성공() throws Exception {
         UUID notificationId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        LocalDateTime now = LocalDateTime.now();
+        Instant now = Instant.now();
 
         NotificationDto dto = new NotificationDto(
             notificationId,

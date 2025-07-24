@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 import org.springframework.data.domain.Sort.Direction;
@@ -74,7 +74,7 @@ public class CommentController {
         @RequestParam UUID reviewId,
         @RequestParam(defaultValue = "DESC") Direction direction,
         @RequestParam(required = false) String cursor,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime after,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant after,
         @RequestParam(required = false, defaultValue = "50") @Min(1) @Max(100) Integer limit
     ) {
         return queryService.getComments(reviewId, direction, cursor, after, limit);
