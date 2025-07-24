@@ -18,6 +18,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.twogether.deokhugam.book.entity.Book;
+import com.twogether.deokhugam.book.exception.BookNotFoundException;
 import com.twogether.deokhugam.book.repository.BookRepository;
 import com.twogether.deokhugam.common.dto.CursorPageResponseDto;
 import com.twogether.deokhugam.review.dto.ReviewDto;
@@ -35,6 +36,7 @@ import com.twogether.deokhugam.review.repository.ReviewLikeRepository;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
 import com.twogether.deokhugam.review.service.util.ReviewCursorHelper;
 import com.twogether.deokhugam.user.entity.User;
+import com.twogether.deokhugam.user.exception.UserNotFoundException;
 import com.twogether.deokhugam.user.repository.UserRepository;
 import jakarta.validation.Validator;
 import java.time.LocalDate;
@@ -246,7 +248,7 @@ public class BasicReviewServiceTest {
         when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(NoSuchElementException.class, () -> {
+        assertThrows(BookNotFoundException.class, () -> {
             basicReviewService.create(reviewCreateRequest);
         });
 
@@ -265,7 +267,7 @@ public class BasicReviewServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(NoSuchElementException.class, () -> {
+        assertThrows(UserNotFoundException.class, () -> {
             basicReviewService.create(reviewCreateRequest);
         });
 
@@ -340,6 +342,26 @@ public class BasicReviewServiceTest {
             UUID reviewId2 = UUID.randomUUID();
             when(expectedReview1.getId()).thenReturn(reviewId1);
             when(expectedReview2.getId()).thenReturn(reviewId2);
+
+            // 리뷰 정보 동기화 용
+            User mockUser = mock(User.class);
+            when(mockUser.getNickname()).thenReturn("닉네임");
+            when(expectedReview1.getUser()).thenReturn(mockUser);
+            when(expectedReview2.getUser()).thenReturn(mockUser);
+
+            when(expectedReview1.getUserNickName()).thenReturn("닉네임");
+            when(expectedReview2.getUserNickName()).thenReturn("닉네임");
+
+            Book mockBook = mock(Book.class);
+            when(mockBook.getTitle()).thenReturn("책 제목");
+            when(mockBook.getThumbnailUrl()).thenReturn("http://thumbnail.url");
+            when(expectedReview1.getBook()).thenReturn(mockBook);
+            when(expectedReview2.getBook()).thenReturn(mockBook);
+
+            when(expectedReview1.getBookTitle()).thenReturn("책 제목");
+            when(expectedReview2.getBookTitle()).thenReturn("책 제목");
+            when(expectedReview1.getBookThumbnailUrl()).thenReturn("http://thumbnail.url");
+            when(expectedReview2.getBookThumbnailUrl()).thenReturn("http://thumbnail.url");
 
             Pageable pageable = PageRequest.of(0, 50);
             Slice<Review> mockSlice = new SliceImpl<>(expectedResult, pageable, false);
