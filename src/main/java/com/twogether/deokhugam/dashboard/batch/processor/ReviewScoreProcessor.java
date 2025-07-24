@@ -9,6 +9,8 @@ import org.springframework.batch.item.ItemProcessor;
 @RequiredArgsConstructor
 public class ReviewScoreProcessor implements ItemProcessor<ReviewScoreDto, PopularReviewRanking> {
 
+    private final Instant executionTime;
+
     @Override
     public PopularReviewRanking process(ReviewScoreDto dto) {
         return PopularReviewRanking.builder()
@@ -25,7 +27,7 @@ public class ReviewScoreProcessor implements ItemProcessor<ReviewScoreDto, Popul
             .commentCount(dto.commentCount())
             .score(dto.calculateScore())
             .rank(0)
-            .createdAt(Instant.now())
+            .createdAt(executionTime)
             .build();
     }
 }

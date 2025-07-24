@@ -10,9 +10,11 @@ import org.springframework.batch.item.ItemProcessor;
 public class PowerUserScoreProcessor implements ItemProcessor<PowerUserScoreDto, PowerUserRanking> {
 
     private final EntityManager em;
+    private final Instant executionTime;
 
-    public PowerUserScoreProcessor(EntityManager em) {
+    public PowerUserScoreProcessor(EntityManager em, Instant executionTime) {
         this.em = em;
+        this.executionTime = executionTime;
     }
 
     @Override
@@ -29,7 +31,7 @@ public class PowerUserScoreProcessor implements ItemProcessor<PowerUserScoreDto,
             .likeCount(dto.likeCount())
             .commentCount(dto.commentCount())
             .rank(0)
-            .createdAt(Instant.now())
+            .createdAt(executionTime)
             .build();
     }
 }

@@ -34,6 +34,7 @@ public class PowerUserRankingScheduler {
         String requestId = UUID.randomUUID().toString();
         int successCount = 0;
         int failureCount = 0;
+        Instant now = Instant.now();
 
         for (RankingPeriod period : RankingPeriod.values()) {
             try {
@@ -46,7 +47,7 @@ public class PowerUserRankingScheduler {
 
                 JobParameters params = new JobParametersBuilder()
                     .addString("period", period.name())
-                    .addString("now", Instant.now().toString())
+                    .addString("now", now.toString())
                     .addString("requestId", requestId)
                     .toJobParameters();
 
