@@ -50,6 +50,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.AnnotateWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -532,6 +533,24 @@ public class BasicReviewServiceTest {
     }
 
     @Test
+    @DisplayName("존재 하지 않는 리뷰 수정 시 예외가 발생해야 한다.")
+    void updateReview_WithNonExistentReview_ThrowsReviewNotFoundException() {
+        UUID reviewId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        ReviewUpdateRequest updateRequest = new ReviewUpdateRequest(
+                "수정 하고싶습니다",
+                4
+        );
+
+        when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
+
+        assertThrows(ReviewNotFoundException.class, () -> {
+            basicReviewService.updateReview(reviewId, userId, updateRequest);
+        });
+    }
+
+    @Test
     @DisplayName("작성자는 리뷰를 논리삭제 할 수 있다.")
     void shouldSoftDelete_whenUserIsAuthor(){
         // Given
@@ -599,6 +618,18 @@ public class BasicReviewServiceTest {
         verify(bookRepository, never()).save(mockBook);
     }
 
+    @Test
+    @DisplayName("존재 하지 않는 리뷰 논리 삭제 시 예외가 발생해야 한다.")
+    void deleteReviewSoft_WithNonExistentReview_ThrowsReviewNotFoundException() {
+        UUID mockReviewId = UUID.randomUUID();
+        UUID requestUserId = UUID.randomUUID();
+
+        when(reviewRepository.findById(mockReviewId)).thenReturn(Optional.empty());
+
+        assertThrows(ReviewNotFoundException.class, () -> {
+            basicReviewService.deleteReviewSoft(mockReviewId, requestUserId);
+        });
+    }
 
     @Test
     @DisplayName("작성자는 리뷰를 물리 삭제 할 수 있다.")
@@ -660,6 +691,24 @@ public class BasicReviewServiceTest {
         verify(bookRepository, never()).updateBookReviewStats(mockBookId);
         verify(reviewRepository, never()).delete(mockReview);
         verify(bookRepository, never()).save(mockBook);
+    }
+
+    @Test
+    @DisplayName("존재 하지 않는 리뷰 물리 삭제 시 예외가 발생해야 한다.")
+    void deleteReviewHard_WithNonExistentReview_ThrowsReviewNotFoundException() {
+        UUID mockReviewId = UUID.randomUUID();
+        UUID requestUserId = UUID.randomUUID();
+
+        ReviewUpdateRequest updateRequest = new ReviewUpdateRequest(
+                "수정 하고싶습니다",
+                4
+        );
+
+        when(reviewRepository.findById(mockReviewId)).thenReturn(Optional.empty());
+
+        assertThrows(ReviewNotFoundException.class, () -> {
+            basicReviewService.deleteReviewHard(mockReviewId, requestUserId);
+        });
     }
 
     @Test
