@@ -11,6 +11,7 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.database.JpaPagingItemReader;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -35,13 +36,16 @@ public class NotificationCleanupJobConfig {
     public Step notificationCleanupStep(JobRepository jobRepository) {
         return new StepBuilder("notificationCleanupStep", jobRepository)
             .<Notification, Notification>chunk(100, transactionManager)
-            .reader(notificationReader())
+            .reader(notificationReader(null))
             .writer(notificationDeleteWriter)
             .build();
     }
 
     @Bean
-    public JpaPagingItemReader<Notification> notificationReader() {
-        return jpaNotificationReader.create();
+    @JobScope
+    public JpaPagingItemReader<Notification> notificationReader(
+        @Value("#{jobParameters['now']}") String now
+    ) {
+        return jpaNotificationReader.create(now);
     }
 }

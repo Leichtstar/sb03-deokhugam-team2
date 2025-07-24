@@ -19,11 +19,12 @@ public class JpaNotificationReader {
         this.entityManagerFactory = entityManagerFactory;
     }
 
-    public JpaPagingItemReader<Notification> create() {
+    public JpaPagingItemReader<Notification> create(String nowString) {
+        Instant now = Instant.parse(nowString);
         // 테스트용 15분 기준 삭제로 변경
-        Instant cutoff = Instant.now().minus(15, ChronoUnit.MINUTES);
+        Instant cutoff = now.minus(15, ChronoUnit.MINUTES);
         // 실제 배포 환경 사용
-        // Instant cutoff = Instant.now().minus(7, ChronoUnit.DAYS);
+//         Instant cutoff = now.minus(7, ChronoUnit.DAYS);
 
         Map<String, Object> params = new HashMap<>();
         params.put("cutoff", cutoff);
