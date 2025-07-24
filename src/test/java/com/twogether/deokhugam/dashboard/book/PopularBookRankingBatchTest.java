@@ -49,12 +49,18 @@ class PopularBookRankingBatchTest {
         // given
         JobParameters params = new JobParametersBuilder()
             .addString("period", period.name())
-            .addString("now", "2025-07-22T00:00:00")
+            .addString("now", "2025-07-22T00:00:00Z")
             .addLong("timestamp", System.currentTimeMillis())
             .toJobParameters();
 
         // when
         JobExecution execution = jobLauncherTestUtils.launchJob(params);
+
+        if (execution.getStatus() == BatchStatus.FAILED) {
+            System.out.println("🔥 배치 실패 예외 목록:");
+            execution.getAllFailureExceptions().forEach(Throwable::printStackTrace);
+        }
+
 
         // then
         assertThat(execution.getStatus()).isEqualTo(BatchStatus.COMPLETED);

@@ -52,7 +52,7 @@ class PopularReviewRankingBatchTest {
         // given
         JobParameters jobParameters = new JobParametersBuilder()
             .addString("period", period.name())
-            .addString("now", "2025-07-22T00:00:00")
+            .addString("now", "2025-07-22T00:00:00Z")
             .addLong("time", System.currentTimeMillis())
             .toJobParameters();
 
