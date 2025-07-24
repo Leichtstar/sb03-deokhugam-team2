@@ -16,7 +16,7 @@ logging:
     com.twogether.deokhugam: info
     org.hibernate.SQL: info
   file:
-    path: ./logs
+    path: /app/logs
     name: application
 
 management:
