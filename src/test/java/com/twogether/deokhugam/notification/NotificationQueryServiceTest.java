@@ -1,6 +1,7 @@
 package com.twogether.deokhugam.notification;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -175,5 +176,54 @@ class NotificationQueryServiceTest {
 
         assertThat(result.getContent()).isEmpty();
         assertThat(result.isHasNext()).isFalse();
+    }
+
+    @Test
+    void 알림_목록_조회_실패_잘못된_cursor() {
+        UUID userId = UUID.randomUUID();
+        String invalidCursor = "invalid-cursor";
+
+        assertThatThrownBy(() ->
+            notificationQueryService.getNotifications(
+                userId, invalidCursor, null, 20, Sort.Direction.DESC
+            )
+        ).isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Invalid cursor format");
+    }
+
+    @Test
+    void 알림_목록_조회_기본_limit_적용() {
+        UUID userId = UUID.randomUUID();
+        when(notificationRepository.findByUserIdWithoutAfter(eq(userId), any())).thenReturn(List.of());
+
+        // limit null
+        CursorPageResponse<NotificationDto> result1 = notificationQueryService.getNotifications(
+            userId, null, null, null, Sort.Direction.DESC
+        );
+        assertThat(result1.getSize()).isEqualTo(20);
+
+        // limit 초과
+        CursorPageResponse<NotificationDto> result2 = notificationQueryService.getNotifications(
+            userId, null, null, 999, Sort.Direction.DESC
+        );
+        assertThat(result2.getSize()).isEqualTo(20);
+
+        // limit 음수
+        CursorPageResponse<NotificationDto> result3 = notificationQueryService.getNotifications(
+            userId, null, null, -5, Sort.Direction.DESC
+        );
+        assertThat(result3.getSize()).isEqualTo(20);
+    }
+
+    @Test
+    void 알림_목록_조회_direction_null이면_DESC_기본() {
+        UUID userId = UUID.randomUUID();
+        when(notificationRepository.findByUserIdWithoutAfter(eq(userId), any())).thenReturn(List.of());
+
+        CursorPageResponse<NotificationDto> result = notificationQueryService.getNotifications(
+            userId, null, null, 10, null
+        );
+
+        assertThat(result.getSize()).isEqualTo(10);
     }
 }
