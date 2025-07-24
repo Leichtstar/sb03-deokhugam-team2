@@ -1,6 +1,7 @@
 package com.twogether.deokhugam.notification;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -39,7 +40,6 @@ class NotificationQueryServiceTest {
 
     @Test
     void 알림_목록_조회_성공_after_없음() {
-        // given
         UUID userId = UUID.randomUUID();
         Instant baseTime = Instant.now();
         int limit = 2;
@@ -68,29 +68,16 @@ class NotificationQueryServiceTest {
                 .build()
         );
 
-        when(notificationRepository.findByUserIdWithoutAfter(eq(userId), any()))
-            .thenReturn(notifications);
-        when(notificationMapper.toDto(any()))
-            .thenAnswer(invocation -> {
-                Notification n = invocation.getArgument(0);
-                return new NotificationDto(
-                    n.getId(),
-                    userId,
-                    UUID.randomUUID(),
-                    "도서 제목",
-                    n.getContent(),
-                    n.isConfirmed(),
-                    n.getCreatedAt(),
-                    n.getUpdatedAt()
-                );
-            });
+        when(notificationRepository.findByUserIdWithoutAfter(eq(userId), any())).thenReturn(notifications);
+        when(notificationMapper.toDto(any())).thenAnswer(invocation -> {
+            Notification n = invocation.getArgument(0);
+            return new NotificationDto(n.getId(), userId, UUID.randomUUID(), "도서 제목", n.getContent(), n.isConfirmed(), n.getCreatedAt(), n.getUpdatedAt());
+        });
 
-        // when
         CursorPageResponse<NotificationDto> result = notificationQueryService.getNotifications(
             userId, null, null, limit, Sort.Direction.DESC
         );
 
-        // then
         assertThat(result.getContent()).hasSize(2);
         assertThat(result.isHasNext()).isFalse();
         assertThat(result.getSize()).isEqualTo(2);
@@ -98,60 +85,145 @@ class NotificationQueryServiceTest {
 
     @Test
     void 알림_목록_조회_성공_after_있음() {
-        // given
         UUID userId = UUID.randomUUID();
         Instant baseTime = Instant.now();
         Instant after = baseTime.minus(1, ChronoUnit.HOURS);
-        int limit = 1;
+        int limit = 2;
 
-        User user = mock(User.class);
-        Review review = mock(Review.class);
+        User user1 = mock(User.class);
+        Review review1 = mock(Review.class);
+        User user2 = mock(User.class);
+        Review review2 = mock(Review.class);
 
-        Notification notification = Notification.builder()
+        Notification notification1 = Notification.builder()
             .id(UUID.randomUUID())
             .content("test3")
             .confirmed(false)
             .createdAt(baseTime.minus(10, ChronoUnit.MINUTES))
             .updatedAt(baseTime.minus(10, ChronoUnit.MINUTES))
-            .user(user)
-            .review(review)
+            .user(user1)
+            .review(review1)
             .build();
 
-        Notification anotherNotification = Notification.builder()
+        Notification notification2 = Notification.builder()
             .id(UUID.randomUUID())
             .content("test4")
             .confirmed(false)
-            .createdAt(baseTime.minus(10, ChronoUnit.MINUTES))
-            .updatedAt(baseTime.minus(10, ChronoUnit.MINUTES))
-            .user(user)
-            .review(review)
+            .createdAt(baseTime.minus(20, ChronoUnit.MINUTES))
+            .updatedAt(baseTime.minus(20, ChronoUnit.MINUTES))
+            .user(user2)
+            .review(review2)
             .build();
 
-        when(notificationRepository.findByUserIdWithAfter(eq(userId), eq(after), any()))
-            .thenReturn(List.of(notification, anotherNotification));
-        when(notificationMapper.toDto(any()))
-            .thenAnswer(invocation -> {
-                Notification n = invocation.getArgument(0);
-                return new NotificationDto(
-                    n.getId(),
-                    userId,
-                    UUID.randomUUID(),
-                    "도서 제목",
-                    n.getContent(),
-                    n.isConfirmed(),
-                    n.getCreatedAt(),
-                    n.getUpdatedAt()
-                );
-            });
+        List<Notification> notifications = List.of(notification1, notification2);
 
-        // when
+        when(notificationRepository.findByUserIdWithAfter(eq(userId), eq(after), any()))
+            .thenReturn(notifications);
+
+        when(notificationMapper.toDto(any())).thenAnswer(invocation -> {
+            Notification n = invocation.getArgument(0);
+            return new NotificationDto(
+                n.getId(),
+                userId,
+                UUID.randomUUID(),
+                "도서 제목",
+                n.getContent(),
+                n.isConfirmed(),
+                n.getCreatedAt(),
+                n.getUpdatedAt()
+            );
+        });
+
         CursorPageResponse<NotificationDto> result = notificationQueryService.getNotifications(
-            userId, after.toString(), after, limit, Sort.Direction.DESC
+            userId, null, after, limit, Sort.Direction.DESC
         );
 
-        // then
-        assertThat(result.getContent()).hasSize(1);
-        assertThat(result.isHasNext()).isTrue();
-        assertThat(result.getSize()).isEqualTo(1);
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.isHasNext()).isFalse();
+        assertThat(result.getSize()).isEqualTo(2);
+    }
+
+    @Test
+    void 알림_목록_조회_성공_cursor만_있는_경우() {
+        UUID userId = UUID.randomUUID();
+        int limit = 1;
+        String cursor = Instant.now().minus(10, ChronoUnit.MINUTES).toString();
+        Instant parsedCursor = Instant.parse(cursor);
+
+        when(notificationRepository.findByUserIdWithCursor(eq(userId), eq(parsedCursor), any())).thenReturn(List.of());
+
+        CursorPageResponse<NotificationDto> result = notificationQueryService.getNotifications(
+            userId, cursor, null, limit, Sort.Direction.DESC
+        );
+
+        assertThat(result.getContent()).isEmpty();
+        assertThat(result.isHasNext()).isFalse();
+    }
+
+    @Test
+    void 알림_목록_조회_성공_cursor_and_after_있는_경우() {
+        UUID userId = UUID.randomUUID();
+        String cursor = Instant.now().minus(10, ChronoUnit.MINUTES).toString();
+        Instant parsedCursor = Instant.parse(cursor);
+        Instant after = Instant.now().minus(30, ChronoUnit.MINUTES);
+        int limit = 1;
+
+        when(notificationRepository.findByUserIdWithCursorAndAfter(eq(userId), eq(parsedCursor), eq(after), any())).thenReturn(List.of());
+
+        CursorPageResponse<NotificationDto> result = notificationQueryService.getNotifications(
+            userId, cursor, after, limit, Sort.Direction.DESC
+        );
+
+        assertThat(result.getContent()).isEmpty();
+        assertThat(result.isHasNext()).isFalse();
+    }
+
+    @Test
+    void 알림_목록_조회_실패_잘못된_cursor() {
+        UUID userId = UUID.randomUUID();
+        String invalidCursor = "invalid-cursor";
+
+        assertThatThrownBy(() ->
+            notificationQueryService.getNotifications(
+                userId, invalidCursor, null, 20, Sort.Direction.DESC
+            )
+        ).isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Invalid cursor format");
+    }
+
+    @Test
+    void 알림_목록_조회_기본_limit_적용() {
+        UUID userId = UUID.randomUUID();
+        when(notificationRepository.findByUserIdWithoutAfter(eq(userId), any())).thenReturn(List.of());
+
+        // limit null
+        CursorPageResponse<NotificationDto> result1 = notificationQueryService.getNotifications(
+            userId, null, null, null, Sort.Direction.DESC
+        );
+        assertThat(result1.getSize()).isEqualTo(20);
+
+        // limit 초과
+        CursorPageResponse<NotificationDto> result2 = notificationQueryService.getNotifications(
+            userId, null, null, 999, Sort.Direction.DESC
+        );
+        assertThat(result2.getSize()).isEqualTo(20);
+
+        // limit 음수
+        CursorPageResponse<NotificationDto> result3 = notificationQueryService.getNotifications(
+            userId, null, null, -5, Sort.Direction.DESC
+        );
+        assertThat(result3.getSize()).isEqualTo(20);
+    }
+
+    @Test
+    void 알림_목록_조회_direction_null이면_DESC_기본() {
+        UUID userId = UUID.randomUUID();
+        when(notificationRepository.findByUserIdWithoutAfter(eq(userId), any())).thenReturn(List.of());
+
+        CursorPageResponse<NotificationDto> result = notificationQueryService.getNotifications(
+            userId, null, null, 10, null
+        );
+
+        assertThat(result.getSize()).isEqualTo(10);
     }
 }

@@ -26,6 +26,31 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
         Pageable pageable
     );
 
+    // cursor와 after가 모두 있는 경우
+    @Query("""
+        SELECT n FROM Notification n
+        WHERE n.user.id = :userId AND n.createdAt < :after AND n.createdAt < :cursor
+        ORDER BY n.createdAt DESC, n.id DESC
+    """)
+    List<Notification> findByUserIdWithCursorAndAfter(
+        @Param("userId") UUID userId,
+        @Param("cursor") Instant cursor,
+        @Param("after") Instant after,
+        Pageable pageable
+    );
+
+    // cursor만 있는 경우
+    @Query("""
+        SELECT n FROM Notification n
+        WHERE n.user.id = :userId AND n.createdAt < :cursor
+        ORDER BY n.createdAt DESC, n.id DESC
+    """)
+    List<Notification> findByUserIdWithCursor(
+        @Param("userId") UUID userId,
+        @Param("cursor") Instant cursor,
+        Pageable pageable
+    );
+
     // after가 없는 경우
     @Query("""
         SELECT n FROM Notification n
