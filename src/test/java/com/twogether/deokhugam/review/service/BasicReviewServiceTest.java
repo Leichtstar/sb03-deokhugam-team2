@@ -441,6 +441,8 @@ public class BasicReviewServiceTest {
             UUID reviewId = UUID.randomUUID();
             UUID requestUserId = UUID.randomUUID();
 
+            when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
+
             assertThrows(ReviewNotFoundException.class, () -> {
                 basicReviewService.findById(reviewId, requestUserId);
             });
