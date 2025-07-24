@@ -106,7 +106,6 @@ public class BasicReviewService implements ReviewService{
 
         log.info("[BasicReviewService]: 리뷰 조회 완료");
 
-        ReviewDto test =  reviewMapper.toDto(review, likeByMe);
         return reviewMapper.toDto(review, likeByMe);
     }
 
