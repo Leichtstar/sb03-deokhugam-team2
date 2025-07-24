@@ -50,6 +50,7 @@ public class BookServiceTest {
 
   private Book book; // 테스트에 사용될 Book 엔티티
   private BookCreateRequest createRequest; // 테스트에 사용될 BookCreateRequest
+  private BookCreateRequest createRequestWithIsbn; // 테스트에 사용될 BookCreateRequest
   private BookUpdateRequest updateRequest; // 테스트에 사용될 BookUpdateRequest
 
   @BeforeEach // 각 테스트 메서드 실행 전 초기화
@@ -72,6 +73,14 @@ public class BookServiceTest {
         "이북리더즈",
         LocalDate.of(1989, 5, 12),
         null // ISBN 없음
+    );
+    createRequestWithIsbn = new BookCreateRequest(
+        "더쿠의 심리학",
+        "박인규",
+        "더쿠에 대한 심도깊은 해설",
+        "이북리더즈",
+        LocalDate.of(1989, 5, 12),
+        "9791122334455"
     );
 
     updateRequest = new BookUpdateRequest(
@@ -126,11 +135,11 @@ public class BookServiceTest {
   @DisplayName("도서 등록 실패 테스트 - ISBN 중복")
   void registerBookFail_DuplicatedIsbn() {
     // given: ISBN 중복 발생
-    given(bookRepository.existsByIsbn(any())).willReturn(true);
+    given(bookRepository.existsByIsbn("9791122334455")).willReturn(true);
 
     // when & then: DuplicatedIsbnException 발생 확인
-    assertThrows(DuplicatedIsbnException.class, () -> bookService.registerBook(createRequest));
-    verify(bookRepository, times(1)).existsByIsbn(any());
+    assertThrows(DuplicatedIsbnException.class, () -> bookService.registerBook(createRequestWithIsbn));
+    verify(bookRepository, times(1)).existsByIsbn("9791122334455");
     verify(bookRepository, never()).save(any(Book.class)); // save 호출 안됨 확인
   }
 
