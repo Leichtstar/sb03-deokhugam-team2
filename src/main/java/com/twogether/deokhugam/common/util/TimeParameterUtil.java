@@ -5,7 +5,11 @@ import java.time.format.DateTimeParseException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class TimeParameterUtil {
+public final class TimeParameterUtil {
+
+    private TimeParameterUtil() {
+        throw new UnsupportedOperationException("Utility class");
+    }
 
     public static Instant parseNowOrDefault(String nowString) {
         try {
