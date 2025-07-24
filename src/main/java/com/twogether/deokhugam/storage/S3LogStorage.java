@@ -25,10 +25,10 @@ public class S3LogStorage {
     @Value("${AWS_S3_REGION}")
     private String region;
 
-    @Value("${logging.file.path:./logs}")
+    @Value("${logging.file.path}")
     private String logPath;
 
-    @Value("${logging.file.name:application}")
+    @Value("${logging.file.name}")
     private String logFileName;
 
     public S3LogStorage(S3Client s3Client) {

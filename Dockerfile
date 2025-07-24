@@ -24,6 +24,7 @@ RUN ./gradlew bootJar -x test --no-daemon
 FROM amazoncorretto:17-alpine3.21
 
 # 작업 디렉토리 설정
+RUN mkdir -p /app/logs && chmod 755 /app/logs
 WORKDIR /app
 
 # 프로젝트 정보를 ENV로 설정
