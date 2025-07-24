@@ -1,6 +1,7 @@
 package com.twogether.deokhugam.dashboard.batch.scheduler;
 
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +41,7 @@ public class PopularReviewRankingScheduler {
 
                 JobParameters params = new JobParametersBuilder()
                     .addString("period", period.name())
-                    .addString("now", java.time.LocalDateTime.now().toString())
+                    .addString("now", Instant.now().toString())
                     .addString("requestId", requestId)
                     .toJobParameters();
 

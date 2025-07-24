@@ -1,60 +1,65 @@
 package com.twogether.deokhugam.dashboard.entity;
 
 import java.time.DayOfWeek;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 
 public enum RankingPeriod {
 
     DAILY {
         @Override
-        public LocalDateTime getStartTime(LocalDateTime now) {
-            return now.with(LocalTime.MIN);
+        public Instant getStartTime(Instant now) {
+            return now.atZone(ZONE).toLocalDate().atStartOfDay(ZONE).toInstant();
         }
 
         @Override
-        public LocalDateTime getEndTime(LocalDateTime now) {
-            return now.with(LocalTime.MAX);
+        public Instant getEndTime(Instant now) {
+            return now.atZone(ZONE).toLocalDate().atTime(LocalTime.MAX).atZone(ZONE).toInstant();
         }
     },
 
     WEEKLY {
         @Override
-        public LocalDateTime getStartTime(LocalDateTime now) {
-            return now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).with(LocalTime.MIN);
+        public Instant getStartTime(Instant now) {
+            return now.atZone(ZONE).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                .toLocalDate().atStartOfDay(ZONE).toInstant();
         }
 
         @Override
-        public LocalDateTime getEndTime(LocalDateTime now) {
-            return now.with(LocalTime.MAX);
+        public Instant getEndTime(Instant now) {
+            return now.atZone(ZONE).toLocalDate().atTime(LocalTime.MAX).atZone(ZONE).toInstant();
         }
     },
 
     MONTHLY {
         @Override
-        public LocalDateTime getStartTime(LocalDateTime now) {
-            return now.withDayOfMonth(1).with(LocalTime.MIN);
+        public Instant getStartTime(Instant now) {
+            return now.atZone(ZONE).withDayOfMonth(1).toLocalDate().atStartOfDay(ZONE).toInstant();
         }
 
         @Override
-        public LocalDateTime getEndTime(LocalDateTime now) {
-            return now.with(LocalTime.MAX);
+        public Instant getEndTime(Instant now) {
+            return now.atZone(ZONE).toLocalDate().atTime(LocalTime.MAX).atZone(ZONE).toInstant();
         }
     },
 
     ALL_TIME {
         @Override
-        public LocalDateTime getStartTime(LocalDateTime now) {
-            return LocalDateTime.of(2000, 1, 1, 0, 0);
+        public Instant getStartTime(Instant now) {
+            return LocalDate.of(2000, 1, 1).atStartOfDay(ZONE).toInstant();
         }
 
         @Override
-        public LocalDateTime getEndTime(LocalDateTime now) {
+        public Instant getEndTime(Instant now) {
             return now;
         }
     };
 
-    public abstract LocalDateTime getStartTime(LocalDateTime now);
-    public abstract LocalDateTime getEndTime(LocalDateTime now);
+    private static final ZoneId ZONE = ZoneId.systemDefault();
+
+    public abstract Instant getStartTime(Instant now);
+    public abstract Instant getEndTime(Instant now);
 }

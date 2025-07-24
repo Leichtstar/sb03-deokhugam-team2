@@ -1,6 +1,6 @@
 package com.twogether.deokhugam.comments.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 public record CommentResponse(
@@ -9,7 +9,7 @@ public record CommentResponse(
     UUID userId,
     String userNickname,
     UUID reviewId,
-    LocalDateTime createdAt,
-    LocalDateTime updatedAt,
+    Instant createdAt,
+    Instant updatedAt,
     Boolean isDeleted
 ) {}

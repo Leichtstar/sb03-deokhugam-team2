@@ -16,7 +16,7 @@ import com.twogether.deokhugam.dashboard.dto.request.PopularRankingSearchRequest
 import com.twogether.deokhugam.dashboard.dto.response.PopularBookDto;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PopularBookRankingRepository;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -123,11 +123,11 @@ class PopularBookServiceTest {
             99.0,
             12,
             4.5,
-            LocalDateTime.now()
+            Instant.now()
         );
 
         when(bookRepository.findAllByPeriodWithCursor(eq(request), any()))
-            .thenReturn(List.of(dto));  // size = 1 < limit = 10
+            .thenReturn(List.of(dto));
 
         var result = bookService.getPopularBooks(request);
 
@@ -155,11 +155,11 @@ class PopularBookServiceTest {
             87.0,
             22,
             4.8,
-            LocalDateTime.now()
+            Instant.now()
         );
 
         when(bookRepository.findAllByPeriodWithCursor(eq(request), any()))
-            .thenReturn(List.of(dto)); // size == limit
+            .thenReturn(List.of(dto));
 
         var result = bookService.getPopularBooks(request);
 

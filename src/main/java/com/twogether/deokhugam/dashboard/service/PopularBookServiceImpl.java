@@ -6,7 +6,7 @@ import com.twogether.deokhugam.common.exception.ErrorCode;
 import com.twogether.deokhugam.dashboard.dto.request.PopularRankingSearchRequest;
 import com.twogether.deokhugam.dashboard.dto.response.PopularBookDto;
 import com.twogether.deokhugam.dashboard.repository.PopularBookRankingRepository;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +23,7 @@ public class PopularBookServiceImpl implements PopularBookService {
     @Override
     public CursorPageResponse<PopularBookDto> getPopularBooks(PopularRankingSearchRequest request) {
         validateRequest(request);
+
         Pageable pageable = PageRequest.of(0, request.getLimit());
 
         List<PopularBookDto> content = popularBookRankingRepository
@@ -30,12 +31,12 @@ public class PopularBookServiceImpl implements PopularBookService {
 
         boolean hasNext = content.size() == request.getLimit();
         String nextCursor = null;
-        LocalDateTime nextAfter = null;
+        Instant nextAfter = null;
 
         if (hasNext) {
             var last = content.get(content.size() - 1);
             nextCursor = String.valueOf(last.rank());
-            nextAfter = last.createdAt();
+            nextAfter = last.createdAt(); // Instant 기준
         }
 
         return new CursorPageResponse<>(content, nextCursor, nextAfter, request.getLimit(), hasNext);
@@ -52,6 +53,7 @@ public class PopularBookServiceImpl implements PopularBookService {
         if (direction == null) {
             throw new DeokhugamException(ErrorCode.INVALID_DIRECTION);
         }
+
         direction = direction.toUpperCase(Locale.ROOT);
         if (!direction.equals("ASC") && !direction.equals("DESC")) {
             throw new DeokhugamException(ErrorCode.INVALID_DIRECTION);

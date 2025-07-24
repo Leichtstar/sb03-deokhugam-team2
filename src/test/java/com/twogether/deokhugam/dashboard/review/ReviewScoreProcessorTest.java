@@ -7,6 +7,7 @@ import com.twogether.deokhugam.dashboard.batch.model.ReviewScoreDto;
 import com.twogether.deokhugam.dashboard.batch.processor.ReviewScoreProcessor;
 import com.twogether.deokhugam.dashboard.entity.PopularReviewRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
+import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,7 +20,7 @@ class ReviewScoreProcessorTest {
 
     @BeforeEach
     void setUp() {
-        processor = new ReviewScoreProcessor();
+        processor = new ReviewScoreProcessor(Instant.parse("2025-07-22T00:00:00Z"));
     }
 
     @Test

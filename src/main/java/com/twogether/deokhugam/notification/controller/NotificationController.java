@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -37,11 +37,11 @@ public class NotificationController {
         @Parameter(description = "요청자 ID", required = true)
         @RequestHeader("Deokhugam-Request-User-ID") UUID userId,
 
-        @Parameter(description = "커서 (이전 페이지 마지막 알림의 createdAt ISO-8601 형식)", example = "2025-07-20T19:30:00")
+        @Parameter(description = "커서 (이전 페이지 마지막 알림의 createdAt ISO-8601 형식)", example = "2025-07-20T19:30:00Z")
         @RequestParam(required = false) String cursor,
 
-        @Parameter(description = "보조 커서 (정확한 정렬을 위한 createdAt 값)", example = "2025-07-20T19:00:00")
-        @RequestParam(required = false) LocalDateTime after,
+        @Parameter(description = "보조 커서 (정확한 정렬을 위한 createdAt 값)", example = "2025-07-20T19:00:00Z")
+        @RequestParam(required = false) Instant after,
 
         @Min(value = 1, message = "limit은 1 이상의 정수")
         @Parameter(description = "페이지 크기", example = "20")

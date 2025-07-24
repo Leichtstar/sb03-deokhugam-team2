@@ -2,7 +2,7 @@ package com.twogether.deokhugam.notification.batch.reader;
 
 import com.twogether.deokhugam.notification.entity.Notification;
 import jakarta.persistence.EntityManagerFactory;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,11 +19,12 @@ public class JpaNotificationReader {
         this.entityManagerFactory = entityManagerFactory;
     }
 
-    public JpaPagingItemReader<Notification> create() {
+    public JpaPagingItemReader<Notification> create(String nowString) {
+        Instant now = Instant.parse(nowString);
         // 테스트용 15분 기준 삭제로 변경
-        LocalDateTime cutoff = LocalDateTime.now().minus(15, ChronoUnit.MINUTES);
+        Instant cutoff = now.minus(15, ChronoUnit.MINUTES);
         // 실제 배포 환경 사용
-        //LocalDateTime cutoff = LocalDateTime.now().minus(7, ChronoUnit.DAYS);
+//         Instant cutoff = now.minus(7, ChronoUnit.DAYS);
 
         Map<String, Object> params = new HashMap<>();
         params.put("cutoff", cutoff);

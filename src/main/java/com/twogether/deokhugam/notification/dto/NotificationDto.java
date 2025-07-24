@@ -1,7 +1,7 @@
 package com.twogether.deokhugam.notification.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Schema(description = "알림 응답 DTO")
@@ -25,10 +25,10 @@ public record NotificationDto(
     @Schema(description = "알림 확인 여부")
     boolean confirmed,
 
-    @Schema(description = "알림 생성 시각")
-    LocalDateTime createdAt,
+    @Schema(description = "알림 생성 시각", format = "date-time")
+    Instant createdAt,
 
-    @Schema(description = "알림 수정 시각")
-    LocalDateTime updatedAt
+    @Schema(description = "알림 수정 시각", format = "date-time")
+    Instant updatedAt
 
 ) {}

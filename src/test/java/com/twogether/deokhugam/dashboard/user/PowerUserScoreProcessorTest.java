@@ -10,6 +10,7 @@ import com.twogether.deokhugam.dashboard.entity.PowerUserRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.user.entity.User;
 import jakarta.persistence.EntityManager;
+import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,7 +25,7 @@ class PowerUserScoreProcessorTest {
     @BeforeEach
     void setUp() {
         em = mock(EntityManager.class);
-        processor = new PowerUserScoreProcessor(em);
+        processor = new PowerUserScoreProcessor(em, Instant.parse("2025-07-22T00:00:00Z"));
     }
 
     @Test

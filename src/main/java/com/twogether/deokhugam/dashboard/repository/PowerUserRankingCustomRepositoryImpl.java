@@ -8,7 +8,7 @@ import com.twogether.deokhugam.dashboard.dto.response.PowerUserDto;
 import com.twogether.deokhugam.dashboard.dto.response.QPowerUserDto;
 import com.twogether.deokhugam.dashboard.entity.QPowerUserRanking;
 import com.twogether.deokhugam.user.entity.QUser;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -48,7 +48,7 @@ public class PowerUserRankingCustomRepositoryImpl implements PowerUserRankingCus
             .fetch();
     }
 
-    private BooleanExpression ltCursor(Integer cursor, LocalDateTime after, String direction) {
+    private BooleanExpression ltCursor(Integer cursor, Instant after, String direction) {
         QPowerUserRanking r = QPowerUserRanking.powerUserRanking;
         if (cursor == null || after == null) return null;
 
@@ -63,12 +63,12 @@ public class PowerUserRankingCustomRepositoryImpl implements PowerUserRankingCus
     private OrderSpecifier<?>[] getOrderSpecifiers(String direction) {
         QPowerUserRanking r = QPowerUserRanking.powerUserRanking;
         if ("DESC".equalsIgnoreCase(direction)) {
-            return new OrderSpecifier[] {
+            return new OrderSpecifier[]{
                 r.rank.desc(),
                 r.createdAt.desc()
             };
         }
-        return new OrderSpecifier[] {
+        return new OrderSpecifier[]{
             r.rank.asc(),
             r.createdAt.asc()
         };

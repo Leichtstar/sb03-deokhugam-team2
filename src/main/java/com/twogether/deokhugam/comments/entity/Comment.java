@@ -13,7 +13,7 @@ import jakarta.persistence.Table;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.user.entity.User;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -46,11 +46,11 @@ public class Comment {
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
@@ -76,7 +76,7 @@ public class Comment {
     public User getUser() { return user; }
     public Review getReview() { return review; }
     public String getContent() { return content; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public Instant getCreatedAt() { return createdAt; }
+    public Instant getUpdatedAt() { return updatedAt; }
     public Boolean getIsDeleted() { return isDeleted; }
 }

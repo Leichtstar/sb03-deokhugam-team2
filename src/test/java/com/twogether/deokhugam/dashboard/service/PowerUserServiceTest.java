@@ -15,6 +15,7 @@ import com.twogether.deokhugam.dashboard.dto.request.PopularRankingSearchRequest
 import com.twogether.deokhugam.dashboard.dto.response.PowerUserDto;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PowerUserRankingRepository;
+import java.time.Instant;
 import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,7 +35,6 @@ class PowerUserServiceTest {
     @Test
     @DisplayName("정상적으로 파워 유저 목록을 조회할 수 있다")
     void getPowerUsers_success() {
-        // given
         PopularRankingSearchRequest request = new PopularRankingSearchRequest();
         request.setPeriod(RankingPeriod.DAILY);
         request.setDirection("ASC");
@@ -43,10 +43,8 @@ class PowerUserServiceTest {
         when(repository.findAllByPeriodWithCursor(eq(request), any()))
             .thenReturn(Collections.emptyList());
 
-        // when
         var response = powerUserService.getPowerUsers(request);
 
-        // then
         assertThat(response).isNotNull();
         assertThat(response.getContent()).isEmpty();
         verify(repository, times(1)).findAllByPeriodWithCursor(eq(request), any());
@@ -55,12 +53,10 @@ class PowerUserServiceTest {
     @Test
     @DisplayName("정렬 방향이 잘못되면 예외를 던진다")
     void getPowerUsers_invalidDirection() {
-        // given
         PopularRankingSearchRequest request = new PopularRankingSearchRequest();
         request.setPeriod(RankingPeriod.DAILY);
         request.setDirection("WRONG");
 
-        // when & then
         assertThatThrownBy(() -> powerUserService.getPowerUsers(request))
             .isInstanceOf(DeokhugamException.class)
             .hasMessageContaining(ErrorCode.INVALID_DIRECTION.getMessage());
@@ -69,12 +65,10 @@ class PowerUserServiceTest {
     @Test
     @DisplayName("기간이 null이면 예외를 던진다")
     void getPowerUsers_nullPeriod() {
-        // given
         PopularRankingSearchRequest request = new PopularRankingSearchRequest();
         request.setPeriod(null);
         request.setDirection("ASC");
 
-        // when & then
         assertThatThrownBy(() -> powerUserService.getPowerUsers(request))
             .isInstanceOf(DeokhugamException.class)
             .hasMessageContaining(ErrorCode.INVALID_RANKING_PERIOD.getMessage());
@@ -95,7 +89,6 @@ class PowerUserServiceTest {
     @Test
     @DisplayName("결과 수가 limit보다 작으면 hasNext는 false다")
     void getPowerUsers_hasNextFalse() {
-        // given
         PopularRankingSearchRequest request = new PopularRankingSearchRequest();
         request.setPeriod(RankingPeriod.DAILY);
         request.setDirection("ASC");
@@ -105,7 +98,7 @@ class PowerUserServiceTest {
             java.util.UUID.randomUUID(),
             "홍길동",
             RankingPeriod.DAILY,
-            java.time.LocalDateTime.now(),
+            Instant.now(),
             1,
             99.5,
             50.0,
@@ -114,12 +107,10 @@ class PowerUserServiceTest {
         );
 
         when(repository.findAllByPeriodWithCursor(eq(request), any()))
-            .thenReturn(java.util.List.of(dto)); // limit보다 적은 결과
+            .thenReturn(java.util.List.of(dto));
 
-        // when
         var response = powerUserService.getPowerUsers(request);
 
-        // then
         assertThat(response.getContent()).hasSize(1);
         assertThat(response.isHasNext()).isFalse();
     }
@@ -127,7 +118,6 @@ class PowerUserServiceTest {
     @Test
     @DisplayName("정렬 방향이 DESC인 경우도 정상적으로 조회된다")
     void getPowerUsers_descDirection() {
-        // given
         PopularRankingSearchRequest request = new PopularRankingSearchRequest();
         request.setPeriod(RankingPeriod.DAILY);
         request.setDirection("DESC");
@@ -136,10 +126,8 @@ class PowerUserServiceTest {
         when(repository.findAllByPeriodWithCursor(eq(request), any()))
             .thenReturn(Collections.emptyList());
 
-        // when
         var response = powerUserService.getPowerUsers(request);
 
-        // then
         assertThat(response).isNotNull();
         assertThat(response.getContent()).isEmpty();
         assertThat(response.isHasNext()).isFalse();

@@ -2,18 +2,19 @@ package com.twogether.deokhugam.dashboard.batch.processor;
 
 import com.twogether.deokhugam.dashboard.batch.model.PowerUserScoreDto;
 import com.twogether.deokhugam.dashboard.entity.PowerUserRanking;
-import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.user.entity.User;
 import jakarta.persistence.EntityManager;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import org.springframework.batch.item.ItemProcessor;
 
 public class PowerUserScoreProcessor implements ItemProcessor<PowerUserScoreDto, PowerUserRanking> {
 
     private final EntityManager em;
+    private final Instant executionTime;
 
-    public PowerUserScoreProcessor(EntityManager em) {
+    public PowerUserScoreProcessor(EntityManager em, Instant executionTime) {
         this.em = em;
+        this.executionTime = executionTime;
     }
 
     @Override
@@ -30,7 +31,7 @@ public class PowerUserScoreProcessor implements ItemProcessor<PowerUserScoreDto,
             .likeCount(dto.likeCount())
             .commentCount(dto.commentCount())
             .rank(0)
-            .createdAt(LocalDateTime.now())
+            .createdAt(executionTime)
             .build();
     }
 }

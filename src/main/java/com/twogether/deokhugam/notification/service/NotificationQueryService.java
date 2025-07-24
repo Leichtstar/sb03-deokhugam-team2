@@ -5,7 +5,7 @@ import com.twogether.deokhugam.notification.dto.NotificationDto;
 import com.twogether.deokhugam.notification.entity.Notification;
 import com.twogether.deokhugam.notification.mapper.NotificationMapper;
 import com.twogether.deokhugam.notification.repository.NotificationRepository;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
@@ -24,7 +24,7 @@ public class NotificationQueryService {
     public CursorPageResponse<NotificationDto> getNotifications(
         UUID userId,
         String cursor,
-        LocalDateTime after,
+        Instant after,
         Integer limit,
         Sort.Direction direction
     ) {
@@ -34,10 +34,10 @@ public class NotificationQueryService {
         // 실제 데이터보다 1개 더 조회하여 다음 페이지 존재 여부 확인
         PageRequest pageable = PageRequest.of(0, pageSize + 1, Sort.by(sortDirection, "createdAt", "id"));
 
-        LocalDateTime parsedCursor = null;
+        Instant parsedCursor = null;
         if (cursor != null && !cursor.isBlank()) {
             try {
-                parsedCursor = LocalDateTime.parse(cursor);
+                parsedCursor = Instant.parse(cursor);
             } catch (DateTimeParseException e) {
                 throw new IllegalArgumentException("Invalid cursor format. Use ISO-8601 date-time format.", e);
             }
@@ -62,7 +62,7 @@ public class NotificationQueryService {
         }
 
         String nextCursor = hasNext ? content.get(content.size() - 1).createdAt().toString() : null;
-        LocalDateTime nextAfter = hasNext ? content.get(content.size() - 1).createdAt() : null;
+        Instant nextAfter = hasNext ? content.get(content.size() - 1).createdAt() : null;
 
         return new CursorPageResponse<>(content, nextCursor, nextAfter, pageSize, hasNext);
     }

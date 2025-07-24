@@ -6,7 +6,7 @@ import com.twogether.deokhugam.common.exception.ErrorCode;
 import com.twogether.deokhugam.dashboard.dto.request.PopularRankingSearchRequest;
 import com.twogether.deokhugam.dashboard.dto.response.PowerUserDto;
 import com.twogether.deokhugam.dashboard.repository.PowerUserRankingRepository;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +23,7 @@ public class PowerUserServiceImpl implements PowerUserService {
     @Override
     public CursorPageResponse<PowerUserDto> getPowerUsers(PopularRankingSearchRequest request) {
         validateRequest(request);
+
         Pageable pageable = PageRequest.of(0, request.getLimit());
 
         List<PowerUserDto> content = powerUserRankingRepository
@@ -30,22 +31,24 @@ public class PowerUserServiceImpl implements PowerUserService {
 
         boolean hasNext = content.size() == request.getLimit();
         String nextCursor = null;
-        LocalDateTime nextAfter = null;
+        Instant nextAfter = null;
 
         if (hasNext) {
             var last = content.get(content.size() - 1);
             nextCursor = String.valueOf(last.rank());
-            nextAfter = last.createdAt();
+            nextAfter = last.createdAt(); // Instant 기준
         }
 
         return new CursorPageResponse<>(content, nextCursor, nextAfter, request.getLimit(), hasNext);
     }
 
     private void validateRequest(PopularRankingSearchRequest request) {
+        // period 필드 null 체크
         if (request.getPeriod() == null) {
             throw new DeokhugamException(ErrorCode.INVALID_RANKING_PERIOD);
         }
 
+        // direction 필드 Enum 체크 (대소문자 구분 없이 ASC, DESC만 허용)
         String direction = request.getDirection();
         if (direction == null) {
             throw new DeokhugamException(ErrorCode.INVALID_DIRECTION);
