@@ -14,8 +14,11 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.data.domain.Sort;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
@@ -40,7 +43,7 @@ class CommentQueryServiceTest {
     @Mock CommentMapper commentMapper;
     @InjectMocks CommentQueryService sut;
 
-    private static Comment stubComment(UUID reviewId, UUID id, LocalDateTime at, boolean deleted) {
+    private static Comment stubComment(UUID reviewId, UUID id, Instant at, boolean deleted) {
         Comment c = mock(Comment.class);
         when(c.getId()).thenReturn(id);
         when(c.getCreatedAt()).thenReturn(at);
@@ -61,7 +64,7 @@ class CommentQueryServiceTest {
     @Test
     void shouldReturnFirstPageInDescendingOrder() {
         UUID reviewId = UUID.randomUUID();
-        Comment c1 = stubComment(reviewId, UUID.randomUUID(), LocalDateTime.now(), false);
+        Comment c1 = stubComment(reviewId, UUID.randomUUID(), Instant.now(), false);
 
         when(commentRepository.findSlice(eq(reviewId), isNull(), isNull(), eq(1), eq(false)))
             .thenReturn(List.of(c1));
@@ -79,9 +82,10 @@ class CommentQueryServiceTest {
     @Test
     void asc_with_cursor() {
         UUID reviewId = UUID.randomUUID();
-        LocalDateTime base = LocalDateTime.of(2025,1,1,0,0);
+        Instant base = LocalDateTime.of(2025, 7, 15, 12, 0)
+            .toInstant(ZoneOffset.ofHours(9));
         UUID baseId = UUID.randomUUID();
-        String cursorRaw = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(base) + "|" + baseId;
+        String cursorRaw = DateTimeFormatter.ISO_INSTANT.format(base) + "|" + baseId;
         String cursor = Base64.getUrlEncoder().encodeToString(cursorRaw.getBytes(UTF_8));
 
         Comment next = stubComment(reviewId, UUID.randomUUID(),
@@ -104,7 +108,7 @@ class CommentQueryServiceTest {
     @Test
     void shouldFallbackToDefaultWhenCursorIsInvalid() {
         UUID reviewId = UUID.randomUUID();
-        LocalDateTime after = LocalDateTime.now().minusDays(1);
+        Instant after = Instant.now().minus(1, ChronoUnit.DAYS);
 
         // lenient 로 StrictStubs 무시
         lenient().when(commentRepository.findSlice(eq(reviewId),
@@ -142,7 +146,7 @@ class CommentQueryServiceTest {
     @Test
     void last_page_nextCursor_is_null() {
         UUID rid = UUID.randomUUID();
-        Comment c = stubComment(rid, UUID.randomUUID(), LocalDateTime.now(), false);
+        Comment c = stubComment(rid, UUID.randomUUID(), Instant.now(), false);
         when(commentRepository.findSlice(eq(rid), isNull(), isNull(), eq(10), eq(false)))
             .thenReturn(List.of(c));      // size <= limit → hasNext=false
 
@@ -155,11 +159,12 @@ class CommentQueryServiceTest {
     @Test
     void valid_cursor_decodes_and_passes_to_repo() {
         UUID rid = UUID.randomUUID();
-        LocalDateTime base = LocalDateTime.of(2025,7,15,12,0);
+        Instant base = LocalDateTime.of(2025, 7, 15, 12, 0)
+            .toInstant(ZoneOffset.ofHours(9));
         UUID baseId = UUID.randomUUID();
 
         // cursor 인코딩
-        String raw = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(base) + "|" + baseId;
+        String raw = DateTimeFormatter.ISO_INSTANT.format(base) + "|" + baseId;
         String cursor = Base64.getUrlEncoder().encodeToString(raw.getBytes(UTF_8));
 
         Comment c = stubComment(rid, UUID.randomUUID(), base.plusSeconds(1), false);
@@ -187,8 +192,8 @@ class CommentQueryServiceTest {
     @Test
     void hasNext_true_sets_nextCursor() {
         UUID rid = UUID.randomUUID();
-        Comment c1 = stubComment(rid, UUID.randomUUID(), LocalDateTime.now(), false);
-        Comment c2 = stubComment(rid, UUID.randomUUID(), LocalDateTime.now().minusSeconds(1), false);
+        Comment c1 = stubComment(rid, UUID.randomUUID(), Instant.now(), false);
+        Comment c2 = stubComment(rid, UUID.randomUUID(), Instant.now().minusSeconds(1), false);
 
         CommentResponse dto1 = stubDto(c1);
 
