@@ -1,4 +1,4 @@
-package com.twogether.deokhugam.book;
+package com.twogether.deokhugam.book.controller;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -6,7 +6,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.twogether.deokhugam.apiclient.NaverBookClient;
-import com.twogether.deokhugam.book.controller.BookInfoController;
 import com.twogether.deokhugam.book.dto.NaverBookDto;
 import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;

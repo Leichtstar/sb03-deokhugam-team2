@@ -1,7 +1,6 @@
-package com.twogether.deokhugam.book;
+package com.twogether.deokhugam.apiclient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.twogether.deokhugam.apiclient.NaverBookClientImpl;
 import com.twogether.deokhugam.apiclient.dto.NaverBookItem;
 import com.twogether.deokhugam.apiclient.dto.NaverBookSearchResponse;
 import com.twogether.deokhugam.book.dto.NaverBookDto;

@@ -1,4 +1,4 @@
-package com.twogether.deokhugam.book;
+package com.twogether.deokhugam.book.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -18,7 +18,6 @@ import com.twogether.deokhugam.book.entity.Book;
 import com.twogether.deokhugam.book.exception.BookNotFoundException;
 import com.twogether.deokhugam.book.exception.DuplicatedIsbnException;
 import com.twogether.deokhugam.book.repository.BookRepository;
-import com.twogether.deokhugam.book.service.BookServiceImpl;
 import com.twogether.deokhugam.storage.S3ImageStorage;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -152,29 +151,61 @@ public class BookServiceTest {
   }
 
   @Test
-  @DisplayName("정렬된 도서 목록 조회 성공 테스트 - 제목 기준 오름차순")
-  void getAllSortedByTitleAscSuccess() {
-    // given: 제목 기준 오름차순으로 정렬된 도서 목록 반환
+  @DisplayName("정렬 옵션별 도서 목록 조회 성공 테스트 - 모든 분기 커버")
+  void getAllSorted_AllSortOptions_Success() {
+    // given
     List<Book> books = Arrays.asList(
         new Book("가나다", "", "", "", LocalDate.now()),
         new Book("마바사", "", "", "", LocalDate.now()),
         new Book("추가책", "", "", "", LocalDate.now())
     );
-    given(bookRepository.findPageByTitleAsc(anyString(), any(), any(), any(Pageable.class)))
-        .willReturn(books);
 
-    given(bookRepository.countByKeyword(anyString())).willReturn(2L);
+    // 공통 Mock 설정
+    given(bookRepository.countByKeyword(anyString())).willReturn(3L);
 
-    // when: 정렬된 도서 목록 조회
-    BookPageResponse<BookDto> result = bookService.getAllSorted("", "title", "ASC", null, null, 2);
+    // 각 정렬별 Mock 설정
+    given(bookRepository.findPageByTitleAsc(anyString(), any(), any(), any(Pageable.class))).willReturn(books);
+    given(bookRepository.findPageByTitleDesc(anyString(), any(), any(), any(Pageable.class))).willReturn(books);
+    given(bookRepository.findPageByReviewCountAsc(anyString(), any(), any(), any(Pageable.class))).willReturn(books);
+    given(bookRepository.findPageByReviewCountDesc(anyString(), any(), any(), any(Pageable.class))).willReturn(books);
+    given(bookRepository.findPageByRatingAsc(anyString(), any(), any(), any(Pageable.class))).willReturn(books);
+    given(bookRepository.findPageByRatingDesc(anyString(), any(), any(), any(Pageable.class))).willReturn(books);
+    given(bookRepository.findPageByPublishedDateAsc(anyString(), any(), any(), any(Pageable.class))).willReturn(books);
+    given(bookRepository.findPageByPublishedDateDesc(anyString(), any(), any(), any(Pageable.class))).willReturn(books);
+    given(bookRepository.findBooksByKeywordAndAfterAsc(anyString(), any(), any(Pageable.class))).willReturn(books);
+    given(bookRepository.findBooksByKeywordAndAfter(anyString(), any(), any(Pageable.class))).willReturn(books);
 
-    // then: 결과 검증
-    assertThat(result.content()).hasSize(2);
-    assertThat(result.content().get(0).title()).isEqualTo("가나다");
-    assertThat(result.nextCursor()).isEqualTo("마바사");
-    assertThat(result.totalElements()).isEqualTo(2L);
+    // when
+    BookPageResponse<BookDto> resultReviewAsc = bookService.getAllSorted("", "reviewCount", "ASC", null, null, 2);
+    BookPageResponse<BookDto> resultReviewDesc = bookService.getAllSorted("", "reviewCount", "DESC", null, null, 2);
+    BookPageResponse<BookDto> resultRatingAsc = bookService.getAllSorted("", "rating", "ASC", null, null, 2);
+    BookPageResponse<BookDto> resultRatingDesc = bookService.getAllSorted("", "rating", "DESC", null, null, 2);
+    BookPageResponse<BookDto> resultPubDateAsc = bookService.getAllSorted("", "publishedDate", "ASC", null, null, 2);
+    BookPageResponse<BookDto> resultPubDateDesc = bookService.getAllSorted("", "publishedDate", "DESC", null, null, 2);
+    BookPageResponse<BookDto> resultTitleAsc = bookService.getAllSorted("", "title", "ASC", null, null, 2);
+    BookPageResponse<BookDto> resultTitleDesc = bookService.getAllSorted("", "title", "DESC", null, null, 2);
+    BookPageResponse<BookDto> resultDefaultAsc = bookService.getAllSorted("", "", "ASC", null, null, 2);
+    BookPageResponse<BookDto> resultDefaultDesc = bookService.getAllSorted("", "", "DESC", null, null, 2);
+
+    // then: 공통 검증
+    assertThat(resultTitleAsc.content()).hasSize(2);
+    assertThat(resultTitleAsc.content().get(0).title()).isEqualTo("가나다");
+    assertThat(resultTitleAsc.nextCursor()).isEqualTo("마바사");
+    assertThat(resultTitleAsc.totalElements()).isEqualTo(3L);
+
+    // then: 분기별 메서드 호출 검증
+    verify(bookRepository, times(1)).findPageByReviewCountAsc(anyString(), any(), any(), any(Pageable.class));
+    verify(bookRepository, times(1)).findPageByReviewCountDesc(anyString(), any(), any(), any(Pageable.class));
+    verify(bookRepository, times(1)).findPageByRatingAsc(anyString(), any(), any(), any(Pageable.class));
+    verify(bookRepository, times(1)).findPageByRatingDesc(anyString(), any(), any(), any(Pageable.class));
+    verify(bookRepository, times(1)).findPageByPublishedDateAsc(anyString(), any(), any(), any(Pageable.class));
+    verify(bookRepository, times(1)).findPageByPublishedDateDesc(anyString(), any(), any(), any(Pageable.class));
     verify(bookRepository, times(1)).findPageByTitleAsc(anyString(), any(), any(), any(Pageable.class));
+    verify(bookRepository, times(1)).findPageByTitleDesc(anyString(), any(), any(), any(Pageable.class));
+    verify(bookRepository, times(1)).findBooksByKeywordAndAfterAsc(anyString(), any(), any(Pageable.class));
+    verify(bookRepository, times(1)).findBooksByKeywordAndAfter(anyString(), any(), any(Pageable.class));
   }
+
 
   @Test
   @DisplayName("단일 도서 조회 성공 테스트")

@@ -1,8 +1,7 @@
-package com.twogether.deokhugam.book;
+package com.twogether.deokhugam.book.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.twogether.deokhugam.book.controller.BookController;
 import com.twogether.deokhugam.book.dto.BookDto;
 import com.twogether.deokhugam.book.dto.request.BookCreateRequest;
 import com.twogether.deokhugam.book.dto.request.BookUpdateRequest;
