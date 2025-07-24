@@ -29,6 +29,7 @@ import com.twogether.deokhugam.review.dto.request.ReviewUpdateRequest;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.review.entity.ReviewLike;
 import com.twogether.deokhugam.review.exception.ReviewExistException;
+import com.twogether.deokhugam.review.exception.ReviewNotFoundException;
 import com.twogether.deokhugam.review.exception.ReviewNotOwnedException;
 import com.twogether.deokhugam.review.mapper.ReviewLikeMapper;
 import com.twogether.deokhugam.review.mapper.ReviewMapper;
@@ -160,7 +161,7 @@ public class BasicReviewServiceTest {
 
     @Test
     @DisplayName("리뷰 내용이 없는 경우 예외가 발생해야 한다.")
-    void shouldNotValid_whenReviewIsEmpty() {
+    void shouldFailValidation_whenReviewIsEmpty() {
         // Given
         ReviewCreateRequest invalidReviewRequest = new ReviewCreateRequest(
                 bookId,
@@ -179,7 +180,7 @@ public class BasicReviewServiceTest {
 
     @Test
     @DisplayName("리뷰 내용이 5000자를 넘는 경우 예외가 발생해야 한다.")
-    void shouldNotValid_whenReviewContentIsOverSize() {
+    void shouldFailValidation_whenReviewContentIsOverSize() {
         // Given
         String tooLongContent = "a".repeat(5001);
         ReviewCreateRequest invalidReviewRequest = new ReviewCreateRequest(
@@ -195,6 +196,40 @@ public class BasicReviewServiceTest {
         assertTrue(violations.stream()
                 .anyMatch(violation -> violation.getMessage().equals("내용은 5000자를 초과할 수 없습니다.")));
 
+    }
+
+    @Test
+    @DisplayName("리뷰의 평점은 1점 미만일 수 없다.")
+    void shouldFailValidation_whenRatingIsLessThanOne() {
+        // Given
+        ReviewCreateRequest invalidReviewRequest = new ReviewCreateRequest(
+                bookId,
+                userId,
+                "1점 보다 작은 평점",
+                0
+        );
+
+        var violations = validator.validate(invalidReviewRequest);
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream()
+                .anyMatch(violation -> violation.getMessage().equals("리뷰 평점은 1점 이상이어야 합니다.")));
+    }
+
+    @Test
+    @DisplayName("리뷰의 평점은 1점 미만일 수 없다.")
+    void shouldFailValidation_whenRatingIsBiggerThanFive() {
+        // Given
+        ReviewCreateRequest invalidReviewRequest = new ReviewCreateRequest(
+                bookId,
+                userId,
+                "1점 보다 작은 평점",
+                7
+        );
+
+        var violations = validator.validate(invalidReviewRequest);
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream()
+                .anyMatch(violation -> violation.getMessage().equals("리뷰 평점은 5점 이하이어야 합니다.")));
     }
 
     @Test
@@ -398,6 +433,17 @@ public class BasicReviewServiceTest {
 
             verify(reviewMapper).toDto(expectedReview1, false);
             verify(reviewMapper).toDto(expectedReview2, false);
+        }
+
+        @Test
+        @DisplayName("리뷰가 없다면 예외를 반환해야한다.")
+        void shouldReturnException_whenReviewNotFound() {
+            UUID reviewId = UUID.randomUUID();
+            UUID requestUserId = UUID.randomUUID();
+
+            assertThrows(ReviewNotFoundException.class, () -> {
+                basicReviewService.findById(reviewId, requestUserId);
+            });
         }
     }
 
