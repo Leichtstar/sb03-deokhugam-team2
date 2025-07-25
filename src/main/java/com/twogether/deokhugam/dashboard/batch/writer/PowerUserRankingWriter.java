@@ -5,6 +5,7 @@ import com.twogether.deokhugam.common.exception.ErrorCode;
 import com.twogether.deokhugam.dashboard.entity.PowerUserRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PowerUserRankingRepository;
+import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,23 +30,31 @@ public class PowerUserRankingWriter implements ItemWriter<PowerUserRanking> {
         }
 
         try {
+            // score 기준 내림차순 정렬 추가
+            rankingList.sort(Comparator.comparingDouble(PowerUserRanking::getScore).reversed());
+
             RankingPeriod period = rankingList.get(0).getPeriod();
             powerUserRankingRepository.deleteByPeriod(period);
 
-            int currentRank = 1;
+            // 동점 처리 포함한 랭킹 부여
+            int rank = 1;
+            double prevScore = Double.NEGATIVE_INFINITY;
+
             for (int i = 0; i < rankingList.size(); i++) {
                 PowerUserRanking current = rankingList.get(i);
-                if (i > 0) {
-                    PowerUserRanking previous = rankingList.get(i - 1);
-                    if (Double.compare(current.getScore(), previous.getScore()) != 0) {
-                        currentRank = i + 1;
-                    }
+                double score = current.getScore();
+
+                if (Double.compare(score, prevScore) != 0) {
+                    rank = i + 1;
                 }
-                current.assignRank(currentRank);
+
+                current.assignRank(rank);
+                prevScore = score;
             }
 
             powerUserRankingRepository.saveAll(rankingList);
             log.info("파워 유저 랭킹 {}건 저장 완료", rankingList.size());
+
         } catch (Exception e) {
             log.error("파워 유저 랭킹 저장 실패", e);
             throw new DeokhugamException(ErrorCode.RANKING_SAVE_FAILED, e);

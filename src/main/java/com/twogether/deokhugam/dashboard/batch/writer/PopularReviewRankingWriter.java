@@ -9,6 +9,7 @@ import com.twogether.deokhugam.notification.event.PopularReviewRankedEvent;
 import com.twogether.deokhugam.notification.service.NotificationService;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -40,26 +41,31 @@ public class PopularReviewRankingWriter implements ItemWriter<PopularReviewRanki
         }
 
         try {
+            // 정렬 보장 추가
+            rankingList.sort(Comparator.comparingDouble(PopularReviewRanking::getScore).reversed());
+
             RankingPeriod period = rankingList.get(0).getPeriod();
             popularReviewRankingRepository.deleteByPeriod(period);
 
+            // 동점 처리 포함한 랭크 부여
+            int rank = 1;
+            double prevScore = Double.NEGATIVE_INFINITY;
+
             for (int i = 0; i < rankingList.size(); i++) {
                 PopularReviewRanking current = rankingList.get(i);
+                double score = current.getScore();
 
-                if (i > 0) {
-                    PopularReviewRanking previous = rankingList.get(i - 1);
-                    if (Double.compare(current.getScore(), previous.getScore()) == 0) {
-                        current.assignRank(previous.getRank());
-                    } else {
-                        current.assignRank(i + 1);
-                    }
-                } else {
-                    current.assignRank(1); // 첫 번째는 무조건 1위
+                if (Double.compare(score, prevScore) != 0) {
+                    rank = i + 1;
                 }
+
+                current.assignRank(rank);
+                prevScore = score;
             }
 
             popularReviewRankingRepository.saveAll(rankingList);
             log.info("인기 리뷰 랭킹 {}건 저장 완료", rankingList.size());
+
         } catch (Exception e) {
             log.error("인기 리뷰 랭킹 저장 실패", e);
             throw new DeokhugamException(ErrorCode.RANKING_SAVE_FAILED);
