@@ -2,6 +2,7 @@ package com.twogether.deokhugam.dashboard.batch.writer;
 
 import com.twogether.deokhugam.common.exception.DeokhugamException;
 import com.twogether.deokhugam.common.exception.ErrorCode;
+import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
 import com.twogether.deokhugam.dashboard.entity.PowerUserRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PowerUserRankingRepository;
@@ -34,7 +35,7 @@ public class PowerUserRankingWriter implements ItemWriter<PowerUserRanking> {
         try {
             rankingList.sort(
                 Comparator.comparingDouble(PowerUserRanking::getScore).reversed()
-                    .thenComparing(Comparator.comparing(PowerUserRanking::getCreatedAt).reversed())
+                    .thenComparing(PowerUserRanking::getCreatedAt, Comparator.reverseOrder())
             );
 
             RankingPeriod period = rankingList.get(0).getPeriod();
