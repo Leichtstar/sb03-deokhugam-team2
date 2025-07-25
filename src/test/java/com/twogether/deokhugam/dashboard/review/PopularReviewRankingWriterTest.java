@@ -97,14 +97,14 @@ class PopularReviewRankingWriterTest {
     }
 
     @Test
-    @DisplayName("동점 리뷰는 최신 createdAt 순으로 우선 순위를 부여한다")
-    void writer_shouldAssignRankWithLatestCreatedAtWhenScoresAreEqual() {
+    @DisplayName("동점 리뷰는 createdAt 오름차순으로 우선 순위를 부여한다")
+    void writer_shouldAssignRankWithEarlierCreatedAtWhenScoresAreEqual() {
         // given
         PopularReviewRanking older = createRanking("책1", 9.0, Instant.parse("2025-07-20T10:00:00Z"));
         PopularReviewRanking newer = createRanking("책2", 9.0, Instant.parse("2025-07-21T10:00:00Z"));
         PopularReviewRanking lower = createRanking("책3", 7.0, Instant.parse("2025-07-22T10:00:00Z"));
 
-        Chunk<PopularReviewRanking> chunk = new Chunk<>(List.of(older, newer, lower));
+        Chunk<PopularReviewRanking> chunk = new Chunk<>(List.of(newer, older, lower)); // 일부러 순서 꼬아줌
 
         when(reviewRepository.findAllById(any()))
             .thenReturn(List.of(mock(Review.class), mock(Review.class), mock(Review.class)));
@@ -113,8 +113,8 @@ class PopularReviewRankingWriterTest {
         writer.write(chunk);
 
         // then
-        assertEquals(1, newer.getRank()); // 최신이 먼저
-        assertEquals(1, older.getRank()); // 동점
+        assertEquals(1, older.getRank()); // 더 먼저 생성된 리뷰가 rank 1
+        assertEquals(1, newer.getRank()); // 동점
         assertEquals(3, lower.getRank()); // 낮은 점수
     }
 
