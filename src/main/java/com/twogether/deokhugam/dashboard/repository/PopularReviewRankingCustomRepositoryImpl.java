@@ -77,13 +77,13 @@ public class PopularReviewRankingCustomRepositoryImpl implements PopularReviewRa
         QPopularReviewRanking r = QPopularReviewRanking.popularReviewRanking;
         if ("DESC".equalsIgnoreCase(direction)) {
             return new OrderSpecifier[]{
-                r.score.desc(),
+                r.rank.desc(),
                 r.createdAt.desc(),
                 r.id.desc()
             };
         }
         return new OrderSpecifier[]{
-            r.score.asc(),
+            r.rank.asc(),
             r.createdAt.asc(),
             r.id.asc()
         };
