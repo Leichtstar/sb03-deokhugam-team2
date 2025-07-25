@@ -8,60 +8,75 @@ import com.twogether.deokhugam.book.entity.Book;
 import com.twogether.deokhugam.book.exception.BookNotFoundException;
 import com.twogether.deokhugam.book.exception.DuplicatedIsbnException;
 import com.twogether.deokhugam.book.repository.BookRepository;
-import com.twogether.deokhugam.review.repository.ReviewRepository;
 import com.twogether.deokhugam.storage.S3ImageStorage;
 import jakarta.annotation.Nullable;
-import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
-    private final ReviewRepository reviewRepository;
     private final S3ImageStorage s3ImageStorage;
 
     @Override
     public BookDto registerBook(BookCreateRequest request)
     {
+        log.info("[BookServiceImpl] 도서 등록 요청 (Thumbnail없음)");
+        // ISBN 중복 여부 확인
         if(bookRepository.existsByIsbn(request.isbn())){
+            log.warn("도서 등록 실패 - 중복 ISBN :{}",request.isbn());
             throw new DuplicatedIsbnException();
         }
         Book book = Book.of(request);
-        return bookRepository.save(book).toDto();
+        BookDto registeredBook = bookRepository.save(book).toDto();
+        log.info("도서 등록 성공 : 도서제목={}", registeredBook.title());
+
+        return registeredBook;
     }
     @Override
     public BookDto registerBook(BookCreateRequest request,MultipartFile thumbnailImg)
     {
+        log.info("[BookServiceImpl] 도서 등록 요청");
+        // ISBN 중복 여부 확인
         if(bookRepository.existsByIsbn(request.isbn())){
+            log.warn("도서 등록 실패 - 중복 ISBN :{}",request.isbn());
             throw new DuplicatedIsbnException();
         }
         Book book = Book.of(request);
+        // 썸네일 이미지 S3로 업로드
 	    String imageUrl;
-	    try {
-		    imageUrl = s3ImageStorage.uploadImage(thumbnailImg, "bookThumbnail/");
-	    } catch (IOException e) {
-		    throw new RuntimeException("이미지 업로드 실패",e);
-	    }
+        log.debug("S3에 썸네일 이미지 업로드 요청: {}",thumbnailImg.getOriginalFilename());
+
+		imageUrl = s3ImageStorage.uploadImage(thumbnailImg, "bookThumbnail/");
+
 	    book.setThumbnailUrl(imageUrl);
-        return bookRepository.save(book).toDto();
+        BookDto registeredBook = bookRepository.save(book).toDto();
+
+        log.info("도서 등록 성공 : {}", registeredBook.title());
+
+        return registeredBook;
     }
 
     @Override
     public List<BookDto> getAllBooks() {
-        return bookRepository.findAll().stream().filter(book -> !book.getIsDeleted()).map(Book::toDto).toList();
+        log.info("[BookServiceImpl] 모든 도서 리스트 조회 요청.");
+        List<BookDto> result = bookRepository.findAll().stream().filter(book -> !book.getIsDeleted()).map(Book::toDto).toList();
+        log.info("모든 도서 리스트 조회 성공: 전체 도서 수량={}" , result.size());
+        return result;
     }
     @Override
     public BookPageResponse<BookDto> getAllSorted(
@@ -72,6 +87,8 @@ public class BookServiceImpl implements BookService {
         Instant after,
         int limit
     ) {
+        log.info("[BookServiceImpl] 도서목록 정렬조회 요청 : 검색어={}",keyword);
+        log.debug("정렬기준={}, 정렬방향={}",orderBy,direction);
         String kw = (keyword == null || keyword.isBlank()) ? "" : keyword;
 
         // 페이징용 Pageable 생성
@@ -112,14 +129,12 @@ public class BookServiceImpl implements BookService {
                     : bookRepository.findPageByReviewCountDesc(kw, cursorReviewCount, after, pageable);
             }
             default -> {
-                // fallback: createdAt 기준
-//                Instant afterTime = (after != null) ? after : Instant.EPOCH;
                 results = isAsc
                     ? bookRepository.findBooksByKeywordAndAfterAsc(kw, after, pageable)
                     : bookRepository.findBooksByKeywordAndAfter(kw, after, pageable);
             }
         }
-
+        log.debug("Pageable 쿼리 조회 성공 : pagesize={}", pageable.getPageSize());
         boolean hasNext = results.size() > limit;
         if (hasNext) {
             results = results.subList(0, limit);
@@ -148,8 +163,8 @@ public class BookServiceImpl implements BookService {
         //전체 목록 카운트
         long totalCount = bookRepository.countByKeyword(kw);
 
-        // 반환
-        return new BookPageResponse<>(
+        // 결과값 생성
+        BookPageResponse<BookDto> resultPage = new BookPageResponse<>(
             results.stream().map(Book::toDto).toList(),
             nextCursor,
             nextAfter,
@@ -157,17 +172,23 @@ public class BookServiceImpl implements BookService {
             totalCount,
             hasNext
         );
+        log.info("도서목록 정렬조회 성공: totalElements={}",resultPage.totalElements());
+        return resultPage;
 }
 
     @Override
     public BookDto getBookbyId(UUID bookId) {
+        log.info("[BookServiceImpl] 도서정보 단일조회 요청 : BookId={}", bookId);
         Book targetbook = bookRepository.findById(bookId)
             .orElseThrow(BookNotFoundException::new);
-        return targetbook.toDto();
+        BookDto result = targetbook.toDto();
+        log.info("도서정보 단일조회 성공 : title={}",result.title());
+        return result;
     }
 
 
     public BookDto updateBook(UUID bookId, BookUpdateRequest request, @Nullable MultipartFile thumbnailImg) {
+        log.info("[BookServiceImpl] 도서정보 수정 요청 : BookId={}",bookId);
         Book targetbook = bookRepository.findById(bookId)
             .orElseThrow(BookNotFoundException::new);
 
@@ -177,37 +198,45 @@ public class BookServiceImpl implements BookService {
         targetbook.setPublisher(request.publisher());
         targetbook.setPublishedDate(request.publishedDate());
 
+
         if (thumbnailImg != null && !thumbnailImg.isEmpty()) {
-            try {
-                String imageUrl = s3ImageStorage.uploadImage(thumbnailImg, "bookThumbnail/");
-                targetbook.setThumbnailUrl(imageUrl);
-            } catch (IOException e) {
-                throw new RuntimeException("이미지 업로드 실패", e);
-            }
+            log.debug("S3 썸네일 교체 요청");
+            String imageUrl = s3ImageStorage.uploadImage(thumbnailImg, "bookThumbnail/");
+            targetbook.setThumbnailUrl(imageUrl);
+            log.debug("S3 썸네일 교체 성공: url={}", imageUrl);
+        } else {
+            log.debug("S3 썸네일 변경 없음.");
         }
-        return bookRepository.save(targetbook).toDto();
+        BookDto result = bookRepository.save(targetbook).toDto();
+        log.info("도서정보 수정 성공: BookId={}",bookId);
+        return result;
     }
 
     @Override
     public void deleteBook(UUID bookId){
+        log.info("[BookServiceImpl] 도서정보 논리삭제 요청 : BookId={}", bookId);
+        // 책 존재 확인 및 조회
         Book book = bookRepository.findById(bookId).
             orElseThrow(BookNotFoundException::new);
+        // 논리삭제 체크 활성화
         book.setIsDeleted(true);
         bookRepository.save(book);
+        log.info("도서정보 논리삭제 성공 : BookId={}", bookId);
     }
 
     @Override
     public void deleteBookHard(UUID bookId){
+        log.info("[BookServiceImpl] 도서정보 물리삭제 요청 : BookId={}", bookId);
         // 책 존재 확인 및 조회
         Book book = bookRepository.findById(bookId)
             .orElseThrow(BookNotFoundException::new);
-
         // 썸네일 URL 추출
-        String thumbnailUrl = book.getThumbnailUrl(); // 예: https://your-bucket.s3.amazonaws.com/book/thumbnail/abc.jpg
-        if (thumbnailUrl != null && !thumbnailUrl.isBlank()) {
-            //s3에서 이미지 삭제 요청
-            s3ImageStorage.deleteImage(thumbnailUrl);
-        }
+        String thumbnailUrl = book.getThumbnailUrl();
+        //s3 썸네일 삭제
+        log.debug("S3 연동 썸네일 삭제 요청");
+        s3ImageStorage.deleteImage(thumbnailUrl);
+
         bookRepository.deleteById(bookId);
+        log.info("도서정보 물리삭제 성공 : BookId={}",bookId);
     }
 }
