@@ -16,6 +16,7 @@ import com.twogether.deokhugam.user.exception.EmailAlreadyExistsException;
 import com.twogether.deokhugam.user.exception.InvalidCredentialsException;
 import com.twogether.deokhugam.user.exception.NicknameAlreadyExistsException;
 import com.twogether.deokhugam.user.exception.UserNotFoundException;
+import com.twogether.deokhugam.user.exception.UserWithdrawnException;
 import com.twogether.deokhugam.user.mapper.UserMapper;
 import com.twogether.deokhugam.user.repository.UserRepository;
 import com.twogether.deokhugam.user.service.BasicUserService;
@@ -145,6 +146,24 @@ public class BasicUserServiceTest {
         // when & then - 비밀번호 불일치로 예외 발생 확인
         assertThatThrownBy(() -> userService.login(loginRequest))
             .isInstanceOf(InvalidCredentialsException.class); // InvalidCredentialsException 발생해야 함
+    }
+
+    @Test
+    @DisplayName("탈퇴한 사용자 로그인 시도 시 실패")
+    void login_WithWithdrawnUser_ThrowsException() {
+        // given - 탈퇴한 사용자 상황 설정
+        user.softDelete();
+
+        UserLoginRequest loginRequest = new UserLoginRequest(email, password);
+
+        // 탈퇴한 사용자를 찾도록 Mock 설정
+        given(userRepository.findByEmail(eq(email)))
+            .willReturn(Optional.of(user));
+
+        // when & then - UserWithdrawnException 발생 확인
+        assertThatThrownBy(() -> userService.login(loginRequest))
+            .isInstanceOf(UserWithdrawnException.class)  // 탈퇴 사용자 전용 예외 확인
+            .hasMessage("탈퇴한 사용자입니다.");  // 예외 메시지 확인 (ErrorCode에 따라 달라질 수 있음)
     }
 
     @Test
