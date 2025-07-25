@@ -23,7 +23,6 @@ public class PopularBookRankingWriter implements ItemWriter<PopularBookRanking> 
 
     @Override
     public void write(Chunk<? extends PopularBookRanking> items) {
-        // Chunk.getItems()는 UnmodifiableList 반환 → 정렬 위해 복사본 생성
         List<PopularBookRanking> rankingList = new ArrayList<>(items.getItems());
 
         if (rankingList.isEmpty()) {
@@ -32,17 +31,14 @@ public class PopularBookRankingWriter implements ItemWriter<PopularBookRanking> 
         }
 
         try {
-            // 점수 기준 내림차순 + createdAt 기준 내림차순 정렬 (최신 리뷰 우선)
             rankingList.sort(
                 Comparator.comparingDouble(PopularBookRanking::getScore).reversed()
                     .thenComparing(Comparator.comparing(PopularBookRanking::getCreatedAt).reversed())
             );
 
-            // 해당 기간 기존 랭킹 삭제
             RankingPeriod period = rankingList.get(0).getPeriod();
             popularBookRankingRepository.deleteByPeriod(period);
 
-            // 랭크 부여 (동점 처리 포함)
             int rank = 1;
             double prevScore = Double.NEGATIVE_INFINITY;
 
