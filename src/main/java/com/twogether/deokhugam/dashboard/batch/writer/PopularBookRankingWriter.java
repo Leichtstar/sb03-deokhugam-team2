@@ -33,25 +33,26 @@ public class PopularBookRankingWriter implements ItemWriter<PopularBookRanking> 
         try {
             rankingList.sort(
                 Comparator.comparingDouble(PopularBookRanking::getScore).reversed()
-                    .thenComparing(PopularBookRanking::getCreatedAt, Comparator.reverseOrder())
+                    .thenComparing(PopularBookRanking::getCreatedAt)
             );
 
             RankingPeriod period = rankingList.get(0).getPeriod();
             popularBookRankingRepository.deleteByPeriod(period);
 
-            int rank = 1;
+            int indexRank = 1;
+            int displayedRank = 1;
             double prevScore = Double.NEGATIVE_INFINITY;
 
-            for (int i = 0; i < rankingList.size(); i++) {
-                PopularBookRanking current = rankingList.get(i);
+            for (PopularBookRanking current : rankingList) {
                 double score = current.getScore();
 
                 if (Double.compare(score, prevScore) != 0) {
-                    rank = i + 1;
+                    displayedRank = indexRank;
                 }
 
-                current.assignRank(rank);
+                current.assignRank(displayedRank);
                 prevScore = score;
+                indexRank++;
             }
 
             popularBookRankingRepository.saveAll(rankingList);

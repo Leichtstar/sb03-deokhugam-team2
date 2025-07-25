@@ -82,36 +82,34 @@ class PopularBookRankingWriterTest {
     }
 
     @Test
-    @DisplayName("여러 개의 랭킹에 assignRank가 동점 + 최신순 기준으로 호출된다")
+    @DisplayName("여러 개의 랭킹에 assignRank가 동점 + 등록시간 오름차순 기준으로 호출된다")
     void write_multipleRankings_assignsRank_withTieBreaker() {
         // given
         PopularBookRanking r1 = mock(PopularBookRanking.class);
         PopularBookRanking r2 = mock(PopularBookRanking.class);
         PopularBookRanking r3 = mock(PopularBookRanking.class);
 
-        // 설정: r1, r2는 동점, r1이 최신 / r3는 낮은 점수
+        // r1, r2: 동점 (5.0), r2가 더 먼저 생성됨
         given(r1.getScore()).willReturn(5.0);
         given(r2.getScore()).willReturn(5.0);
         given(r3.getScore()).willReturn(4.0);
 
         given(r1.getCreatedAt()).willReturn(Instant.parse("2025-07-25T10:00:00Z"));
-        given(r2.getCreatedAt()).willReturn(Instant.parse("2025-07-24T10:00:00Z"));
+        given(r2.getCreatedAt()).willReturn(Instant.parse("2025-07-24T10:00:00Z")); // 더 먼저
         given(r3.getCreatedAt()).willReturn(Instant.parse("2025-07-23T10:00:00Z"));
 
-        // deleteByPeriod용 기간 설정
         given(r1.getPeriod()).willReturn(RankingPeriod.DAILY);
 
-        // 의도적으로 순서 꼬아서 입력
-        Chunk<PopularBookRanking> chunk = new Chunk<>(List.of(r2, r1, r3));
+        Chunk<PopularBookRanking> chunk = new Chunk<>(List.of(r1, r2, r3));
 
         // when
         writer.write(chunk);
 
-        // then
-        verify(r1).assignRank(1);
+        // then: 정렬 순서 → r2 (rank 1), r1 (rank 1), r3 (rank 3)
         verify(r2).assignRank(1);
+        verify(r1).assignRank(1);
         verify(r3).assignRank(3);
 
-        verify(repository).saveAll(List.of(r1, r2, r3));
+        verify(repository).saveAll(List.of(r2, r1, r3));
     }
 }
