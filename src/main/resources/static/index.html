@@ -23,16 +23,22 @@
       /* hover 시 색상 조금 어둡게 */
       .MuiButtonBase-root:hover,
       .MuiListItem-root a:hover {
-        color: #3E2C22 !important;
+        color: #76645e !important;
       }
-      .MuiButton-containedPrimary {
+      .MuiButton-root.Mui-disabled { /* 상호작용 버튼_비활성화 */
+        background-color: #5b4845 !important;
+        color: #292828 !important;
+        opacity: 0.7 !important; /* 흐림 정도 (기본은 0.38) */
+      }
+      .MuiButton-containedPrimary { /* 상호작용 버튼_활성화 */
         background-color: #5C4033 !important;  /* 브라운 계열 */
         color: #ffffff !important;             /* 글자 흰색 */
       }
 
       /* hover 시 조금 어두운 색상 */
-      .MuiButton-containedPrimary:hover {
+      .MuiButton-containedPrimary:hover { /* 상호작용 버튼_마우스 호버링 시 */
         background-color: #3E2C22 !important;
+        color: #ffffff !important;
       }
       /* 헤더의 '덕후감' 텍스트 숨김 */
       header .MuiTypography-root {
