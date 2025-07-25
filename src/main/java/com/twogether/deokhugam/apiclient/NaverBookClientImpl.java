@@ -56,6 +56,7 @@ public class NaverBookClientImpl implements NaverBookClient {
 
     @Override
     public NaverBookDto fetchInfoByIsbn(String isbn) {
+        log.info("[NaverBookClient] ISBN으로 책 정보 가져오기 요청 : isbn = {}", isbn);
         if(isbn == null || isbn.isEmpty()){
             throw new NaverBookException(ErrorCode.INVALID_ISBN);
         }
@@ -67,6 +68,8 @@ public class NaverBookClientImpl implements NaverBookClient {
         headers.set("X-Naver-Client-Secret", clientSecret);
 
         HttpEntity<?> entity = new HttpEntity<>(headers);
+        log.debug("네이버 책 API 접속 시도 : url = {}", url);
+        long requestTime = System.currentTimeMillis();
 
             try {
                 ResponseEntity<NaverBookSearchResponse> response = restTemplate.exchange(
@@ -75,11 +78,14 @@ public class NaverBookClientImpl implements NaverBookClient {
                     entity,
                     NaverBookSearchResponse.class
                 );
+                long elapsedTime = System.currentTimeMillis() - requestTime;
+                log.debug("네이버 책 API에서 정보 가져오기 성공 : Status = {}, 응답시간 = {}", response.getStatusCode(), elapsedTime);
 
                 NaverBookSearchResponse body = response.getBody();
                 if (body == null || body.items() == null || body.items().isEmpty()) {
                     return null;
                 }
+
                 List<NaverBookItem> items = body.items();
 
                 var item = items.get(0);
@@ -97,11 +103,13 @@ public class NaverBookClientImpl implements NaverBookClient {
             }
     }
     private String downloadImageAsBase64(String imageUrl) {
+        log.debug("썸네일 이미지 다운로드 요청 : imageUrl = {}", imageUrl);
         try {
             ResponseEntity<byte[]> response = restTemplate
                 .getForEntity(imageUrl, byte[].class);
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                log.debug("썸네일 이미지 가져오기 성공 : Status = {}",response.getStatusCode());
                 return Base64.getEncoder().encodeToString(response.getBody());
             }
         } catch (Exception e) {
@@ -112,6 +120,7 @@ public class NaverBookClientImpl implements NaverBookClient {
     }
     @Override
     public String extractIsbnFromImage(MultipartFile image) {
+        log.info("[NaverBookClient] 이미지에서 ISBN 추출 요청 : 이미지 = {}", image.getOriginalFilename());
         try {
             // OCR 요청 메시지 구성
             Map<String, Object> message = new HashMap<>();
@@ -124,7 +133,6 @@ public class NaverBookClientImpl implements NaverBookClient {
             String contentType = image.getContentType();
             String format = contentType != null && contentType.startsWith("image/") ? contentType.substring(6) : "jpg";
             imageMap.put("format",format);
-
 
             message.put("images", List.of(imageMap));
 
@@ -142,17 +150,21 @@ public class NaverBookClientImpl implements NaverBookClient {
 
             // OCR 요청
             ResponseEntity<String> response;
+            log.debug("CLOVA OCR API 호출 : image = {}", image.getOriginalFilename());
+            long requestTime = System.currentTimeMillis(); // 요청시간 기록
             try {
                 response = restTemplate.postForEntity(ocrUrl, requestEntity, String.class);
             }catch (RestClientException ex) {
                 throw new NaverBookException(ErrorCode.NAVER_API_CONNECTION_FAILED);
             }
+            long elapsedTime = System.currentTimeMillis() - requestTime; // 응답시간 기록
             // 응답 코드 체크
             if(response.getStatusCode().is4xxClientError()){
                 throw new NaverBookException(ErrorCode.NAVER_API_UNAUTHORIZED);
             } else if(response.getStatusCode().is5xxServerError()){
                 throw new NaverBookException(ErrorCode.NAVER_OCR_SERVER_ERROR);
             }
+            log.debug("OCR 추출 응답 수신 : 처리시간 = {} ms", elapsedTime );
             // OCR 결과에서 ISBN 추출
             String result = parseIsbnFromOcrJson(response.getBody());
             if (result == null || result.isBlank()) {
@@ -169,9 +181,11 @@ public class NaverBookClientImpl implements NaverBookClient {
     }
 
     private String parseIsbnFromOcrJson(String jsonText) {
+        log.debug("응답으로부터 ISBN 추출 시작 : parseIsbnFromOcrJson");
         try {
             JsonNode root = new ObjectMapper().readTree(jsonText);
             JsonNode fields = root.path("images").get(0).path("fields");
+
             //inferText 필드를 숫자 혹은 X인 값만 추출한 리스트 생성
             List<String> digitFragments = new ArrayList<>();
             for(JsonNode field : fields) {
@@ -191,16 +205,19 @@ public class NaverBookClientImpl implements NaverBookClient {
                     if (buffer.length() >= 13) break;
                 }
                 String candidate = buffer.toString();
-                // 13자리, 978/979 시작, 마지막 자리는 숫자 or X
-                if (candidate.matches("97[89]\\d{9}[\\dXx]")) {
+                // 13자리, 978/979 시작, 마지막 자리는 숫자
+                if (candidate.matches("97[89]\\d{9}[\\d]") && isValidIsbn13(candidate)) {
+                    log.info("ISBN-13 코드 추출 성공 : isbn = {}", candidate);
                     return candidate;
                 }
             }
+            log.debug("ISBN 추출 실패 : 조건에 맞는 코드가 존재하지 않습니다.");
             return null;
         } catch (Exception e) {
             throw new NaverBookException(ErrorCode.NAVER_OCR_ISBN_NOT_FOUND);
         }
     }
+
     private static class MultipartInputResource extends ByteArrayResource {
         private final String filename;
 
@@ -214,6 +231,7 @@ public class NaverBookClientImpl implements NaverBookClient {
             return filename;
         }
     }
+
     private LocalDate parseDate(String pubdate) {
         try {
             return LocalDate.parse(pubdate, DateTimeFormatter.ofPattern("yyyyMMdd"));
