@@ -33,7 +33,7 @@ public class PopularBookRankingWriter implements ItemWriter<PopularBookRanking> 
         try {
             rankingList.sort(
                 Comparator.comparingDouble(PopularBookRanking::getScore).reversed()
-                    .thenComparing(Comparator.comparing(PopularBookRanking::getCreatedAt).reversed())
+                    .thenComparing(PopularBookRanking::getCreatedAt, Comparator.reverseOrder())
             );
 
             RankingPeriod period = rankingList.get(0).getPeriod();

@@ -43,7 +43,7 @@ public class PopularReviewRankingWriter implements ItemWriter<PopularReviewRanki
         try {
             rankingList.sort(
                 Comparator.comparingDouble(PopularReviewRanking::getScore).reversed()
-                    .thenComparing(Comparator.comparing(PopularReviewRanking::getCreatedAt).reversed())
+                    .thenComparing(PopularReviewRanking::getCreatedAt, Comparator.reverseOrder())
             );
 
             RankingPeriod period = rankingList.get(0).getPeriod();
