@@ -5,6 +5,7 @@ import com.twogether.deokhugam.common.exception.ErrorCode;
 import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PopularBookRankingRepository;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -22,22 +23,26 @@ public class PopularBookRankingWriter implements ItemWriter<PopularBookRanking> 
 
     @Override
     public void write(Chunk<? extends PopularBookRanking> items) {
-        List<? extends PopularBookRanking> rankingList = items.getItems();
+        // Chunk.getItems()는 UnmodifiableList 반환 → 정렬 위해 복사본 생성
+        List<PopularBookRanking> rankingList = new ArrayList<>(items.getItems());
 
-        if (rankingList == null || rankingList.isEmpty()) {
+        if (rankingList.isEmpty()) {
             log.warn("인기 도서 랭킹 저장 스킵: 저장할 데이터가 없습니다.");
             throw new DeokhugamException(ErrorCode.RANKING_DATA_EMPTY);
         }
 
         try {
-            // 점수 기준 내림차순 정렬
-            rankingList.sort(Comparator.comparingDouble(PopularBookRanking::getScore).reversed());
+            // 점수 기준 내림차순 + createdAt 기준 내림차순 정렬 (최신 리뷰 우선)
+            rankingList.sort(
+                Comparator.comparingDouble(PopularBookRanking::getScore).reversed()
+                    .thenComparing(Comparator.comparing(PopularBookRanking::getCreatedAt).reversed())
+            );
 
-            // 기간별 기존 랭킹 제거
+            // 해당 기간 기존 랭킹 삭제
             RankingPeriod period = rankingList.get(0).getPeriod();
             popularBookRankingRepository.deleteByPeriod(period);
 
-            // 동점 처리 포함 랭크 부여
+            // 랭크 부여 (동점 처리 포함)
             int rank = 1;
             double prevScore = Double.NEGATIVE_INFINITY;
 
