@@ -4,58 +4,9 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon-32x32.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>덕후감 투게더!</title>
-    <script type="module" crossorigin src="/assets/index-BTycM0iU.js"></script>
+    <title>덕후감</title>
+    <script type="module" crossorigin src="/assets/index-CwUV8c0p.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-D30UMZL2.css">
-    <style>
-      /* AppBar 배경색 변경 */
-      .MuiAppBar-root {
-        background-color: #FFF8DC !important; /* 예: 아이보리 */
-        color: #000 !important; /* 글자색 (contrast 보정) */
-      }
-      /* AppBar 메뉴 텍스트 색상 변경 (브라운 계열) */
-      .MuiButtonBase-root,
-      .MuiTypography-root,
-      .MuiListItem-root a {
-        color: #5C4033 !important; /* 예: 진한 브라운 */
-      }
-
-      /* hover 시 색상 조금 어둡게 */
-      .MuiButtonBase-root:hover,
-      .MuiListItem-root a:hover {
-        color: #76645e !important;
-      }
-      .MuiButton-root.Mui-disabled { /* 상호작용 버튼_비활성화 */
-        background-color: #5b4845 !important;
-        color: #292828 !important;
-        opacity: 0.7 !important; /* 흐림 정도 (기본은 0.38) */
-      }
-      .MuiButton-containedPrimary { /* 상호작용 버튼_활성화 */
-        background-color: #5C4033 !important;  /* 브라운 계열 */
-        color: #ffffff !important;             /* 글자 흰색 */
-      }
-
-      /* hover 시 조금 어두운 색상 */
-      .MuiButton-containedPrimary:hover { /* 상호작용 버튼_마우스 호버링 시 */
-        background-color: #3E2C22 !important;
-        color: #ffffff !important;
-      }
-      /* 헤더의 '덕후감' 텍스트 숨김 */
-      header .MuiTypography-root {
-        font-size: 0 !important;   /* 기존 텍스트 숨김 */
-        position: relative;        /* 가상 요소 포지션 기준 */
-      }
-
-      /* 대신 이미지 표시 */
-      header .MuiTypography-root::before {
-        content: "";
-        display: inline-block;
-        width: 200px; /* 원하는 크기 */
-        height: 50px;
-        background: url('/static/images/customlogo.png') no-repeat center/contain;
-      }
-
-    </style>
   </head>
   <body>
     <div id="root"></div>
