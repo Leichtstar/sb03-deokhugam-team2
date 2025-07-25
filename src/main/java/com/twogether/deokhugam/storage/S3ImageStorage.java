@@ -45,7 +45,7 @@ public class S3ImageStorage {
         if (originalFileName == null || originalFileName.isBlank()) {
             originalFileName = "default.jpg";
         }
-        String uniqueFileName = generateUniqueFileName(imageFile.getOriginalFilename());
+        String uniqueFileName = generateUniqueFileName(originalFileName);
 
         // S3 저장 경로 생성 (폴더경로 + 파일명)
         String s3Key = folderPath + uniqueFileName;
