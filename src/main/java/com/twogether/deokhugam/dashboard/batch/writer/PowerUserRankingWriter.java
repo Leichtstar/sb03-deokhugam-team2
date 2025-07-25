@@ -5,6 +5,8 @@ import com.twogether.deokhugam.common.exception.ErrorCode;
 import com.twogether.deokhugam.dashboard.entity.PowerUserRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PowerUserRankingRepository;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -22,21 +24,22 @@ public class PowerUserRankingWriter implements ItemWriter<PowerUserRanking> {
 
     @Override
     public void write(Chunk<? extends PowerUserRanking> items) {
-        List<? extends PowerUserRanking> rankingList = items.getItems();
+        List<PowerUserRanking> rankingList = new ArrayList<>(items.getItems());
 
-        if (rankingList == null || rankingList.isEmpty()) {
+        if (rankingList.isEmpty()) {
             log.warn("파워 유저 랭킹 저장 스킵: 저장할 데이터가 없습니다.");
             return;
         }
 
         try {
-            // score 기준 내림차순 정렬 추가
-            rankingList.sort(Comparator.comparingDouble(PowerUserRanking::getScore).reversed());
+            rankingList.sort(
+                Comparator.comparingDouble(PowerUserRanking::getScore).reversed()
+                    .thenComparing(Comparator.comparing(PowerUserRanking::getCreatedAt).reversed())
+            );
 
             RankingPeriod period = rankingList.get(0).getPeriod();
             powerUserRankingRepository.deleteByPeriod(period);
 
-            // 동점 처리 포함한 랭킹 부여
             int rank = 1;
             double prevScore = Double.NEGATIVE_INFINITY;
 
