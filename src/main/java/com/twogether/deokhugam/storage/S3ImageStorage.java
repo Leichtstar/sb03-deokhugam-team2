@@ -43,9 +43,9 @@ public class S3ImageStorage {
         // 고유한 파일명 생성 (UUID + 타임스탬프)
         String originalFileName = imageFile.getOriginalFilename();
         if (originalFileName == null || originalFileName.isBlank()) {
-            throw new IllegalArgumentException("파일명 정보가 없습니다.");
+            originalFileName = "default.jpg";
         }
-        String uniqueFileName = generateUniqueFileName(imageFile.getOriginalFilename());
+        String uniqueFileName = generateUniqueFileName(originalFileName);
 
         // S3 저장 경로 생성 (폴더경로 + 파일명)
         String s3Key = folderPath + uniqueFileName;
