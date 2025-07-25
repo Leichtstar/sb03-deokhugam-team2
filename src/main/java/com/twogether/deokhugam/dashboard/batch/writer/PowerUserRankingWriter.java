@@ -35,25 +35,26 @@ public class PowerUserRankingWriter implements ItemWriter<PowerUserRanking> {
         try {
             rankingList.sort(
                 Comparator.comparingDouble(PowerUserRanking::getScore).reversed()
-                    .thenComparing(PowerUserRanking::getCreatedAt, Comparator.reverseOrder())
+                    .thenComparing(PowerUserRanking::getCreatedAt)
             );
 
             RankingPeriod period = rankingList.get(0).getPeriod();
             powerUserRankingRepository.deleteByPeriod(period);
 
-            int rank = 1;
+            int indexRank = 1;
+            int displayedRank = 1;
             double prevScore = Double.NEGATIVE_INFINITY;
 
-            for (int i = 0; i < rankingList.size(); i++) {
-                PowerUserRanking current = rankingList.get(i);
+            for (PowerUserRanking current : rankingList) {
                 double score = current.getScore();
 
                 if (Double.compare(score, prevScore) != 0) {
-                    rank = i + 1;
+                    displayedRank = indexRank;
                 }
 
-                current.assignRank(rank);
+                current.assignRank(displayedRank);
                 prevScore = score;
+                indexRank++;
             }
 
             powerUserRankingRepository.saveAll(rankingList);
