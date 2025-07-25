@@ -40,15 +40,44 @@ public interface ReviewApi {
             ),
             @ApiResponse(
                     responseCode = "400", description = "잘못된 요청 (입력값 검증 실패)",
-                    content = @Content(examples = @ExampleObject(value = "입력값 검증에 실패했습니다."))
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                                "timestamp": "2025-07-25T01:05:34.294333Z",
+                                "code": "INVALID_INPUT_VALUE",
+                                "message": "잘못된 입력값입니다.",
+                                "details": {
+                                    "rating": "리뷰 평점은 1점 이상이어야 합니다."
+                                },
+                                "exceptionType": "MethodArgumentNotValidException",
+                                "status": 400
+                            }
+                        """))
             ),
             @ApiResponse(
                     responseCode = "404", description = "도서 정보 없음",
-                    content = @Content(examples = @ExampleObject(value = "리뷰를 작성하고자 하는 도서가 존재하지 않습니다. {request.bookId}"))
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                                "timestamp": "2025-07-25T01:08:52.777917300Z",
+                                "code": "BOOK_NOT_FOUND",
+                                "message": "등록되지 않은 도서입니다.",
+                                "details": {},
+                                "exceptionType": "BookNotFoundException",
+                                "status": 404
+                            }
+                            """))
             ),
             @ApiResponse(
                     responseCode = "409", description = "이미 작성된 리뷰 존재",
-                    content = @Content(examples = @ExampleObject(value = "이미 작성한 리뷰가 있습니다."))
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                                "timestamp": "2025-07-25T01:09:27.812650900Z",
+                                "code": "REVIEW_ALREADY_EXISTS",
+                                "message": "이미 작성한 리뷰가 있습니다.",
+                                "details": {},
+                                "exceptionType": "ReviewExistException",
+                                "status": 409
+                            }
+                            """))
             ),
             @ApiResponse(
                     responseCode = "500", description = "서버 내부 오류",
@@ -74,11 +103,31 @@ public interface ReviewApi {
             ),
             @ApiResponse(
                     responseCode = "400", description = "잘못된 요청 (요청자 ID 누락)",
-                    content = @Content(examples = @ExampleObject(value = "리뷰를 조회하고자 하는 사용자의 Id가 누락됐습니다."))
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                                "timestamp": "2025-07-25T01:10:42.804368500Z",
+                                "code": "MISSING_HEADER",
+                                "message": "필수 헤더가 누락되었습니다: Deokhugam-Request-User-ID",
+                                "details": null,
+                                "exceptionType": "MissingRequestHeaderException",
+                                "status": 400
+                            }
+                            """))
             ),
             @ApiResponse(
                     responseCode = "404", description = "리뷰 정보 없음",
-                    content = @Content(examples = @ExampleObject(value = "조회하고자 하는 리뷰가 존재하지 않습니다."))
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                                "timestamp": "2025-07-25T01:13:30.906575900Z",
+                                "code": "REVIEW_NOT_FOUND",
+                                "message": "리뷰를 찾을 수 없습니다.",
+                                "details": {
+                                    "조회하려고 한 리뷰 아이디": "1364cc9c-ef00-4680-8e93-c8c72dc6d8a3"
+                                },
+                                "exceptionType": "ReviewNotFoundException",
+                                "status": 404
+                            }
+                            """))
             ),
             @ApiResponse(
                     responseCode = "500", description = "서버 내부 오류",
@@ -112,7 +161,16 @@ public interface ReviewApi {
             ),
             @ApiResponse(
                     responseCode = "400", description = "잘못된 요청 (정렬 기준 오류, 페이지네이션 파라미터 오류, 요청자 ID 누락)",
-                    content = @Content(examples = @ExampleObject(value = "orderBy 값이 유효하지 않거나, after 또는 cursor 형식이 잘못됐습니다."))
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                                "timestamp": "2025-07-25T01:14:55.436125300Z",
+                                "code": "MISSING_HEADER",
+                                "message": "필수 헤더가 누락되었습니다: Deokhugam-Request-User-ID",
+                                "details": null,
+                                "exceptionType": "MissingRequestHeaderException",
+                                "status": 400
+                            }
+                            """))
             ),
             @ApiResponse(
                     responseCode = "500", description = "서버 내부 오류",
@@ -181,15 +239,46 @@ public interface ReviewApi {
             ),
             @ApiResponse(
                     responseCode = "400", description = "잘못된 요청 (입력값 검증 실패)",
-                    content = @Content(examples = @ExampleObject(value = "입력값 검증에 실패했습니다."))
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                                "timestamp": "2025-07-25T01:18:43.259248700Z",
+                                "code": "INVALID_INPUT_VALUE",
+                                "message": "잘못된 입력값입니다.",
+                                "details": {
+                                    "content": "리뷰 내용은 필수 입력 항목입니다."
+                                },
+                                "exceptionType": "MethodArgumentNotValidException",
+                                "status": 400
+                            }
+                            """))
             ),
             @ApiResponse(
                     responseCode = "403", description = "리뷰 수정 권한 없음",
-                    content = @Content(examples = @ExampleObject(value = "타인이 작성한 리뷰는 수정할 수 없습니다."))
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                                "timestamp": "2025-07-25T01:18:15.235684800Z",
+                                "code": "REVIEW_NOT_OWNED",
+                                "message": "본인이 작성한 리뷰만 수정/삭제할 수 있습니다.",
+                                "details": {},
+                                "exceptionType": "ReviewNotOwnedException",
+                                "status": 403
+                            }
+                            """))
             ),
             @ApiResponse(
                     responseCode = "404", description = "리뷰 정보 없음",
-                    content = @Content(examples = @ExampleObject(value = "수정하고자 하는 리뷰가 존재하지 않습니다."))
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                                "timestamp": "2025-07-25T01:17:50.466145500Z",
+                                "code": "REVIEW_NOT_FOUND",
+                                "message": "리뷰를 찾을 수 없습니다.",
+                                "details": {
+                                    "조회하려고 한 리뷰 아이디": "1364cc9c-ef00-4680-8e93-c8c72dc6d8a3"
+                                },
+                                "exceptionType": "ReviewNotFoundException",
+                                "status": 404
+                            }
+                            """))
             ),
             @ApiResponse(
                     responseCode = "500", description = "서버 내부 오류",
@@ -224,15 +313,44 @@ public interface ReviewApi {
             @ApiResponse(responseCode = "204", description = "리뷰 삭제 성공"),
             @ApiResponse(
                     responseCode = "400", description = "잘못된 요청 (요청자 ID 누락)",
-                    content = @Content(examples = @ExampleObject(value = "리뷰를 삭제하려면 요청자의 ID가 필요합니다."))
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                                "timestamp": "2025-07-25T01:20:27.596839300Z",
+                                "code": "MISSING_HEADER",
+                                "message": "필수 헤더가 누락되었습니다: Deokhugam-Request-User-ID",
+                                "details": null,
+                                "exceptionType": "MissingRequestHeaderException",
+                                "status": 400
+                            }
+                            """))
             ),
             @ApiResponse(
                     responseCode = "403", description = "리뷰 삭제 권한 없음",
-                    content = @Content(examples = @ExampleObject(value = "해당 리뷰에 대한 삭제 권한이 없습니다."))
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                                "timestamp": "2025-07-25T01:20:40.049809700Z",
+                                "code": "REVIEW_NOT_OWNED",
+                                "message": "본인이 작성한 리뷰만 수정/삭제할 수 있습니다.",
+                                "details": {},
+                                "exceptionType": "ReviewNotOwnedException",
+                                "status": 403
+                            }
+                            """))
             ),
             @ApiResponse(
                     responseCode = "404", description = "리뷰 정보 없음",
-                    content = @Content(examples = @ExampleObject(value = "삭제하려는 리뷰가 존재하지 않습니다."))
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                                "timestamp": "2025-07-25T01:20:57.487838100Z",
+                                "code": "REVIEW_NOT_FOUND",
+                                "message": "리뷰를 찾을 수 없습니다.",
+                                "details": {
+                                    "조회하려고 한 리뷰 아이디": "1364cc9c-ef00-4680-8e93-c8c72dc6d8a3"
+                                },
+                                "exceptionType": "ReviewNotFoundException",
+                                "status": 404
+                            }
+                            """))
             ),
             @ApiResponse(
                     responseCode = "500", description = "서버 내부 오류",
@@ -263,15 +381,44 @@ public interface ReviewApi {
             @ApiResponse(responseCode = "204", description = "리뷰 삭제 성공"),
             @ApiResponse(
                     responseCode = "400", description = "잘못된 요청 (요청자 ID 누락)",
-                    content = @Content(examples = @ExampleObject(value = "리뷰를 삭제하려면 요청자의 ID가 필요합니다."))
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                                "timestamp": "2025-07-25T01:20:27.596839300Z",
+                                "code": "MISSING_HEADER",
+                                "message": "필수 헤더가 누락되었습니다: Deokhugam-Request-User-ID",
+                                "details": null,
+                                "exceptionType": "MissingRequestHeaderException",
+                                "status": 400
+                            }
+                            """))
             ),
             @ApiResponse(
                     responseCode = "403", description = "리뷰 삭제 권한 없음",
-                    content = @Content(examples = @ExampleObject(value = "해당 리뷰에 대한 삭제 권한이 없습니다."))
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                                "timestamp": "2025-07-25T01:20:40.049809700Z",
+                                "code": "REVIEW_NOT_OWNED",
+                                "message": "본인이 작성한 리뷰만 수정/삭제할 수 있습니다.",
+                                "details": {},
+                                "exceptionType": "ReviewNotOwnedException",
+                                "status": 403
+                            }
+                            """))
             ),
             @ApiResponse(
                     responseCode = "404", description = "리뷰 정보 없음",
-                    content = @Content(examples = @ExampleObject(value = "삭제하려는 리뷰가 존재하지 않습니다."))
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                                "timestamp": "2025-07-25T01:20:57.487838100Z",
+                                "code": "REVIEW_NOT_FOUND",
+                                "message": "리뷰를 찾을 수 없습니다.",
+                                "details": {
+                                    "조회하려고 한 리뷰 아이디": "1364cc9c-ef00-4680-8e93-c8c72dc6d8a3"
+                                },
+                                "exceptionType": "ReviewNotFoundException",
+                                "status": 404
+                            }
+                            """))
             ),
             @ApiResponse(
                     responseCode = "500", description = "서버 내부 오류",
@@ -309,11 +456,31 @@ public interface ReviewApi {
             ),
             @ApiResponse(
                     responseCode = "400", description = "잘못된 요청 (요청자 ID 누락)",
-                    content = @Content(examples = @ExampleObject(value = "좋아요 요청에는 요청자 ID가 필요합니다."))
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                                "timestamp": "2025-07-25T01:22:38.436546700Z",
+                                "code": "MISSING_HEADER",
+                                "message": "필수 헤더가 누락되었습니다: Deokhugam-Request-User-ID",
+                                "details": null,
+                                "exceptionType": "MissingRequestHeaderException",
+                                "status": 400
+                            }
+                            """))
             ),
             @ApiResponse(
                     responseCode = "404", description = "리뷰 정보 없음",
-                    content = @Content(examples = @ExampleObject(value = "좋아요하려는 리뷰가 존재하지 않습니다."))
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                                "timestamp": "2025-07-25T01:22:55.860815600Z",
+                                "code": "REVIEW_NOT_FOUND",
+                                "message": "리뷰를 찾을 수 없습니다.",
+                                "details": {
+                                    "조회하려고 한 리뷰 아이디": "1364cc9c-ef00-4680-8e93-c8c72dc6d8a3"
+                                },
+                                "exceptionType": "ReviewNotFoundException",
+                                "status": 404
+                            }
+                            """))
             ),
             @ApiResponse(
                     responseCode = "500", description = "서버 내부 오류",

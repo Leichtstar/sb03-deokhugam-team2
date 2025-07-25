@@ -6,9 +6,10 @@ import com.twogether.deokhugam.dashboard.entity.PopularReviewRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PopularReviewRankingRepository;
 import com.twogether.deokhugam.notification.event.PopularReviewRankedEvent;
-import com.twogether.deokhugam.notification.service.NotificationService;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -32,47 +33,51 @@ public class PopularReviewRankingWriter implements ItemWriter<PopularReviewRanki
 
     @Override
     public void write(Chunk<? extends PopularReviewRanking> items) {
-        List<? extends PopularReviewRanking> rankingList = items.getItems();
+        List<PopularReviewRanking> rankingList = new ArrayList<>(items.getItems());
 
-        if (rankingList == null || rankingList.isEmpty()) {
+        if (rankingList.isEmpty()) {
             log.warn("인기 리뷰 랭킹 저장 스킵: 저장할 데이터가 없습니다.");
             throw new DeokhugamException(ErrorCode.RANKING_DATA_EMPTY);
         }
 
         try {
+            rankingList.sort(
+                Comparator.comparingDouble(PopularReviewRanking::getScore).reversed()
+                    .thenComparing(Comparator.comparing(PopularReviewRanking::getCreatedAt).reversed())
+            );
+
             RankingPeriod period = rankingList.get(0).getPeriod();
             popularReviewRankingRepository.deleteByPeriod(period);
 
+            int rank = 1;
+            double prevScore = Double.NEGATIVE_INFINITY;
+
             for (int i = 0; i < rankingList.size(); i++) {
                 PopularReviewRanking current = rankingList.get(i);
+                double score = current.getScore();
 
-                if (i > 0) {
-                    PopularReviewRanking previous = rankingList.get(i - 1);
-                    if (Double.compare(current.getScore(), previous.getScore()) == 0) {
-                        current.assignRank(previous.getRank());
-                    } else {
-                        current.assignRank(i + 1);
-                    }
-                } else {
-                    current.assignRank(1); // 첫 번째는 무조건 1위
+                if (Double.compare(score, prevScore) != 0) {
+                    rank = i + 1;
                 }
+
+                current.assignRank(rank);
+                prevScore = score;
             }
 
             popularReviewRankingRepository.saveAll(rankingList);
             log.info("인기 리뷰 랭킹 {}건 저장 완료", rankingList.size());
+
         } catch (Exception e) {
             log.error("인기 리뷰 랭킹 저장 실패", e);
             throw new DeokhugamException(ErrorCode.RANKING_SAVE_FAILED);
         }
 
         try {
-            // 리뷰 ID 수집
             List<UUID> top10ReviewIds = rankingList.stream()
                 .filter(r -> r.getRank() <= 10)
                 .map(PopularReviewRanking::getReviewId)
                 .toList();
 
-            // 일괄 조회
             Map<UUID, Review> reviewMap = reviewRepository.findAllById(top10ReviewIds)
                 .stream()
                 .collect(Collectors.toMap(Review::getId, Function.identity()));
@@ -90,7 +95,6 @@ public class PopularReviewRankingWriter implements ItemWriter<PopularReviewRanki
 
         } catch (Exception e) {
             log.error("랭킹 알림 이벤트 발행 실패 - 랭킹 저장은 성공", e);
-            // 전체 프로세스를 중단시키지 않음
         }
     }
 }

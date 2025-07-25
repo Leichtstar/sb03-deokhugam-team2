@@ -21,6 +21,7 @@ import com.twogether.deokhugam.notification.service.NotificationService;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
 import com.twogether.deokhugam.user.entity.User;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,8 +54,8 @@ class PopularReviewRankingWriterTest {
     @DisplayName("리뷰 랭킹 리스트에 순위를 부여하고 저장한다")
     void writer_shouldAssignRankAndSave() {
         // given
-        PopularReviewRanking r1 = createRanking("책1", 9.5);
-        PopularReviewRanking r2 = createRanking("책2", 7.8);
+        PopularReviewRanking r1 = createRanking("책1", 9.5, Instant.parse("2025-07-21T00:00:00Z"));
+        PopularReviewRanking r2 = createRanking("책2", 7.8, Instant.parse("2025-07-20T00:00:00Z"));
         Chunk<PopularReviewRanking> chunk = new Chunk<>(List.of(r1, r2));
 
         Review mockReview1 = mock(Review.class);
@@ -85,7 +86,7 @@ class PopularReviewRankingWriterTest {
     @Test
     @DisplayName("저장 중 예외 발생 시 RANKING_SAVE_FAILED 예외를 던진다")
     void writer_shouldThrowException_whenRepositoryFails() {
-        PopularReviewRanking r1 = createRanking("책", 8.0);
+        PopularReviewRanking r1 = createRanking("책", 8.0, Instant.parse("2025-07-20T00:00:00Z"));
         Chunk<PopularReviewRanking> chunk = new Chunk<>(List.of(r1));
 
         doThrow(new RuntimeException("DB 에러"))
@@ -95,7 +96,30 @@ class PopularReviewRankingWriterTest {
         assertEquals(ErrorCode.RANKING_SAVE_FAILED, ex.getErrorCode());
     }
 
-    private PopularReviewRanking createRanking(String title, double score) {
+    @Test
+    @DisplayName("동점 리뷰는 최신 createdAt 순으로 우선 순위를 부여한다")
+    void writer_shouldAssignRankWithLatestCreatedAtWhenScoresAreEqual() {
+        // given
+        PopularReviewRanking older = createRanking("책1", 9.0, Instant.parse("2025-07-20T10:00:00Z"));
+        PopularReviewRanking newer = createRanking("책2", 9.0, Instant.parse("2025-07-21T10:00:00Z"));
+        PopularReviewRanking lower = createRanking("책3", 7.0, Instant.parse("2025-07-22T10:00:00Z"));
+
+        Chunk<PopularReviewRanking> chunk = new Chunk<>(List.of(older, newer, lower));
+
+        when(reviewRepository.findAllById(any()))
+            .thenReturn(List.of(mock(Review.class), mock(Review.class), mock(Review.class)));
+
+        // when
+        writer.write(chunk);
+
+        // then
+        assertEquals(1, newer.getRank()); // 최신이 먼저
+        assertEquals(1, older.getRank()); // 동점
+        assertEquals(3, lower.getRank()); // 낮은 점수
+    }
+
+    // 오버로드 메서드: createdAt 포함
+    private PopularReviewRanking createRanking(String title, double score, Instant createdAt) {
         return PopularReviewRanking.builder()
             .reviewId(UUID.randomUUID())
             .userId(UUID.randomUUID())
@@ -109,6 +133,7 @@ class PopularReviewRankingWriterTest {
             .score(score)
             .likeCount(10L)
             .commentCount(20L)
+            .createdAt(createdAt)
             .rank(0)
             .build();
     }

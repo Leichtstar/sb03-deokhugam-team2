@@ -67,10 +67,9 @@ public class PowerUserRanking {
     @PositiveOrZero
     private long commentCount;
 
-    @Builder.Default
     @Positive
     @Column(nullable = false)
-    private int rank = 1;
+    private int rank;
 
     @Column(nullable = false, length = 50)
     @NotNull
