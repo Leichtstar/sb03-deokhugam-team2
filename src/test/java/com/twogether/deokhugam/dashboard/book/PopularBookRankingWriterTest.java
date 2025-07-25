@@ -2,16 +2,18 @@ package com.twogether.deokhugam.dashboard.book;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.twogether.deokhugam.common.exception.DeokhugamException;
 import com.twogether.deokhugam.common.exception.ErrorCode;
 import com.twogether.deokhugam.dashboard.batch.writer.PopularBookRankingWriter;
 import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
+import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PopularBookRankingRepository;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,14 +37,18 @@ class PopularBookRankingWriterTest {
     void write_successful() {
         // given
         PopularBookRanking ranking = mock(PopularBookRanking.class);
+        given(ranking.getScore()).willReturn(5.0);
+        given(ranking.getCreatedAt()).willReturn(Instant.parse("2025-07-25T10:00:00Z"));
+        given(ranking.getPeriod()).willReturn(RankingPeriod.DAILY);
+
         Chunk<PopularBookRanking> chunk = new Chunk<>(List.of(ranking));
 
         // when
         writer.write(chunk);
 
         // then
-        verify(ranking, times(1)).assignRank(1); // assignRank(1) 호출 확인
-        verify(repository, times(1)).saveAll(List.of(ranking));
+        verify(ranking).assignRank(1);
+        verify(repository).saveAll(List.of(ranking));
     }
 
     @Test
@@ -62,6 +68,10 @@ class PopularBookRankingWriterTest {
     void write_repositoryThrows_throwsWrappedException() {
         // given
         PopularBookRanking ranking = mock(PopularBookRanking.class);
+        given(ranking.getScore()).willReturn(4.0);
+        given(ranking.getCreatedAt()).willReturn(Instant.parse("2025-07-25T10:00:00Z"));
+        given(ranking.getPeriod()).willReturn(RankingPeriod.DAILY);
+
         Chunk<PopularBookRanking> chunk = new Chunk<>(List.of(ranking));
         doThrow(new RuntimeException("DB 에러")).when(repository).saveAll(any());
 
@@ -72,21 +82,36 @@ class PopularBookRankingWriterTest {
     }
 
     @Test
-    @DisplayName("여러 개의 랭킹에 assignRank가 순차적으로 호출된다")
-    void write_multipleRankings_assignsSequentialRank() {
+    @DisplayName("여러 개의 랭킹에 assignRank가 동점 + 최신순 기준으로 호출된다")
+    void write_multipleRankings_assignsRank_withTieBreaker() {
         // given
         PopularBookRanking r1 = mock(PopularBookRanking.class);
         PopularBookRanking r2 = mock(PopularBookRanking.class);
         PopularBookRanking r3 = mock(PopularBookRanking.class);
-        Chunk<PopularBookRanking> chunk = new Chunk<>(List.of(r1, r2, r3));
+
+        // 설정: r1, r2는 동점, r1이 최신 / r3는 낮은 점수
+        given(r1.getScore()).willReturn(5.0);
+        given(r2.getScore()).willReturn(5.0);
+        given(r3.getScore()).willReturn(4.0);
+
+        given(r1.getCreatedAt()).willReturn(Instant.parse("2025-07-25T10:00:00Z"));
+        given(r2.getCreatedAt()).willReturn(Instant.parse("2025-07-24T10:00:00Z"));
+        given(r3.getCreatedAt()).willReturn(Instant.parse("2025-07-23T10:00:00Z"));
+
+        // deleteByPeriod용 기간 설정
+        given(r1.getPeriod()).willReturn(RankingPeriod.DAILY);
+
+        // 의도적으로 순서 꼬아서 입력
+        Chunk<PopularBookRanking> chunk = new Chunk<>(List.of(r2, r1, r3));
 
         // when
         writer.write(chunk);
 
         // then
         verify(r1).assignRank(1);
-        verify(r2).assignRank(2);
+        verify(r2).assignRank(1);
         verify(r3).assignRank(3);
+
         verify(repository).saveAll(List.of(r1, r2, r3));
     }
 }

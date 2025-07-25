@@ -45,9 +45,20 @@ public class NotificationQueryService {
 
         List<Notification> notifications;
 
-        if (parsedCursor != null) {
-            notifications = notificationRepository.findByUserIdWithAfter(userId, parsedCursor, pageable);
-        } else {
+        // cursor와 after 모두 있는 경우
+        if (parsedCursor != null && after != null) {
+            notifications = notificationRepository.findByUserIdWithCursorAndAfter(userId, parsedCursor, after, pageable);
+        }
+        // cursor만 있는 경우
+        else if (parsedCursor != null) {
+            notifications = notificationRepository.findByUserIdWithCursor(userId, parsedCursor, pageable);
+        }
+        // after만 있는 경우
+        else if (after != null) {
+            notifications = notificationRepository.findByUserIdWithAfter(userId, after, pageable);
+        }
+        // 기본 조회
+        else {
             notifications = notificationRepository.findByUserIdWithoutAfter(userId, pageable);
         }
 

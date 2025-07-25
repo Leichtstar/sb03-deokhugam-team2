@@ -1,6 +1,5 @@
 package com.twogether.deokhugam.storage;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
@@ -34,7 +33,7 @@ public class S3ImageStorage {
      * @param folderPath S3 내 저장 경로 (예: "thumbnail/")
      * @return S3에 저장된 이미지 URL
      */
-    public String uploadImage(MultipartFile imageFile, String folderPath) throws IOException {
+    public String uploadImage(MultipartFile imageFile, String folderPath) {
         log.info("이미지 업로드 시작 - 파일명: {}, 크기: {}바이트",
             imageFile.getOriginalFilename(), imageFile.getSize());
 
@@ -42,7 +41,11 @@ public class S3ImageStorage {
         validateImageFile(imageFile);
 
         // 고유한 파일명 생성 (UUID + 타임스탬프)
-        String uniqueFileName = generateUniqueFileName(imageFile.getOriginalFilename());
+        String originalFileName = imageFile.getOriginalFilename();
+        if (originalFileName == null || originalFileName.isBlank()) {
+            originalFileName = "default.jpg";
+        }
+        String uniqueFileName = generateUniqueFileName(originalFileName);
 
         // S3 저장 경로 생성 (폴더경로 + 파일명)
         String s3Key = folderPath + uniqueFileName;

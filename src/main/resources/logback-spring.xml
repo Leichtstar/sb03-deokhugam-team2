@@ -12,7 +12,7 @@
   <!-- 운영 환경에서만 파일 출력 설정 -->
   <springProfile name="prod">
     <property name="LOG_PATTERN" value="%d{yy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %-36logger{36} [%X{jobName} | %X{rankingPeriod} | %X{requestId} | %X{requestMethod} | %X{requestUri} | %X{clientIp}] - %msg%n"/>
-    <property name="LOG_FILE_PATH" value=".logs"/>
+    <property name="LOG_FILE_PATH" value="/app/logs"/>
     <property name="LOG_FILE_NAME" value="application"/>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
