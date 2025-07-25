@@ -150,9 +150,9 @@ public class NaverBookClientTest {
       "images": [{
         "fields": [
           {"inferText":"ISBN"},
-          {"inferText":"978"},
-          {"inferText":"896077"},
-          {"inferText":"3433"}
+          {"inferText":"979"},
+          {"inferText":"11976930"},
+          {"inferText":"07"}
         ]
       }]
     }
@@ -168,7 +168,7 @@ public class NaverBookClientTest {
         String extractedIsbn = naverBookClient.extractIsbnFromImage(image);
 
         // then: 추출된 ISBN 검증
-        assertThat(extractedIsbn).isEqualTo("9788960773433");
+        assertThat(extractedIsbn).isEqualTo("9791197693007");
 
         // HttpEntity의 body가 올바르게 구성되었는지 확인
         ArgumentCaptor<HttpEntity> httpEntityCaptor = ArgumentCaptor.forClass(HttpEntity.class);
