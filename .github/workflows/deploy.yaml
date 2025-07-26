@@ -1,4 +1,4 @@
-name: Deploy to AWS ECS
+name: Zero Downtime Deploy with Dynamic Scaling
 
 on:
   push:
@@ -45,13 +45,46 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: ${{ vars.AWS_REGION }}
 
+      - name: 현재 서비스 상태 확인
+        run: |
+          # 현재 desired count만 확인
+          CURRENT_COUNT=$(aws ecs describe-services \
+            --cluster ${{ vars.ECS_CLUSTER }} \
+            --services ${{ vars.ECS_SERVICE }} \
+            --query 'services[0].desiredCount' \
+            --output text)
+          
+          echo "CURRENT_COUNT=$CURRENT_COUNT" >> $GITHUB_ENV
+
+      - name: 배포를 위한 서비스 확장
+        run: |
+          if [ "$CURRENT_COUNT" -eq 1 ]; then
+          
+            # 서비스를 2개로 확장
+            aws ecs update-service \
+              --cluster ${{ vars.ECS_CLUSTER }} \
+              --service ${{ vars.ECS_SERVICE }} \
+              --desired-count 2
+          
+            # 서비스 안정화 대기
+            aws ecs wait services-stable \
+              --cluster ${{ vars.ECS_CLUSTER }} \
+              --services ${{ vars.ECS_SERVICE }}
+          
+            echo "서비스 확장 완료 (1개 → 2개)"
+          else
+            echo "이미 $CURRENT_COUNT개 실행 중, 확장 건너뛰기"
+          fi
+
       - name: ECS 태스크 정의 업데이트
         run: |
+          # 현재 태스크 정의 가져오기
           TASK_DEFINITION=$(
           aws ecs describe-task-definition \
            --task-definition ${{ vars.ECS_TASK_DEFINITION }}
           )
-
+          
+          # 새 이미지로 태스크 정의 업데이트
           NEW_TASK_DEFINITION=$(
           echo $TASK_DEFINITION | jq \
             --arg IMAGE "${{ vars.ECR_REPOSITORY_URI }}:latest" \
@@ -68,10 +101,41 @@ jobs:
           # 환경 파일에 변수 저장 (다음 단계에서 사용 가능)
           echo "NEW_TASK_DEF_ARN=$NEW_TASK_DEF_ARN" >> $GITHUB_ENV
 
-      - name: ECS 서비스 업데이트
+      - name: ECS Rolling Update 배포
         run: |
           aws ecs update-service \
             --cluster ${{ vars.ECS_CLUSTER }} \
             --service ${{ vars.ECS_SERVICE }} \
             --task-definition $NEW_TASK_DEF_ARN \
             --force-new-deployment
+
+      - name: 배포 완료 대기
+        run: |
+          aws ecs wait services-stable \
+            --cluster ${{ vars.ECS_CLUSTER }} \
+            --services ${{ vars.ECS_SERVICE }}
+          
+      - name: 서비스 축소 (비용 절약)
+        run: |
+          # 원래 1개였는지 확인하여 축소 여부 결정
+          if [ "$CURRENT_COUNT" -eq 1 ]; then
+          
+            # 잠시 대기 (새 태스크 안정화)
+            echo "새 태스크 안정화를 위해 30초 대기..."
+            sleep 30
+          
+            # 서비스를 1개로 축소
+            aws ecs update-service \
+              --cluster ${{ vars.ECS_CLUSTER }} \
+              --service ${{ vars.ECS_SERVICE }} \
+              --desired-count 1
+          
+            # 서비스 안정화 대기
+            aws ecs wait services-stable \
+              --cluster ${{ vars.ECS_CLUSTER }} \
+              --services ${{ vars.ECS_SERVICE }}
+          
+            echo "서비스 축소 완료 (2개 → 1개)"
+          else
+            echo "원래 desired count $CURRENT_COUNT 유지"
+          fi
