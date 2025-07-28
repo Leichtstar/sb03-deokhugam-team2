@@ -15,6 +15,7 @@ import com.twogether.deokhugam.dashboard.batch.writer.PowerUserRankingWriter;
 import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
 import com.twogether.deokhugam.dashboard.entity.PopularReviewRanking;
 import com.twogether.deokhugam.dashboard.entity.PowerUserRanking;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.persistence.EntityManager;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class RankingBatchJobConfig {
 
     private final EntityManager em;
+    private final MeterRegistry meterRegistry;
+
     private final PopularBookRankingWriter bookWriter;
     private final PopularReviewRankingWriter reviewWriter;
     private final PowerUserRankingWriter powerUserRankingWriter;
@@ -54,7 +57,9 @@ public class RankingBatchJobConfig {
     public Step popularBookRankingStep(JobRepository jobRepository,
         PlatformTransactionManager transactionManager,
         JpaBookScoreReader reader) {
-        ItemProcessor<BookScoreDto, PopularBookRanking> processor = new BookScoreProcessor(em);
+
+        ItemProcessor<BookScoreDto, PopularBookRanking> processor =
+            new BookScoreProcessor(em, meterRegistry);
 
         return new StepBuilder("popularBookStep", jobRepository)
             .<BookScoreDto, PopularBookRanking>chunk(100, transactionManager)
@@ -94,7 +99,7 @@ public class RankingBatchJobConfig {
     public ItemProcessor<ReviewScoreDto, PopularReviewRanking> reviewScoreProcessor(
         @Value("#{jobParameters['now']}") String now
     ) {
-        return new ReviewScoreProcessor(Instant.parse(now));
+        return new ReviewScoreProcessor(Instant.parse(now), meterRegistry);
     }
 
     // [3] 파워 유저 랭킹 Job
@@ -127,6 +132,6 @@ public class RankingBatchJobConfig {
     public ItemProcessor<PowerUserScoreDto, PowerUserRanking> powerUserScoreProcessor(
         @Value("#{jobParameters['now']}") String now
     ) {
-        return new PowerUserScoreProcessor(em, Instant.parse(now));
+        return new PowerUserScoreProcessor(em, Instant.parse(now), meterRegistry);
     }
 }
