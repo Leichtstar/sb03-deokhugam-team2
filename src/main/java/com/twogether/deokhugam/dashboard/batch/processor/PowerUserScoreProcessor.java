@@ -6,7 +6,10 @@ import com.twogether.deokhugam.user.entity.User;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import java.time.Duration;
 import java.time.Instant;
+import java.util.UUID;
 import org.springframework.batch.item.ItemProcessor;
 
 public class PowerUserScoreProcessor implements ItemProcessor<PowerUserScoreDto, PowerUserRanking> {
@@ -28,12 +31,11 @@ public class PowerUserScoreProcessor implements ItemProcessor<PowerUserScoreDto,
         User user = em.find(User.class, dto.userId());
         if (user == null) return null;
 
-        double score = dto.calculateScore();
+        double baseScore = dto.calculateScore();
+        double freshnessBonus = calculateFreshnessBonus(dto.userId());
+        double finalScore = baseScore + freshnessBonus;
 
-        // 커스텀 메트릭 - 계산 건수 카운터 증가
         meterRegistry.counter("batch.power_user.processed.count").increment();
-
-        // 커스텀 메트릭 - 개별 처리 시간 기록
         sample.stop(Timer.builder("batch.power_user.processed.timer")
             .description("파워 유저 점수 계산에 소요된 시간")
             .tag("userId", dto.userId().toString())
@@ -43,12 +45,48 @@ public class PowerUserScoreProcessor implements ItemProcessor<PowerUserScoreDto,
             .user(user)
             .nickname(dto.nickname())
             .period(dto.period())
-            .score(score)
+            .score(finalScore)
             .reviewScoreSum(dto.reviewScoreSum())
             .likeCount(dto.likeCount())
             .commentCount(dto.commentCount())
             .rank(0)
             .createdAt(executionTime)
             .build();
+    }
+
+    private double calculateFreshnessBonus(UUID userId) {
+        Instant latestReviewTime = getMaxCreatedAt(
+            "SELECT MAX(r.createdAt) FROM Review r WHERE r.user.id = :userId AND r.isDeleted = false", userId);
+
+        Instant latestCommentTime = getMaxCreatedAt(
+            "SELECT MAX(c.createdAt) FROM Comment c WHERE c.user.id = :userId AND c.isDeleted = false", userId);
+
+        // ⚠ ReviewLike에는 createdAt 없으므로 제외
+
+        Instant latestActivity = maxInstant(latestReviewTime, latestCommentTime);
+
+        return computeBonus(latestActivity);
+    }
+
+    private Instant getMaxCreatedAt(String jpql, UUID userId) {
+        TypedQuery<Instant> query = em.createQuery(jpql, Instant.class);
+        query.setParameter("userId", userId);
+        return query.getSingleResult();
+    }
+
+    private Instant maxInstant(Instant a, Instant b) {
+        if (a == null) return b;
+        if (b == null) return a;
+        return a.isAfter(b) ? a : b;
+    }
+
+    private double computeBonus(Instant time) {
+        if (time == null) return 0.0;
+
+        long hoursAgo = Duration.between(time, Instant.now()).toHours();
+        if (hoursAgo < 1) return 0.003;
+        if (hoursAgo < 6) return 0.002;
+        if (hoursAgo < 24) return 0.001;
+        return 0.0;
     }
 }
