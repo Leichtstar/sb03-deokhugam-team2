@@ -1,7 +1,7 @@
 name: Zero Downtime Deploy with Dynamic Scaling
 
 on:
-  pull_request:
+  push:
     branches: [ dev ]
 
 jobs:
