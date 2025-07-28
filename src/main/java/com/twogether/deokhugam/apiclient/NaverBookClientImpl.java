@@ -10,12 +10,13 @@ import com.twogether.deokhugam.common.exception.ErrorCode;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -186,31 +187,26 @@ public class NaverBookClientImpl implements NaverBookClient {
             JsonNode root = new ObjectMapper().readTree(jsonText);
             JsonNode fields = root.path("images").get(0).path("fields");
 
-            //inferText 필드를 숫자 혹은 X인 값만 추출한 리스트 생성
-            List<String> digitFragments = new ArrayList<>();
-            for(JsonNode field : fields) {
+            // inferText 필드에서 숫자+X만 남김
+            for (JsonNode field : fields) {
                 String text = field.path("inferText").asText();
-                String digits = text.replaceAll("[^0-9Xx]", "");//정규식으로 숫자와 X 외의 값 공백처리
-                if(!digits.isEmpty()){
-                    digitFragments.add(digits); // 추출된 숫자와 X값을 리스트에 추가
-                }
-            }
-            // 추출값 직렬화하여 978/979로 시작하는 ISBN 코드 추출
-            StringBuilder buffer = new StringBuilder();
-            for(int i = 0; i < digitFragments.size(); i++){
-                buffer.setLength(0); // 초기화
+                if (text == null || text.isBlank()) continue;
 
-                for (int j = i; j < digitFragments.size(); j++) {
-                    buffer.append(digitFragments.get(j));
-                    if (buffer.length() >= 13) break;
-                }
-                String candidate = buffer.toString();
-                // 13자리, 978/979 시작, 마지막 자리는 숫자
-                if (candidate.matches("97[89]\\d{9}[\\d]") && isValidIsbn13(candidate)) {
-                    log.info("ISBN-13 코드 추출 성공 : isbn = {}", candidate);
-                    return candidate;
+                // 숫자, X만 남기기
+                String digits = text.replaceAll("[^0-9Xx]", "");
+                if (digits.isEmpty()) continue;
+
+                // ISBN-13 후보 패턴 (978/979으로 시작, 총 13자리)
+                Matcher matcher = Pattern.compile("(97[89]\\d{10})").matcher(digits);
+                while (matcher.find()) {
+                    String candidate = matcher.group(1);
+                    if (isValidIsbn13(candidate)) {
+                        log.info("ISBN-13 코드 추출 성공 : isbn = {}", candidate);
+                        return candidate;
+                    }
                 }
             }
+
             log.debug("ISBN 추출 실패 : 조건에 맞는 코드가 존재하지 않습니다.");
             return null;
         } catch (Exception e) {
