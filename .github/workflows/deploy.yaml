@@ -1,4 +1,4 @@
-name: Zero Downtime Deploy with Dynamic Scaling
+name: Zero Downtime Deploy to AWS ECS
 
 on:
   push:
