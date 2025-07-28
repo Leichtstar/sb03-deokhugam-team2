@@ -62,32 +62,41 @@ class PowerUserRankingWriterTest {
     }
 
     @Test
-    @DisplayName("동점자가 있는 경우 같은 순위를 부여하고 다음 순위를 올바르게 계산한다")
+    @DisplayName("동점자가 있는 경우 score DESC, createdAt ASC 기준으로 순위를 부여한다")
     void write_tiedScores_assignCorrectRanks() {
-        PowerUserRanking r1 = createRanking("user1", 10.0, Instant.parse("2025-07-25T10:00:00Z"));
-        PowerUserRanking r2 = createRanking("user2", 10.0, Instant.parse("2025-07-24T10:00:00Z"));
+        // given
+        PowerUserRanking r1 = createRanking("user1", 10.0, Instant.parse("2025-07-25T10:00:00Z")); // 늦게 생성
+        PowerUserRanking r2 = createRanking("user2", 10.0, Instant.parse("2025-07-24T10:00:00Z")); // 먼저 생성
         PowerUserRanking r3 = createRanking("user3", 8.0, Instant.parse("2025-07-23T10:00:00Z"));
         PowerUserRanking r4 = createRanking("user4", 8.0, Instant.parse("2025-07-22T10:00:00Z"));
         PowerUserRanking r5 = createRanking("user5", 6.0, Instant.parse("2025-07-21T10:00:00Z"));
-        Chunk<PowerUserRanking> chunk = new Chunk<>(List.of(r1, r2, r3, r4, r5));
+        Chunk<PowerUserRanking> chunk = new Chunk<>(List.of(r1, r2, r3, r4, r5)); // 순서 의도적으로 뒤섞음
 
+        // when
         writer.write(chunk);
 
-        List<PowerUserRanking> result = new ArrayList<>(List.of(r1, r2, r3, r4, r5));
-        result.sort(Comparator.comparingInt(PowerUserRanking::getRank));
+        // then
+        List<PowerUserRanking> rank1List = List.of(r1, r2).stream()
+            .filter(r -> r.getRank() == 1)
+            .sorted(Comparator.comparing(PowerUserRanking::getCreatedAt))
+            .toList();
 
-        assertEquals("user1", result.get(0).getNickname());
-        assertEquals("user2", result.get(1).getNickname());
-        assertEquals(1, result.get(0).getRank());
-        assertEquals(1, result.get(1).getRank());
+        assertEquals(1, r1.getRank());
+        assertEquals(1, r2.getRank());
+        assertEquals("user2", rank1List.get(0).getNickname()); // 먼저 생성된 user2
+        assertEquals("user1", rank1List.get(1).getNickname());
 
-        assertEquals("user3", result.get(2).getNickname());
-        assertEquals("user4", result.get(3).getNickname());
-        assertEquals(3, result.get(2).getRank());
-        assertEquals(3, result.get(3).getRank());
+        List<PowerUserRanking> rank3List = List.of(r3, r4).stream()
+            .filter(r -> r.getRank() == 3)
+            .sorted(Comparator.comparing(PowerUserRanking::getCreatedAt))
+            .toList();
 
-        assertEquals("user5", result.get(4).getNickname());
-        assertEquals(5, result.get(4).getRank());
+        assertEquals(3, r3.getRank());
+        assertEquals(3, r4.getRank());
+        assertEquals("user4", rank3List.get(0).getNickname());
+        assertEquals("user3", rank3List.get(1).getNickname());
+
+        assertEquals(5, r5.getRank());
     }
 
     @Test
