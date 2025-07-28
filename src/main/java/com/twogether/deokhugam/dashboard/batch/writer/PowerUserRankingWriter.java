@@ -2,11 +2,10 @@ package com.twogether.deokhugam.dashboard.batch.writer;
 
 import com.twogether.deokhugam.common.exception.DeokhugamException;
 import com.twogether.deokhugam.common.exception.ErrorCode;
-import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
 import com.twogether.deokhugam.dashboard.entity.PowerUserRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PowerUserRankingRepository;
-import java.time.Instant;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -22,6 +21,7 @@ import org.springframework.stereotype.Component;
 public class PowerUserRankingWriter implements ItemWriter<PowerUserRanking> {
 
     private final PowerUserRankingRepository powerUserRankingRepository;
+    private final MeterRegistry meterRegistry;
 
     @Override
     public void write(Chunk<? extends PowerUserRanking> items) {
@@ -58,6 +58,11 @@ public class PowerUserRankingWriter implements ItemWriter<PowerUserRanking> {
             }
 
             powerUserRankingRepository.saveAll(rankingList);
+
+            // 커스텀 메트릭 - 저장 건수 카운터
+            meterRegistry.counter("batch.power_user.saved.count", "period", period.name())
+                .increment(rankingList.size());
+
             log.info("파워 유저 랭킹 {}건 저장 완료", rankingList.size());
 
         } catch (Exception e) {

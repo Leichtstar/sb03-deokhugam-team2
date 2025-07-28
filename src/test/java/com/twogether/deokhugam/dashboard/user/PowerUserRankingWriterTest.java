@@ -14,6 +14,7 @@ import com.twogether.deokhugam.dashboard.batch.writer.PowerUserRankingWriter;
 import com.twogether.deokhugam.dashboard.entity.PowerUserRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PowerUserRankingRepository;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +34,7 @@ class PowerUserRankingWriterTest {
     @BeforeEach
     void setUp() {
         repository = mock(PowerUserRankingRepository.class);
-        writer = new PowerUserRankingWriter(repository);
+        writer = new PowerUserRankingWriter(repository, new SimpleMeterRegistry());
     }
 
     @Test

@@ -8,7 +8,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.twogether.deokhugam.common.exception.DeokhugamException;
@@ -17,10 +16,9 @@ import com.twogether.deokhugam.dashboard.batch.writer.PopularReviewRankingWriter
 import com.twogether.deokhugam.dashboard.entity.PopularReviewRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PopularReviewRankingRepository;
-import com.twogether.deokhugam.notification.service.NotificationService;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
-import com.twogether.deokhugam.user.entity.User;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -47,7 +45,12 @@ class PopularReviewRankingWriterTest {
         reviewRepository = mock(ReviewRepository.class);
         eventPublisher = mock(ApplicationEventPublisher.class);
 
-        writer = new PopularReviewRankingWriter(repository, reviewRepository, eventPublisher);
+        writer = new PopularReviewRankingWriter(
+            repository,
+            reviewRepository,
+            eventPublisher,
+            new SimpleMeterRegistry()  // 커스텀 메트릭을 위한 레지스트리 주입
+        );
     }
 
     @Test
