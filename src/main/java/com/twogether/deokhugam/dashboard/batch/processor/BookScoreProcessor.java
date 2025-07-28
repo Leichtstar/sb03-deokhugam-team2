@@ -6,6 +6,7 @@ import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import jakarta.persistence.EntityManager;
+import java.time.Duration;
 import java.time.Instant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;
@@ -32,7 +33,19 @@ public class BookScoreProcessor implements ItemProcessor<BookScoreDto, PopularBo
             return null;
         }
 
+        // 기존 점수 계산
         double score = dto.calculateScore();
+
+        // 최신 리뷰 작성 시간 조회 (논리 삭제 제외: isDeleted = false)
+        Instant latestReviewCreatedAt = em.createQuery(
+                "SELECT MAX(r.createdAt) FROM Review r " +
+                    "WHERE r.book.id = :bookId AND r.isDeleted = false", Instant.class)
+            .setParameter("bookId", dto.bookId())
+            .getSingleResult();
+
+        // freshness bonus 계산
+        double bonus = calculateFreshnessBonus(latestReviewCreatedAt);
+        double finalScore = score + bonus;
 
         // 커스텀 메트릭 - 처리 건수 카운터 증가
         meterRegistry.counter("batch.popular_book.processed.count").increment();
@@ -43,8 +56,8 @@ public class BookScoreProcessor implements ItemProcessor<BookScoreDto, PopularBo
             .tag("bookId", dto.bookId().toString())
             .register(meterRegistry));
 
-        log.info("[BookScoreProcessor] 도서 '{}' (ID: {}) 점수 계산 완료 - 리뷰 수: {}, 평점 평균: {}, 계산된 점수: {}",
-            dto.title(), dto.bookId(), dto.reviewCount(), dto.averageRating(), score
+        log.info("[BookScoreProcessor] 도서 '{}' (ID: {}) 점수 계산 완료 - 리뷰 수: {}, 평점 평균: {}, 기본 점수: {}, bonus: {}, 최종 점수: {}",
+            dto.title(), dto.bookId(), dto.reviewCount(), dto.averageRating(), score, bonus, finalScore
         );
 
         return PopularBookRanking.builder()
@@ -52,11 +65,21 @@ public class BookScoreProcessor implements ItemProcessor<BookScoreDto, PopularBo
             .title(dto.title())
             .author(dto.author())
             .thumbnailUrl(dto.thumbnailUrl())
-            .score(score)
+            .score(finalScore)
             .reviewCount(dto.reviewCount())
             .rating(dto.averageRating())
             .period(dto.period())
             .createdAt(Instant.now())
             .build();
+    }
+
+    private double calculateFreshnessBonus(Instant latestActivityTime) {
+        if (latestActivityTime == null) return 0.0;
+
+        long hoursAgo = Duration.between(latestActivityTime, Instant.now()).toHours();
+        if (hoursAgo < 1) return 0.003;
+        if (hoursAgo < 6) return 0.002;
+        if (hoursAgo < 24) return 0.001;
+        return 0.0;
     }
 }
