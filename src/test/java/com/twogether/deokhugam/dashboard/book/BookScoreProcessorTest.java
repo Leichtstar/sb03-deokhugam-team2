@@ -5,10 +5,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.twogether.deokhugam.book.entity.Book;
-import com.twogether.deokhugam.dashboard.batch.processor.BookScoreProcessor;
 import com.twogether.deokhugam.dashboard.batch.model.BookScoreDto;
+import com.twogether.deokhugam.dashboard.batch.processor.BookScoreProcessor;
 import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import jakarta.persistence.EntityManager;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +25,7 @@ class BookScoreProcessorTest {
     @BeforeEach
     void setUp() {
         em = mock(EntityManager.class);
-        processor = new BookScoreProcessor(em);
+        processor = new BookScoreProcessor(em, new SimpleMeterRegistry());
     }
 
     @Test
