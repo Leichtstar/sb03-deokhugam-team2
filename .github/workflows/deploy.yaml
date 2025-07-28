@@ -1,4 +1,4 @@
-name: Deploy to AWS ECS
+name: Zero Downtime Deploy to AWS ECS
 
 on:
   push:
@@ -47,11 +47,13 @@ jobs:
 
       - name: ECS 태스크 정의 업데이트
         run: |
+          # 현재 태스크 정의 가져오기
           TASK_DEFINITION=$(
           aws ecs describe-task-definition \
            --task-definition ${{ vars.ECS_TASK_DEFINITION }}
           )
-
+          
+          # 새 이미지로 태스크 정의 업데이트
           NEW_TASK_DEFINITION=$(
           echo $TASK_DEFINITION | jq \
             --arg IMAGE "${{ vars.ECR_REPOSITORY_URI }}:latest" \
@@ -68,10 +70,16 @@ jobs:
           # 환경 파일에 변수 저장 (다음 단계에서 사용 가능)
           echo "NEW_TASK_DEF_ARN=$NEW_TASK_DEF_ARN" >> $GITHUB_ENV
 
-      - name: ECS 서비스 업데이트
+      - name: ECS Rolling Update 배포
         run: |
           aws ecs update-service \
             --cluster ${{ vars.ECS_CLUSTER }} \
             --service ${{ vars.ECS_SERVICE }} \
             --task-definition $NEW_TASK_DEF_ARN \
             --force-new-deployment
+
+      - name: 배포 완료 대기
+        run: |
+          aws ecs wait services-stable \
+            --cluster ${{ vars.ECS_CLUSTER }} \
+            --services ${{ vars.ECS_SERVICE }}
