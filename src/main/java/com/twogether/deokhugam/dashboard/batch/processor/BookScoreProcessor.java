@@ -26,14 +26,12 @@ public class BookScoreProcessor implements ItemProcessor<BookScoreDto, PopularBo
         // 처리 시간 측정을 위한 타이머 샘플 시작
         Timer.Sample sample = Timer.start(meterRegistry);
 
-        // 도서 ID로 Book 엔티티 조회
         Book book = em.find(Book.class, dto.bookId());
         if (book == null) {
             log.warn("[BookScoreProcessor] 도서 ID {} 에 해당하는 Book 엔티티가 존재하지 않아 점수 계산을 건너뜁니다.", dto.bookId());
             return null;
         }
 
-        // 점수 계산
         double score = dto.calculateScore();
 
         // 커스텀 메트릭 - 처리 건수 카운터 증가
@@ -49,7 +47,6 @@ public class BookScoreProcessor implements ItemProcessor<BookScoreDto, PopularBo
             dto.title(), dto.bookId(), dto.reviewCount(), dto.averageRating(), score
         );
 
-        // 인기 도서 랭킹 엔티티 생성 후 반환
         return PopularBookRanking.builder()
             .book(book)
             .title(dto.title())
