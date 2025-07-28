@@ -7,6 +7,7 @@ import com.twogether.deokhugam.dashboard.batch.model.ReviewScoreDto;
 import com.twogether.deokhugam.dashboard.batch.processor.ReviewScoreProcessor;
 import com.twogether.deokhugam.dashboard.entity.PopularReviewRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +21,10 @@ class ReviewScoreProcessorTest {
 
     @BeforeEach
     void setUp() {
-        processor = new ReviewScoreProcessor(Instant.parse("2025-07-22T00:00:00Z"));
+        processor = new ReviewScoreProcessor(
+            Instant.parse("2025-07-22T00:00:00Z"),
+            new SimpleMeterRegistry()
+        );
     }
 
     @Test
