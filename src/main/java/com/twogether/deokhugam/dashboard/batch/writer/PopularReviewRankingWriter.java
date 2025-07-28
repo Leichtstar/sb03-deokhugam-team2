@@ -8,6 +8,7 @@ import com.twogether.deokhugam.dashboard.repository.PopularReviewRankingReposito
 import com.twogether.deokhugam.notification.event.PopularReviewRankedEvent;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -30,6 +31,7 @@ public class PopularReviewRankingWriter implements ItemWriter<PopularReviewRanki
     private final PopularReviewRankingRepository popularReviewRankingRepository;
     private final ReviewRepository reviewRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final MeterRegistry meterRegistry;
 
     @Override
     public void write(Chunk<? extends PopularReviewRanking> items) {
@@ -55,17 +57,20 @@ public class PopularReviewRankingWriter implements ItemWriter<PopularReviewRanki
 
             for (PopularReviewRanking current : rankingList) {
                 double score = current.getScore();
-
                 if (Double.compare(score, prevScore) != 0) {
                     displayedRank = indexRank;
                 }
-
                 current.assignRank(displayedRank);
                 prevScore = score;
                 indexRank++;
             }
 
             popularReviewRankingRepository.saveAll(rankingList);
+
+            // 커스텀 메트릭 - 저장 건수 카운터
+            meterRegistry.counter("batch.popular_review.saved.count", "period", period.name())
+                .increment(rankingList.size());
+
             log.info("인기 리뷰 랭킹 {}건 저장 완료", rankingList.size());
 
         } catch (Exception e) {
