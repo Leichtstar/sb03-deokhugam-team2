@@ -13,6 +13,7 @@ import com.twogether.deokhugam.dashboard.batch.writer.PopularBookRankingWriter;
 import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PopularBookRankingRepository;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.item.Chunk;
 
+@DisplayName("PopularBookRankingWriter 단위 테스트")
 class PopularBookRankingWriterTest {
 
     private PopularBookRankingRepository repository;
@@ -29,7 +31,7 @@ class PopularBookRankingWriterTest {
     @BeforeEach
     void setUp() {
         repository = mock(PopularBookRankingRepository.class);
-        writer = new PopularBookRankingWriter(repository);
+        writer = new PopularBookRankingWriter(repository, new SimpleMeterRegistry());
     }
 
     @Test
