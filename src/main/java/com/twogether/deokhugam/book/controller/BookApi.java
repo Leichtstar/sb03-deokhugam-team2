@@ -46,13 +46,13 @@ public interface BookApi {
                       "status": 400
                     }
                     """))),
-		@ApiResponse(responseCode = "401", description = "중복된 ISBN",
+		@ApiResponse(responseCode = "409", description = "중복된 ISBN",
 			content = @Content(schema = @Schema(implementation = ErrorResponse.class),
 				examples = @ExampleObject(value = """
                     {
                       "message": "이미 사용된 ISBN 코드입니다.",
                       "code": "DUPLICATED_ISBN",
-                      "status": 401
+                      "status": 409
                     }
                     """))),
 		@ApiResponse(responseCode = "500", description = "서버 오류",
