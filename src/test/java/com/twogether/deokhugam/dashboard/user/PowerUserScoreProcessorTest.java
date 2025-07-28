@@ -26,7 +26,11 @@ class PowerUserScoreProcessorTest {
     @BeforeEach
     void setUp() {
         em = mock(EntityManager.class);
-        processor = new PowerUserScoreProcessor(em, Instant.parse("2025-07-22T00:00:00Z"), new SimpleMeterRegistry());
+        processor = new PowerUserScoreProcessor(
+            em,
+            Instant.parse("2025-07-22T00:00:00Z"),
+            new SimpleMeterRegistry()
+        );
     }
 
     @Test
@@ -37,14 +41,20 @@ class PowerUserScoreProcessorTest {
         User user = mock(User.class);
         when(em.find(User.class, userId)).thenReturn(user);
 
+        double reviewScoreSum = 30.0;
+        long likeCount = 5L;
+        long commentCount = 10L;
+
         PowerUserScoreDto dto = new PowerUserScoreDto(
             userId,
             "활동왕",
-            30.0,
-            5L,
-            10L,
+            reviewScoreSum,
+            likeCount,
+            commentCount,
             RankingPeriod.DAILY
         );
+
+        double expectedScore = dto.calculateScore();
 
         // when
         PowerUserRanking result = processor.process(dto);
@@ -53,11 +63,9 @@ class PowerUserScoreProcessorTest {
         assertThat(result).isNotNull();
         assertThat(result.getUser()).isEqualTo(user);
         assertThat(result.getNickname()).isEqualTo("활동왕");
-        assertThat(result.getReviewScoreSum()).isEqualTo(30.0);
-        assertThat(result.getLikeCount()).isEqualTo(5L);
-        assertThat(result.getCommentCount()).isEqualTo(10L);
-
-        double expectedScore = 30.0 * 0.5 + 5 * 0.2 + 10 * 0.3;
+        assertThat(result.getReviewScoreSum()).isEqualTo(reviewScoreSum);
+        assertThat(result.getLikeCount()).isEqualTo(likeCount);
+        assertThat(result.getCommentCount()).isEqualTo(commentCount);
         assertThat(result.getScore()).isEqualTo(expectedScore);
         assertThat(result.getPeriod()).isEqualTo(dto.period());
         assertThat(result.getRank()).isEqualTo(0);

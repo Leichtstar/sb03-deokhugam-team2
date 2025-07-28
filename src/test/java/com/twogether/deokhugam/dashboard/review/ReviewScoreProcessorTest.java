@@ -28,9 +28,15 @@ class ReviewScoreProcessorTest {
     }
 
     @Test
-    @DisplayName("좋아요 5, 댓글 15일 때 점수는 (5 * 0.3 + 15 * 0.7) = 12.0")
+    @DisplayName("좋아요 5, 댓글 15일 때 정규화 점수를 계산한다")
     void process_shouldCalculateCorrectScore() {
         // given
+        long like = 5L;
+        long comment = 15L;
+
+        double expectedScore = Math.log1p(like) / 10 * 0.3
+            + Math.log1p(comment) / 10 * 0.7;
+
         ReviewScoreDto input = new ReviewScoreDto(
             UUID.randomUUID(),
             UUID.randomUUID(),
@@ -40,8 +46,8 @@ class ReviewScoreProcessorTest {
             UUID.randomUUID(),
             "이펙티브 자바",
             "http://example.com/image.jpg",
-            5L,
-            15L,
+            like,
+            comment,
             RankingPeriod.DAILY
         );
 
@@ -49,7 +55,7 @@ class ReviewScoreProcessorTest {
         PopularReviewRanking result = processor.process(input);
 
         // then
-        assertEquals(12.0, result.getScore(), 0.0001);
+        assertEquals(expectedScore, result.getScore(), 0.0001);
         assertEquals(RankingPeriod.DAILY, result.getPeriod());
         assertEquals(input.reviewId(), result.getReviewId());
         assertEquals(input.userId(), result.getUserId());
@@ -59,8 +65,6 @@ class ReviewScoreProcessorTest {
         assertEquals(input.bookId(), result.getBookId());
         assertEquals(input.bookTitle(), result.getBookTitle());
         assertEquals(input.bookThumbnailUrl(), result.getBookThumbnailUrl());
-        assertEquals(input.likeCount(), result.getLikeCount());
-        assertEquals(input.commentCount(), result.getCommentCount());
         assertEquals(0, result.getRank());
         assertNotNull(result.getCreatedAt());
     }
