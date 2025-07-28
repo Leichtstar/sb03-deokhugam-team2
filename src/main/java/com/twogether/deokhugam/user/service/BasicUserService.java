@@ -9,6 +9,7 @@ import com.twogether.deokhugam.user.exception.EmailAlreadyExistsException;
 import com.twogether.deokhugam.user.exception.InvalidCredentialsException;
 import com.twogether.deokhugam.user.exception.NicknameAlreadyExistsException;
 import com.twogether.deokhugam.user.exception.UserNotFoundException;
+import com.twogether.deokhugam.user.exception.UserWithdrawnException;
 import com.twogether.deokhugam.user.mapper.UserMapper;
 import com.twogether.deokhugam.user.repository.UserRepository;
 import java.util.Optional;
@@ -60,6 +61,10 @@ public class BasicUserService implements UserService {
 
         User user = userRepository.findByEmail(email)
             .orElseThrow(InvalidCredentialsException::emailNotFound);
+
+        if (user.getIsDeleted().equals(true)) {
+            throw UserWithdrawnException.withEmail(email);
+        }
 
         if (!user.getPassword().equals(password)) {
             throw InvalidCredentialsException.wrongPassword();

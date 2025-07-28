@@ -2,6 +2,7 @@ package com.twogether.deokhugam.dashboard.batch.writer;
 
 import com.twogether.deokhugam.common.exception.DeokhugamException;
 import com.twogether.deokhugam.common.exception.ErrorCode;
+import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
 import com.twogether.deokhugam.dashboard.entity.PowerUserRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PowerUserRankingRepository;
@@ -34,25 +35,26 @@ public class PowerUserRankingWriter implements ItemWriter<PowerUserRanking> {
         try {
             rankingList.sort(
                 Comparator.comparingDouble(PowerUserRanking::getScore).reversed()
-                    .thenComparing(Comparator.comparing(PowerUserRanking::getCreatedAt).reversed())
+                    .thenComparing(PowerUserRanking::getCreatedAt)
             );
 
             RankingPeriod period = rankingList.get(0).getPeriod();
             powerUserRankingRepository.deleteByPeriod(period);
 
-            int rank = 1;
+            int indexRank = 1;
+            int displayedRank = 1;
             double prevScore = Double.NEGATIVE_INFINITY;
 
-            for (int i = 0; i < rankingList.size(); i++) {
-                PowerUserRanking current = rankingList.get(i);
+            for (PowerUserRanking current : rankingList) {
                 double score = current.getScore();
 
                 if (Double.compare(score, prevScore) != 0) {
-                    rank = i + 1;
+                    displayedRank = indexRank;
                 }
 
-                current.assignRank(rank);
+                current.assignRank(displayedRank);
                 prevScore = score;
+                indexRank++;
             }
 
             powerUserRankingRepository.saveAll(rankingList);
