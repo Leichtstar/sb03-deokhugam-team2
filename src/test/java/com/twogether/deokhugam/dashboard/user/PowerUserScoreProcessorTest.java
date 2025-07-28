@@ -9,6 +9,7 @@ import com.twogether.deokhugam.dashboard.batch.processor.PowerUserScoreProcessor
 import com.twogether.deokhugam.dashboard.entity.PowerUserRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.user.entity.User;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import jakarta.persistence.EntityManager;
 import java.time.Instant;
 import java.util.UUID;
@@ -25,7 +26,7 @@ class PowerUserScoreProcessorTest {
     @BeforeEach
     void setUp() {
         em = mock(EntityManager.class);
-        processor = new PowerUserScoreProcessor(em, Instant.parse("2025-07-22T00:00:00Z"));
+        processor = new PowerUserScoreProcessor(em, Instant.parse("2025-07-22T00:00:00Z"), new SimpleMeterRegistry());
     }
 
     @Test
