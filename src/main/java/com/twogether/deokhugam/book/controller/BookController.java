@@ -28,7 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("api/books")
 @RequiredArgsConstructor
-public class BookController {
+public class BookController implements BookApi{
 	private final BookService bookService;
 
 	/** 도서 등록
@@ -76,7 +76,7 @@ public class BookController {
 
 	/** 도서 목록 조회
 	 * 출력 :
-	 * List<BookDTO>
+	 * ResponseEntity<BookPageResponse<BookDto>>
 	 */
 	@GetMapping
 	public ResponseEntity<BookPageResponse<BookDto>> getAllBooks(

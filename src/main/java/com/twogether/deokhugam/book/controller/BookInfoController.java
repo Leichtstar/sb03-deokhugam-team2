@@ -6,19 +6,19 @@ import com.twogether.deokhugam.book.exception.NaverBookException;
 import com.twogether.deokhugam.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/books")
 @RequiredArgsConstructor
-public class BookInfoController {
+public class BookInfoController implements BookInfoApi {
 
     private final NaverBookClient naverBookClient;
 
@@ -33,8 +33,9 @@ public class BookInfoController {
         }
         return ResponseEntity.status(HttpStatus.OK).body(dto);
     }
-    @PostMapping(value = "/isbn/ocr")
-    public ResponseEntity<String> getIsbnFromOcr(@RequestPart(value = "image", required = true) MultipartFile bookImage){
+
+    @PostMapping(value = "/isbn/ocr", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> getIsbnFromOcr(@RequestParam("image") MultipartFile bookImage){
     if (bookImage.isEmpty() || bookImage.getSize() == 0){
         throw new NaverBookException(ErrorCode.INVALID_IMAGE_FILE);
     }
