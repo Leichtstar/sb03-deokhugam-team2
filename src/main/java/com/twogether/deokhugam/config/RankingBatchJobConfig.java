@@ -99,7 +99,7 @@ public class RankingBatchJobConfig {
     public ItemProcessor<ReviewScoreDto, PopularReviewRanking> reviewScoreProcessor(
         @Value("#{jobParameters['now']}") String now
     ) {
-        return new ReviewScoreProcessor(Instant.parse(now), meterRegistry);
+        return new ReviewScoreProcessor(Instant.parse(now), meterRegistry, em);
     }
 
     // [3] 파워 유저 랭킹 Job
