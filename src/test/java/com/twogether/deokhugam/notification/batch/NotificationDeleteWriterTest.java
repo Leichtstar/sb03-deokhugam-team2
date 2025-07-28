@@ -1,5 +1,7 @@
 package com.twogether.deokhugam.notification.batch;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -45,9 +47,8 @@ class NotificationDeleteWriterTest {
 
         // then
         verify(notificationRepository).deleteAllInBatch(List.of(n1, n2));
-
-        double count = meterRegistry.get("batch.notification.cleaned.count").counter().count();
-        assert count == 2.0;
+        double count = meterRegistry.get("batch.notification.deleted.count").counter().count();
+        assertEquals(2.0, count);
     }
 
     @Test
@@ -61,7 +62,7 @@ class NotificationDeleteWriterTest {
 
         // then
         verify(notificationRepository, never()).deleteAllInBatch(any());
-        assert meterRegistry.find("batch.notification.cleaned.count").counter() == null;
+        assertNull(meterRegistry.find("batch.notification.deleted.count").counter());
     }
 
     @Test
@@ -80,7 +81,7 @@ class NotificationDeleteWriterTest {
         } catch (Exception ignored) {
         }
 
-        double failed = meterRegistry.get("batch.notification.cleaned.count.failed").counter().count();
-        assert failed == 1.0;
+        double failed = meterRegistry.get("batch.notification.deleted.count.failed").counter().count();
+        assertEquals(1.0, failed);
     }
 }
