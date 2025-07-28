@@ -187,23 +187,26 @@ public class NaverBookClientImpl implements NaverBookClient {
             JsonNode root = new ObjectMapper().readTree(jsonText);
             JsonNode fields = root.path("images").get(0).path("fields");
 
-            // inferText 필드에서 숫자+X만 남김
+            StringBuilder allDigits = new StringBuilder();
             for (JsonNode field : fields) {
                 String text = field.path("inferText").asText();
-                if (text == null || text.isBlank()) continue;
+                if (text != null && !text.isBlank()) {
+                    allDigits.append(text.replaceAll("[^0-9Xx]", ""));
+                }
+            }
 
-                // 숫자, X만 남기기
-                String digits = text.replaceAll("[^0-9Xx]", "");
-                if (digits.isEmpty()) continue;
+            String combinedDigits = allDigits.toString();
+            log.debug("OCR 추출된 전체 숫자 시퀀스: {}", combinedDigits);
 
-                // ISBN-13 후보 패턴 (978/979으로 시작, 총 13자리)
-                Matcher matcher = Pattern.compile("(97[89]\\d{10})").matcher(digits);
-                while (matcher.find()) {
-                    String candidate = matcher.group(1);
-                    if (isValidIsbn13(candidate)) {
-                        log.info("ISBN-13 코드 추출 성공 : isbn = {}", candidate);
-                        return candidate;
-                    }
+            // ISBN-13 패턴 탐색 (978 또는 979로 시작 + 10자리 숫자 = 총 13자리)
+            Pattern isbnPattern = Pattern.compile("(97[89]\\d{10})");
+            Matcher matcher = isbnPattern.matcher(combinedDigits);
+
+            while (matcher.find()) {
+                String candidate = matcher.group(1);
+                if (isValidIsbn13(candidate)) {
+                    log.info("ISBN-13 코드 추출 성공 : isbn = {}", candidate);
+                    return candidate;
                 }
             }
 
