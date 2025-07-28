@@ -32,7 +32,7 @@ public class NotificationDeleteWriter implements ItemWriter<Notification> {
             notificationRepository.deleteAllInBatch(notifications);
 
             // 커스텀 메트릭 기록
-            meterRegistry.counter("batch.notification.cleaned.count")
+            meterRegistry.counter("batch.notification.deleted.count")
                 .increment(notifications.size());
 
             log.info("🔔 알림 {}건 삭제 완료", notifications.size());
@@ -41,7 +41,7 @@ public class NotificationDeleteWriter implements ItemWriter<Notification> {
             log.error("🚨 알림 삭제 중 오류 발생", e);
 
             // 실패 건 메트릭 기록
-            meterRegistry.counter("batch.notification.cleaned.count.failed").increment();
+            meterRegistry.counter("batch.notification.deleted.count.failed").increment();
 
             throw e;
         }
