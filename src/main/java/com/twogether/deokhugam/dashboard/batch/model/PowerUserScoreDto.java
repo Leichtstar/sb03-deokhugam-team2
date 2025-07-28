@@ -24,8 +24,11 @@ public record PowerUserScoreDto(
     private static final double COMMENT_COUNT_WEIGHT = 0.3;
 
     public double calculateScore() {
-        return (reviewScoreSum * REVIEW_SCORE_WEIGHT)
-            + (likeCount * LIKE_COUNT_WEIGHT)
-            + (commentCount * COMMENT_COUNT_WEIGHT);
+        double normalizedReviewScore = reviewScoreSum / 4.0;
+        double normalizedLike = Math.log1p(likeCount) / 10.0;
+        double normalizedComment = Math.log1p(commentCount) / 10.0;
+        return (normalizedReviewScore * REVIEW_SCORE_WEIGHT)
+            + (normalizedLike * LIKE_COUNT_WEIGHT)
+            + (normalizedComment * COMMENT_COUNT_WEIGHT);
     }
 }

@@ -27,6 +27,8 @@ public record ReviewScoreDto(
     private static final double COMMENT_COUNT_WEIGHT = 0.7;
 
     public double calculateScore() {
-        return (likeCount * LIKE_COUNT_WEIGHT) + (commentCount * COMMENT_COUNT_WEIGHT);
+        double normalizedLike = Math.log1p(likeCount) / 10.0;
+        double normalizedComment = Math.log1p(commentCount) / 10.0;
+        return (normalizedLike * LIKE_COUNT_WEIGHT) + (normalizedComment * COMMENT_COUNT_WEIGHT);
     }
 }
