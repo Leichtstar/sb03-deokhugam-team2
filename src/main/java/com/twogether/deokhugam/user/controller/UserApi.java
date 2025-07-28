@@ -136,6 +136,25 @@ public interface UserApi {
             )
         ),
         @ApiResponse(
+            responseCode = "403", description = "로그인 실패 (탈퇴한 사용자)",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = """
+                        {
+                            "timestamp": "2025-07-20T10:30:00.123456Z",
+                            "code": "USER_WITHDRAWN",
+                            "message": "탈퇴한 사용자입니다.",
+                            "details": {
+                                "email": "okodee@test.com"
+                            },
+                            "exceptionType": "UserWithdrawnException",
+                            "status": 403
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(
             responseCode = "500", description = "서버 내부 오류",
             content = @Content(examples = @ExampleObject(value = "서버 내부 오류: null"))
         )

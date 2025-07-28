@@ -43,25 +43,26 @@ public class PopularReviewRankingWriter implements ItemWriter<PopularReviewRanki
         try {
             rankingList.sort(
                 Comparator.comparingDouble(PopularReviewRanking::getScore).reversed()
-                    .thenComparing(Comparator.comparing(PopularReviewRanking::getCreatedAt).reversed())
+                    .thenComparing(PopularReviewRanking::getCreatedAt)
             );
 
             RankingPeriod period = rankingList.get(0).getPeriod();
             popularReviewRankingRepository.deleteByPeriod(period);
 
-            int rank = 1;
+            int indexRank = 1;
+            int displayedRank = 1;
             double prevScore = Double.NEGATIVE_INFINITY;
 
-            for (int i = 0; i < rankingList.size(); i++) {
-                PopularReviewRanking current = rankingList.get(i);
+            for (PopularReviewRanking current : rankingList) {
                 double score = current.getScore();
 
                 if (Double.compare(score, prevScore) != 0) {
-                    rank = i + 1;
+                    displayedRank = indexRank;
                 }
 
-                current.assignRank(rank);
+                current.assignRank(displayedRank);
                 prevScore = score;
+                indexRank++;
             }
 
             popularReviewRankingRepository.saveAll(rankingList);
