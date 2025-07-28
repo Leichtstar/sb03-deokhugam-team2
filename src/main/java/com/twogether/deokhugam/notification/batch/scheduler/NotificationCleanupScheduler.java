@@ -1,5 +1,6 @@
 package com.twogether.deokhugam.notification.batch.scheduler;
 
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.BatchStatus;
@@ -27,7 +28,7 @@ public class NotificationCleanupScheduler {
             log.info("[NotificationCleanupScheduler] 읽은 알림 삭제 배치 시작");
 
             JobParameters jobParameters = new JobParametersBuilder()
-                .addLong("timestamp", System.currentTimeMillis())
+                .addString("now", Instant.now().toString())
                 .toJobParameters();
 
             JobExecution execution = jobLauncher.run(notificationCleanupJob, jobParameters);
