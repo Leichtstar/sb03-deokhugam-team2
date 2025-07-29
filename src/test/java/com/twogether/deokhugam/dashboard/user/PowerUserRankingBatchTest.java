@@ -80,7 +80,7 @@ class PowerUserRankingBatchTest {
         } else if (period == RankingPeriod.MONTHLY) {
             assertThat(rankings).hasSize(2);
         } else if (period == RankingPeriod.ALL_TIME) {
-            assertThat(rankings).hasSize(3);
+            assertThat(rankings).hasSize(4);
         }
     }
 }

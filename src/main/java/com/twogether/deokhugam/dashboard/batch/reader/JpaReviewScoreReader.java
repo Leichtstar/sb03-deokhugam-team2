@@ -52,7 +52,7 @@ public class JpaReviewScoreReader implements ItemReader<ReviewScoreDto> {
             FROM Review r
             JOIN r.user u
             JOIN r.book b
-            WHERE r.createdAt >= :start AND r.createdAt < :end
+            WHERE r.createdAt >= :start AND r.createdAt <= :end
               AND r.isDeleted = false
             ORDER BY COALESCE(r.likeCount, 0) DESC, COALESCE(r.commentCount, 0) DESC
         """, Object[].class)

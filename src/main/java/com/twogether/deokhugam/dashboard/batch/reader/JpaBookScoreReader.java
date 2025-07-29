@@ -49,7 +49,7 @@ public class JpaBookScoreReader implements ItemReader<BookScoreDto> {
                    COUNT(r), COALESCE(AVG(r.rating), 0.0)
             FROM Review r
             JOIN r.book b
-            WHERE r.createdAt >= :start AND r.createdAt < :end
+            WHERE r.createdAt >= :start AND r.createdAt <= :end
               AND r.isDeleted = false AND b.isDeleted = false
             GROUP BY b.id, b.title, b.author, b.thumbnailUrl
             ORDER BY COUNT(r) DESC, AVG(r.rating) DESC

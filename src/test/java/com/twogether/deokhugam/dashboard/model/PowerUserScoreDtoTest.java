@@ -25,21 +25,25 @@ class PowerUserScoreDtoTest {
 
     @ParameterizedTest
     @CsvSource({
-        "20.0,0,0",
-        "20.0,9,9",
-        "40.0,99,0",
-        "16.0,0,99",
-        "0.0,99,99"
+        "20.0,0,0",     // 상한선
+        "40.0,0,0",     // 상한선 초과
+        "10.0,0,0",     // 상한선 이하
+        "40.0,99,0",    // 초과 + like
+        "16.0,0,99",    // 적절한 값 조합
+        "0.0,99,99"     // 리뷰 점수 없음
     })
     void calculateScore_returnsExpectedValue(double reviewScoreSum, long likeCount, long commentCount) {
         PowerUserScoreDto dto = new PowerUserScoreDto(
             UUID.randomUUID(), "테스트유저", reviewScoreSum, likeCount, commentCount, RankingPeriod.DAILY
         );
 
-        double normalizedReview = reviewScoreSum / 4.0 * 0.5;
-        double normalizedLike = Math.log1p(likeCount) / 10.0 * 0.2;
-        double normalizedComment = Math.log1p(commentCount) / 10.0 * 0.3;
-        double expected = normalizedReview + normalizedLike + normalizedComment;
+        double normalizedReview = Math.min(reviewScoreSum / 20.0, 1.0);
+        double normalizedLike = Math.log1p(likeCount) / 10.0;
+        double normalizedComment = Math.log1p(commentCount) / 10.0;
+
+        double expected = normalizedReview * 0.5
+            + normalizedLike * 0.2
+            + normalizedComment * 0.3;
 
         assertThat(dto.calculateScore()).isEqualTo(expected, within(1e-6));
     }
