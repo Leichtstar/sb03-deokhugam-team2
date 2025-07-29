@@ -36,10 +36,11 @@ class PowerUserScoreDtoTest {
             UUID.randomUUID(), "테스트유저", reviewScoreSum, likeCount, commentCount, RankingPeriod.DAILY
         );
 
-        double normalizedReview = reviewScoreSum / 4.0 * 0.5;
-        double normalizedLike = Math.log1p(likeCount) / 10.0 * 0.2;
-        double normalizedComment = Math.log1p(commentCount) / 10.0 * 0.3;
-        double expected = normalizedReview + normalizedLike + normalizedComment;
+        double reviewScoreComponent = reviewScoreSum * 0.5;
+        double likeScoreComponent = Math.log1p(likeCount) / 10.0 * 0.2;
+        double commentScoreComponent = Math.log1p(commentCount) / 10.0 * 0.3;
+
+        double expected = reviewScoreComponent + likeScoreComponent + commentScoreComponent;
 
         assertThat(dto.calculateScore()).isEqualTo(expected, within(1e-6));
     }
