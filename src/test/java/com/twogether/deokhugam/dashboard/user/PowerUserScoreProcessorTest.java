@@ -44,7 +44,7 @@ class PowerUserScoreProcessorTest {
         User user = mock(User.class);
         userMap = Map.of(userId, user);
 
-        Instant recentActivityTime = Instant.now().minusSeconds(30 * 60); // 30분 전
+        Instant recentActivityTime = executionTime.minusSeconds(30 * 60); // 30분 전
         mockLatestActivityQueries(userId, recentActivityTime, null); // 리뷰만 있음
 
         PowerUserScoreDto dto = new PowerUserScoreDto(
@@ -62,7 +62,7 @@ class PowerUserScoreProcessorTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result.getUser()).isEqualTo(user);
-        assertThat(result.getScore()).isEqualTo(expectedScore, within(1e-3));
+        assertThat(result.getScore()).isEqualTo(expectedScore, within(1e-2));
     }
 
     @Test

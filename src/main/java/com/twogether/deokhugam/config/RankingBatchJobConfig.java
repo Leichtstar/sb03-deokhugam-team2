@@ -1,5 +1,7 @@
 package com.twogether.deokhugam.config;
 
+import com.twogether.deokhugam.common.exception.DeokhugamException;
+import com.twogether.deokhugam.common.exception.ErrorCode;
 import com.twogether.deokhugam.dashboard.batch.model.BookScoreDto;
 import com.twogether.deokhugam.dashboard.batch.model.PowerUserScoreDto;
 import com.twogether.deokhugam.dashboard.batch.model.ReviewScoreDto;
@@ -141,7 +143,13 @@ public class RankingBatchJobConfig {
         @Value("#{jobParameters['period']}") String periodString
     ) {
         Instant nowInstant = Instant.parse(now);
-        RankingPeriod period = RankingPeriod.valueOf(periodString);
+        RankingPeriod period;
+        try {
+            period = RankingPeriod.valueOf(periodString);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new DeokhugamException(ErrorCode.INVALID_RANKING_PERIOD,
+                String.format("잘못된 랭킹 기간 파라미터입니다. periodString=%s", periodString));
+        }
         boolean isAllTime = (period == RankingPeriod.ALL_TIME);
         Instant start = isAllTime ? null : period.getStartTime(nowInstant);
         Instant end = isAllTime ? null : period.getEndTime(nowInstant);
