@@ -42,6 +42,16 @@ public class DeokhugamException extends RuntimeException {
         this.details = new HashMap<>();
     }
 
+    /**
+     * 상세 메시지를 포함한 생성자
+     */
+    public DeokhugamException(ErrorCode errorCode, String detailMessage) {
+        super(detailMessage);
+        this.timestamp = Instant.now();
+        this.errorCode = errorCode;
+        this.details = new HashMap<>();
+    }
+
     public void addDetail(String key, Object value) {
         this.details.put(key, value);
     }

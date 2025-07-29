@@ -1,5 +1,7 @@
 package com.twogether.deokhugam.dashboard.batch.reader;
 
+import com.twogether.deokhugam.common.exception.DeokhugamException;
+import com.twogether.deokhugam.common.exception.ErrorCode;
 import com.twogether.deokhugam.common.util.TimeParameterUtil;
 import com.twogether.deokhugam.dashboard.batch.model.ReviewScoreDto;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
@@ -38,7 +40,14 @@ public class JpaReviewScoreReader implements ItemReader<ReviewScoreDto> {
     }
 
     private List<ReviewScoreDto> fetchReviewScores() {
-        RankingPeriod period = RankingPeriod.valueOf(periodString);
+        RankingPeriod period;
+        try {
+            period = RankingPeriod.valueOf(periodString);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new DeokhugamException(ErrorCode.INVALID_RANKING_PERIOD,
+                String.format("잘못된 랭킹 기간 파라미터입니다. periodString=%s", periodString));
+        }
+
         Instant now = TimeParameterUtil.parseNowOrDefault(nowString);
 
         boolean isAllTime = (period == RankingPeriod.ALL_TIME);
@@ -46,17 +55,17 @@ public class JpaReviewScoreReader implements ItemReader<ReviewScoreDto> {
         Instant end = isAllTime ? null : period.getEndTime(now);
 
         String query = """
-            SELECT r.id, u.id, u.nickname, r.content,
-                   COALESCE(r.rating, 0.0),
-                   b.id, b.title, b.thumbnailUrl,
-                   COALESCE(r.likeCount, 0), COALESCE(r.commentCount, 0)
-            FROM Review r
-            JOIN r.user u
-            JOIN r.book b
-            WHERE r.isDeleted = false
-        """ + (isAllTime ? "" : " AND r.createdAt BETWEEN :start AND :end") + """
-            ORDER BY COALESCE(r.likeCount, 0) DESC, COALESCE(r.commentCount, 0) DESC
-        """;
+        SELECT r.id, u.id, u.nickname, r.content,
+               COALESCE(r.rating, 0.0),
+               b.id, b.title, b.thumbnailUrl,
+               COALESCE(r.likeCount, 0), COALESCE(r.commentCount, 0)
+        FROM Review r
+        JOIN r.user u
+        JOIN r.book b
+        WHERE r.isDeleted = false
+    """ + (isAllTime ? "" : " AND r.createdAt BETWEEN :start AND :end") + """
+        ORDER BY COALESCE(r.likeCount, 0) DESC, COALESCE(r.commentCount, 0) DESC
+    """;
 
         var typedQuery = entityManager.createQuery(query, Object[].class);
         if (!isAllTime) {

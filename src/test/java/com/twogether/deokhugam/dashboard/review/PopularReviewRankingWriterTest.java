@@ -140,4 +140,34 @@ class PopularReviewRankingWriterTest {
             .rank(0)
             .build();
     }
+
+    @Test
+    @DisplayName("랭킹 항목의 period가 null이면 INVALID_RANKING_PERIOD 예외를 던진다")
+    void writer_shouldThrowException_whenPeriodIsNull() {
+        // given
+        PopularReviewRanking invalid = PopularReviewRanking.builder()
+            .reviewId(UUID.randomUUID())
+            .userId(UUID.randomUUID())
+            .userNickname("테스터")
+            .reviewContent("내용입니다")
+            .reviewRating(4.5)
+            .bookId(UUID.randomUUID())
+            .bookTitle("책")
+            .bookThumbnailUrl("http://example.com/thumb.jpg")
+            .period(null)
+            .score(8.0)
+            .likeCount(10L)
+            .commentCount(20L)
+            .createdAt(Instant.now())
+            .rank(0)
+            .build();
+
+        Chunk<PopularReviewRanking> chunk = new Chunk<>(List.of(invalid));
+
+        // when
+        DeokhugamException ex = assertThrows(DeokhugamException.class, () -> writer.write(chunk));
+
+        // then
+        assertEquals(ErrorCode.INVALID_RANKING_PERIOD, ex.getErrorCode());
+    }
 }

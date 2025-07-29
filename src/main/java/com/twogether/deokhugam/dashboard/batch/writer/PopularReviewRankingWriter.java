@@ -42,13 +42,21 @@ public class PopularReviewRankingWriter implements ItemWriter<PopularReviewRanki
             throw new DeokhugamException(ErrorCode.RANKING_DATA_EMPTY);
         }
 
+        RankingPeriod period = rankingList.get(0).getPeriod();
+
+        // period null 체크
+        if (period == null) {
+            log.error("랭킹 저장 실패: period 값이 null입니다. 첫 번째 항목: {}", rankingList.get(0));
+            throw new DeokhugamException(ErrorCode.INVALID_RANKING_PERIOD,
+                Map.of("reason", "rankingList.get(0).period == null"));
+        }
+
         try {
             rankingList.sort(
                 Comparator.comparingDouble(PopularReviewRanking::getScore).reversed()
                     .thenComparing(PopularReviewRanking::getCreatedAt)
             );
 
-            RankingPeriod period = rankingList.get(0).getPeriod();
             popularReviewRankingRepository.deleteByPeriod(period);
 
             int indexRank = 1;
@@ -66,12 +74,10 @@ public class PopularReviewRankingWriter implements ItemWriter<PopularReviewRanki
             }
 
             popularReviewRankingRepository.saveAll(rankingList);
-
-            // 커스텀 메트릭 - 저장 건수 카운터
             meterRegistry.counter("batch.popular_review.saved.count", "period", period.name())
                 .increment(rankingList.size());
 
-            log.info("인기 리뷰 랭킹 {}건 저장 완료", rankingList.size());
+            log.info("인기 리뷰 랭킹 {}건 저장 완료 (period: {})", rankingList.size(), period);
 
         } catch (Exception e) {
             log.error("인기 리뷰 랭킹 저장 실패", e);
