@@ -10,12 +10,6 @@ spring:
       hibernate:
         format_sql: false
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        jdbc.time_zone: UTC # 배치에서 LocalDateTime → Instant 변환 시 UTC 기준으로 계산
-  batch:
-    job:
-      enabled: false # 애플리케이션 시작 시 배치 작업 자동 실행 방지
-    jdbc:
-      initialize-schema: always # Spring Batch 관련 테이블 자동 생성
 
 logging:
   level:
@@ -51,20 +45,3 @@ info:
     jpa:
       ddl-auto: ${spring.jpa.hibernate.ddl-auto}
 
-
-#Spring Batch 설정
-batch:
-  popular-book-ranking:
-    enabled: true
-    cron: "0 */5 * * * *"
-
-  popular-review-ranking:
-    enabled: true
-    cron: "0 */5 * * * *"
-
-  power-user-ranking:
-    enabled: true
-    cron: "0 */5 * * * *"
-  notification-cleanup:
-    enabled: true
-    cron: "0 */15 * * * *"

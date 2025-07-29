@@ -58,16 +58,16 @@ public class JpaReviewScoreReader implements ItemReader<ReviewScoreDto> {
             SELECT r.id, u.id, u.nickname, r.content,
                    COALESCE(r.rating, 0.0),
                    b.id, b.title, b.thumbnailUrl,
-                   (SELECT COUNT(rl) FROM ReviewLike rl WHERE rl.review.id = r.id),
-                   (SELECT COUNT(c) FROM Comment c WHERE c.review.id = r.id AND c.isDeleted = false)
+                   COALESCE(r.likeCount, 0),
+                   COALESCE(r.commentCount, 0)
             FROM Review r
             JOIN r.user u
             JOIN r.book b
             WHERE r.isDeleted = false
         """ + (isAllTime ? "" : " AND r.createdAt BETWEEN :start AND :end") + """
             ORDER BY
-              (SELECT COUNT(rl) FROM ReviewLike rl WHERE rl.review.id = r.id) DESC,
-              (SELECT COUNT(c) FROM Comment c WHERE c.review.id = r.id AND c.isDeleted = false) DESC
+              COALESCE(r.likeCount, 0) DESC,
+              COALESCE(r.commentCount, 0) DESC
         """;
 
         var typedQuery = entityManager.createQuery(query, Object[].class);

@@ -6,13 +6,11 @@ import com.twogether.deokhugam.dashboard.entity.PopularReviewRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PopularReviewRankingRepository;
 import com.twogether.deokhugam.notification.event.PopularReviewRankedEvent;
-import com.twogether.deokhugam.review.dto.ReviewDto;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -53,11 +51,6 @@ public class PopularReviewRankingWriter implements ItemWriter<PopularReviewRanki
         }
 
         try {
-            rankingList.sort(
-                Comparator.comparingDouble(PopularReviewRanking::getScore).reversed()
-                    .thenComparing(PopularReviewRanking::getCreatedAt)
-            );
-
             popularReviewRankingRepository.deleteByPeriod(period);
 
             int indexRank = 1;
@@ -75,6 +68,7 @@ public class PopularReviewRankingWriter implements ItemWriter<PopularReviewRanki
             }
 
             popularReviewRankingRepository.saveAll(rankingList);
+            popularReviewRankingRepository.flush();
             meterRegistry.counter("batch.popular_review.saved.count", "period", period.name())
                 .increment(rankingList.size());
 
