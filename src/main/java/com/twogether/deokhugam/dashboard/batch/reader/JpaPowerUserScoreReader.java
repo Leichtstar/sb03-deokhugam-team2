@@ -44,21 +44,26 @@ public class JpaPowerUserScoreReader implements ItemReader<PowerUserScoreDto> {
     }
 
     private List<PowerUserScoreDto> aggregatePowerUserScores() {
-        RankingPeriod period = RankingPeriod.valueOf(periodString);
+        RankingPeriod period;
+        try {
+            period = RankingPeriod.valueOf(periodString);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new IllegalArgumentException("잘못된 랭킹 기간 파라미터입니다: " + periodString);
+        }
+
         Instant now = TimeParameterUtil.parseNowOrDefault(nowString);
         boolean isAllTime = (period == RankingPeriod.ALL_TIME);
         Instant start = isAllTime ? null : period.getStartTime(now);
         Instant end = isAllTime ? null : period.getEndTime(now);
 
-        // 1. 리뷰 점수
+        // 1. 리뷰 점수 (기간 필터 O)
         String reviewQuery = """
-        SELECT r.user.id, SUM(r.likeCount * 0.3 + r.commentCount * 0.7)
-        FROM Review r
-        WHERE r.isDeleted = false
-    """ + (isAllTime ? "" : " AND r.createdAt BETWEEN :start AND :end") + """
-        GROUP BY r.user.id
-    """;
-
+            SELECT r.user.id, SUM(r.likeCount * 0.3 + r.commentCount * 0.7)
+            FROM Review r
+            WHERE r.isDeleted = false
+        """ + (isAllTime ? "" : " AND r.createdAt BETWEEN :start AND :end") + """
+            GROUP BY r.user.id
+        """;
         var reviewTypedQuery = em.createQuery(reviewQuery, Object[].class);
         if (!isAllTime) {
             reviewTypedQuery.setParameter("start", start);
@@ -70,35 +75,28 @@ public class JpaPowerUserScoreReader implements ItemReader<PowerUserScoreDto> {
                 row -> ((Number) row[1]).doubleValue()
             ));
 
-        // 2. 좋아요 수
+        // 2. 좋아요 수 (항상 전체 기준)
         String likeQuery = """
-        SELECT l.reviewLikePK.userId, COUNT(l)
-        FROM ReviewLike l
-        WHERE l.liked = true
-    """ + (isAllTime ? "" : " AND l.review.createdAt BETWEEN :start AND :end") + """
-        GROUP BY l.reviewLikePK.userId
-    """;
-
+            SELECT l.reviewLikePK.userId, COUNT(l)
+            FROM ReviewLike l
+            WHERE l.liked = true
+            GROUP BY l.reviewLikePK.userId
+        """;
         var likeTypedQuery = em.createQuery(likeQuery, Object[].class);
-        if (!isAllTime) {
-            likeTypedQuery.setParameter("start", start);
-            likeTypedQuery.setParameter("end", end);
-        }
         Map<UUID, Long> likeCountMap = likeTypedQuery.getResultList().stream()
             .collect(Collectors.toMap(
                 row -> (UUID) row[0],
                 row -> ((Number) row[1]).longValue()
             ));
 
-        // 3. 댓글 수
+        // 3. 댓글 수 (기간 필터 O)
         String commentQuery = """
-        SELECT c.user.id, COUNT(c)
-        FROM Comment c
-        WHERE c.isDeleted = false
-    """ + (isAllTime ? "" : " AND c.createdAt BETWEEN :start AND :end") + """
-        GROUP BY c.user.id
-    """;
-
+            SELECT c.user.id, COUNT(c)
+            FROM Comment c
+            WHERE c.isDeleted = false
+        """ + (isAllTime ? "" : " AND c.createdAt BETWEEN :start AND :end") + """
+            GROUP BY c.user.id
+        """;
         var commentTypedQuery = em.createQuery(commentQuery, Object[].class);
         if (!isAllTime) {
             commentTypedQuery.setParameter("start", start);
@@ -110,7 +108,7 @@ public class JpaPowerUserScoreReader implements ItemReader<PowerUserScoreDto> {
                 row -> ((Number) row[1]).longValue()
             ));
 
-        // 통합 userId 목록
+        // userId 수집
         Set<UUID> userIds = new HashSet<>();
         userIds.addAll(reviewScoreMap.keySet());
         userIds.addAll(likeCountMap.keySet());
@@ -119,10 +117,10 @@ public class JpaPowerUserScoreReader implements ItemReader<PowerUserScoreDto> {
         // 닉네임 조회
         Map<UUID, String> nicknameMap = userIds.isEmpty() ? Collections.emptyMap() :
             em.createQuery("""
-            SELECT u.id, u.nickname
-            FROM User u
-            WHERE u.id IN :userIds
-        """, Object[].class)
+                SELECT u.id, u.nickname
+                FROM User u
+                WHERE u.id IN :userIds
+            """, Object[].class)
                 .setParameter("userIds", userIds)
                 .getResultList().stream()
                 .collect(Collectors.toMap(
