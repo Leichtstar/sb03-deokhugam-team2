@@ -46,52 +46,65 @@ public class JpaPowerUserScoreReader implements ItemReader<PowerUserScoreDto> {
     private List<PowerUserScoreDto> aggregatePowerUserScores() {
         RankingPeriod period = RankingPeriod.valueOf(periodString);
         Instant now = TimeParameterUtil.parseNowOrDefault(nowString);
-        Instant start = period.getStartTime(now);
-        Instant end = period.getEndTime(now);
+        boolean isAllTime = (period == RankingPeriod.ALL_TIME);
+        Instant start = isAllTime ? null : period.getStartTime(now);
+        Instant end = isAllTime ? null : period.getEndTime(now);
 
-        // 1. 작성한 리뷰의 인기 점수
-        Map<UUID, Double> reviewScoreMap = em.createQuery("""
-            SELECT r.user.id, SUM(r.likeCount * 0.3 + r.commentCount * 0.7)
-            FROM Review r
-            WHERE r.createdAt >= :start AND r.createdAt <= :end
-              AND r.isDeleted = false
-            GROUP BY r.user.id
-        """, Object[].class)
-            .setParameter("start", start)
-            .setParameter("end", end)
-            .getResultList().stream()
+        // 1. 리뷰 점수
+        String reviewQuery = """
+        SELECT r.user.id, SUM(r.likeCount * 0.3 + r.commentCount * 0.7)
+        FROM Review r
+        WHERE r.isDeleted = false
+    """ + (isAllTime ? "" : " AND r.createdAt BETWEEN :start AND :end") + """
+        GROUP BY r.user.id
+    """;
+
+        var reviewTypedQuery = em.createQuery(reviewQuery, Object[].class);
+        if (!isAllTime) {
+            reviewTypedQuery.setParameter("start", start);
+            reviewTypedQuery.setParameter("end", end);
+        }
+        Map<UUID, Double> reviewScoreMap = reviewTypedQuery.getResultList().stream()
             .collect(Collectors.toMap(
                 row -> (UUID) row[0],
                 row -> ((Number) row[1]).doubleValue()
             ));
 
-        // 2. 좋아요 참여 수
-        Map<UUID, Long> likeCountMap = em.createQuery("""
-            SELECT l.reviewLikePK.userId, COUNT(l)
-            FROM ReviewLike l
-            WHERE l.liked = true
-              AND l.review.createdAt >= :start AND l.review.createdAt <= :end
-            GROUP BY l.reviewLikePK.userId
-        """, Object[].class)
-            .setParameter("start", start)
-            .setParameter("end", end)
-            .getResultList().stream()
+        // 2. 좋아요 수
+        String likeQuery = """
+        SELECT l.reviewLikePK.userId, COUNT(l)
+        FROM ReviewLike l
+        WHERE l.liked = true
+    """ + (isAllTime ? "" : " AND l.review.createdAt BETWEEN :start AND :end") + """
+        GROUP BY l.reviewLikePK.userId
+    """;
+
+        var likeTypedQuery = em.createQuery(likeQuery, Object[].class);
+        if (!isAllTime) {
+            likeTypedQuery.setParameter("start", start);
+            likeTypedQuery.setParameter("end", end);
+        }
+        Map<UUID, Long> likeCountMap = likeTypedQuery.getResultList().stream()
             .collect(Collectors.toMap(
                 row -> (UUID) row[0],
                 row -> ((Number) row[1]).longValue()
             ));
 
-        // 3. 댓글 참여 수
-        Map<UUID, Long> commentCountMap = em.createQuery("""
-            SELECT c.user.id, COUNT(c)
-            FROM Comment c
-            WHERE c.createdAt >= :start AND c.createdAt <= :end
-              AND c.isDeleted = false
-            GROUP BY c.user.id
-        """, Object[].class)
-            .setParameter("start", start)
-            .setParameter("end", end)
-            .getResultList().stream()
+        // 3. 댓글 수
+        String commentQuery = """
+        SELECT c.user.id, COUNT(c)
+        FROM Comment c
+        WHERE c.isDeleted = false
+    """ + (isAllTime ? "" : " AND c.createdAt BETWEEN :start AND :end") + """
+        GROUP BY c.user.id
+    """;
+
+        var commentTypedQuery = em.createQuery(commentQuery, Object[].class);
+        if (!isAllTime) {
+            commentTypedQuery.setParameter("start", start);
+            commentTypedQuery.setParameter("end", end);
+        }
+        Map<UUID, Long> commentCountMap = commentTypedQuery.getResultList().stream()
             .collect(Collectors.toMap(
                 row -> (UUID) row[0],
                 row -> ((Number) row[1]).longValue()
@@ -104,24 +117,20 @@ public class JpaPowerUserScoreReader implements ItemReader<PowerUserScoreDto> {
         userIds.addAll(commentCountMap.keySet());
 
         // 닉네임 조회
-        Map<UUID, String> nicknameMap;
-        if (userIds.isEmpty()) {
-            nicknameMap = Collections.emptyMap();
-        } else {
-            nicknameMap = em.createQuery("""
-                 SELECT u.id, u.nickname
-                 FROM User u
-                 WHERE u.id IN :userIds
-            """, Object[].class)
+        Map<UUID, String> nicknameMap = userIds.isEmpty() ? Collections.emptyMap() :
+            em.createQuery("""
+            SELECT u.id, u.nickname
+            FROM User u
+            WHERE u.id IN :userIds
+        """, Object[].class)
                 .setParameter("userIds", userIds)
                 .getResultList().stream()
                 .collect(Collectors.toMap(
                     row -> (UUID) row[0],
                     row -> (String) row[1]
                 ));
-        }
 
-        // DTO 조립 후 정렬
+        // DTO 조립 및 점수 기준 정렬
         return userIds.stream()
             .map(userId -> new PowerUserScoreDto(
                 userId,
