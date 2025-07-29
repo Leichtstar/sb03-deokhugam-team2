@@ -28,6 +28,10 @@ management:
     enable:
       all: true
 
+logging:
+  level:
+    org.springframework.jdbc.datasource.init.ScriptUtils: DEBUG
+
 naver:
   api:
     client-id: ${NAVER_CLIENT_ID:dummy-id}

@@ -41,10 +41,11 @@ public class JpaReviewScoreReader implements ItemReader<ReviewScoreDto> {
         RankingPeriod period = RankingPeriod.valueOf(periodString);
         Instant now = TimeParameterUtil.parseNowOrDefault(nowString);
 
-        Instant start = period.getStartTime(now);
-        Instant end = period.getEndTime(now);
+        boolean isAllTime = (period == RankingPeriod.ALL_TIME);
+        Instant start = isAllTime ? null : period.getStartTime(now);
+        Instant end = isAllTime ? null : period.getEndTime(now);
 
-        return entityManager.createQuery("""
+        String query = """
             SELECT r.id, u.id, u.nickname, r.content,
                    COALESCE(r.rating, 0.0),
                    b.id, b.title, b.thumbnailUrl,
@@ -52,15 +53,19 @@ public class JpaReviewScoreReader implements ItemReader<ReviewScoreDto> {
             FROM Review r
             JOIN r.user u
             JOIN r.book b
-            WHERE r.createdAt >= :start AND r.createdAt <= :end
-              AND r.isDeleted = false
+            WHERE r.isDeleted = false
+        """ + (isAllTime ? "" : " AND r.createdAt BETWEEN :start AND :end") + """
             ORDER BY COALESCE(r.likeCount, 0) DESC, COALESCE(r.commentCount, 0) DESC
-        """, Object[].class)
-            .setParameter("start", start)
-            .setParameter("end", end)
-            .setMaxResults(1000)
-            .getResultList()
-            .stream()
+        """;
+
+        var typedQuery = entityManager.createQuery(query, Object[].class);
+        if (!isAllTime) {
+            typedQuery.setParameter("start", start);
+            typedQuery.setParameter("end", end);
+        }
+
+        return typedQuery.setMaxResults(1000)
+            .getResultList().stream()
             .map(row -> new ReviewScoreDto(
                 (UUID) row[0],
                 (UUID) row[1],

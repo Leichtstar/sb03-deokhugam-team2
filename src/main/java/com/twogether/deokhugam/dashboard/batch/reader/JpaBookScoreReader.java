@@ -41,24 +41,29 @@ public class JpaBookScoreReader implements ItemReader<BookScoreDto> {
         RankingPeriod period = RankingPeriod.valueOf(periodString);
         Instant now = TimeParameterUtil.parseNowOrDefault(nowString);
 
-        Instant start = period.getStartTime(now);
-        Instant end = period.getEndTime(now);
+        boolean isAllTime = (period == RankingPeriod.ALL_TIME);
+        Instant start = isAllTime ? null : period.getStartTime(now);
+        Instant end = isAllTime ? null : period.getEndTime(now);
 
-        return entityManager.createQuery("""
+        String query = """
             SELECT b.id, b.title, b.author, b.thumbnailUrl,
                    COUNT(r), COALESCE(AVG(r.rating), 0.0)
             FROM Review r
             JOIN r.book b
-            WHERE r.createdAt >= :start AND r.createdAt <= :end
-              AND r.isDeleted = false AND b.isDeleted = false
+            WHERE r.isDeleted = false AND b.isDeleted = false
+        """ + (isAllTime ? "" : " AND r.createdAt BETWEEN :start AND :end") + """
             GROUP BY b.id, b.title, b.author, b.thumbnailUrl
             ORDER BY COUNT(r) DESC, AVG(r.rating) DESC
-        """, Object[].class)
-            .setParameter("start", start)
-            .setParameter("end", end)
-            .setMaxResults(1000)
-            .getResultList()
-            .stream()
+        """;
+
+        var typedQuery = entityManager.createQuery(query, Object[].class);
+        if (!isAllTime) {
+            typedQuery.setParameter("start", start);
+            typedQuery.setParameter("end", end);
+        }
+
+        return typedQuery.setMaxResults(1000)
+            .getResultList().stream()
             .map(row -> new BookScoreDto(
                 (UUID) row[0],
                 (String) row[1],
