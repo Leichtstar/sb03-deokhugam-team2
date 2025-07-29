@@ -6,9 +6,11 @@ import com.twogether.deokhugam.dashboard.entity.PopularReviewRanking;
 import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
 import com.twogether.deokhugam.dashboard.repository.PopularReviewRankingRepository;
 import com.twogether.deokhugam.notification.event.PopularReviewRankedEvent;
+import com.twogether.deokhugam.review.dto.ReviewDto;
 import com.twogether.deokhugam.review.entity.Review;
 import com.twogether.deokhugam.review.repository.ReviewRepository;
 import io.micrometer.core.instrument.MeterRegistry;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -44,7 +46,6 @@ public class PopularReviewRankingWriter implements ItemWriter<PopularReviewRanki
 
         RankingPeriod period = rankingList.get(0).getPeriod();
 
-        // period null 체크
         if (period == null) {
             log.error("랭킹 저장 실패: period 값이 null입니다. 첫 번째 항목: {}", rankingList.get(0));
             throw new DeokhugamException(ErrorCode.INVALID_RANKING_PERIOD,
@@ -92,13 +93,38 @@ public class PopularReviewRankingWriter implements ItemWriter<PopularReviewRanki
 
             Map<UUID, Review> reviewMap = reviewRepository.findAllById(top10ReviewIds)
                 .stream()
+                .peek(review -> {
+                    try {
+                        Field commentField = Review.class.getDeclaredField("commentCount");
+                        commentField.setAccessible(true);
+                        if (commentField.get(review) == null) {
+                            commentField.set(review, 0L);
+                        }
+
+                        Field likeField = Review.class.getDeclaredField("likeCount");
+                        likeField.setAccessible(true);
+                        if (likeField.get(review) == null) {
+                            likeField.set(review, 0L);
+                        }
+
+                        Field ratingField = Review.class.getDeclaredField("rating");
+                        ratingField.setAccessible(true);
+                        if (ratingField.get(review) == null) {
+                            ratingField.set(review, 0.0);
+                        }
+                    } catch (Exception e) {
+                        log.warn("Review 필드 초기화 실패: {}", review.getId(), e);
+                    }
+                })
                 .collect(Collectors.toMap(Review::getId, Function.identity()));
 
             for (PopularReviewRanking ranking : rankingList) {
                 if (ranking.getRank() <= 10) {
                     Review review = reviewMap.get(ranking.getReviewId());
                     if (review != null) {
-                        eventPublisher.publishEvent(new PopularReviewRankedEvent(review.getUser(), review));
+                        eventPublisher.publishEvent(new PopularReviewRankedEvent(
+                            review.getUser(), review
+                        ));
                     } else {
                         log.warn("알림 이벤트 발행 스킵: 리뷰가 존재하지 않습니다. reviewId: {}", ranking.getReviewId());
                     }
