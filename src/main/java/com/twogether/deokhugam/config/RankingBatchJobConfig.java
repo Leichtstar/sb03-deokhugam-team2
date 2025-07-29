@@ -15,9 +15,16 @@ import com.twogether.deokhugam.dashboard.batch.writer.PowerUserRankingWriter;
 import com.twogether.deokhugam.dashboard.entity.PopularBookRanking;
 import com.twogether.deokhugam.dashboard.entity.PopularReviewRanking;
 import com.twogether.deokhugam.dashboard.entity.PowerUserRanking;
+import com.twogether.deokhugam.dashboard.entity.RankingPeriod;
+import com.twogether.deokhugam.user.entity.User;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.persistence.EntityManager;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -130,8 +137,58 @@ public class RankingBatchJobConfig {
     @Bean
     @JobScope
     public ItemProcessor<PowerUserScoreDto, PowerUserRanking> powerUserScoreProcessor(
-        @Value("#{jobParameters['now']}") String now
+        @Value("#{jobParameters['now']}") String now,
+        @Value("#{jobParameters['period']}") String periodString
     ) {
-        return new PowerUserScoreProcessor(em, Instant.parse(now), meterRegistry);
+        Instant nowInstant = Instant.parse(now);
+        RankingPeriod period = RankingPeriod.valueOf(periodString);
+        boolean isAllTime = (period == RankingPeriod.ALL_TIME);
+        Instant start = isAllTime ? null : period.getStartTime(nowInstant);
+        Instant end = isAllTime ? null : period.getEndTime(nowInstant);
+
+        Set<UUID> userIds = new HashSet<>();
+
+        // 1. 리뷰 유저
+        var q1 = em.createQuery("""
+                SELECT DISTINCT r.user.id FROM Review r
+                WHERE r.isDeleted = false""" + (isAllTime ? "" : " AND r.createdAt BETWEEN :start AND :end"),
+            UUID.class);
+        if (!isAllTime) {
+            q1.setParameter("start", start);
+            q1.setParameter("end", end);
+        }
+        userIds.addAll(q1.getResultList());
+
+        // 2. 댓글 유저
+        var q2 = em.createQuery("""
+                SELECT DISTINCT c.user.id FROM Comment c
+                WHERE c.isDeleted = false""" + (isAllTime ? "" : " AND c.createdAt BETWEEN :start AND :end"),
+            UUID.class);
+        if (!isAllTime) {
+            q2.setParameter("start", start);
+            q2.setParameter("end", end);
+        }
+        userIds.addAll(q2.getResultList());
+
+        // 3. 좋아요 유저
+        var q3 = em.createQuery("""
+                SELECT DISTINCT l.reviewLikePK.userId FROM ReviewLike l
+                WHERE l.liked = true""" + (isAllTime ? "" : " AND l.review.createdAt BETWEEN :start AND :end"),
+            UUID.class);
+        if (!isAllTime) {
+            q3.setParameter("start", start);
+            q3.setParameter("end", end);
+        }
+        userIds.addAll(q3.getResultList());
+
+        // 4. User Map 생성
+        Map<UUID, User> userMap = em.createQuery("""
+                SELECT u FROM User u WHERE u.id IN :ids
+            """, User.class)
+            .setParameter("ids", userIds)
+            .getResultList().stream()
+            .collect(Collectors.toMap(User::getId, u -> u));
+
+        return new PowerUserScoreProcessor(userMap, nowInstant, meterRegistry, em);
     }
 }
