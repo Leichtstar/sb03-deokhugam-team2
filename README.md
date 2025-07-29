@@ -1,4 +1,5 @@
 # 덕후감 (Deokhugam)
+[![codecov](https://codecov.io/gh/sb03-deokhugam-team2/sb03-deokhugam-team2/branch/dev/graph/badge.svg)](https://codecov.io/gh/sb03-deokhugam-team2/sb03-deokhugam-team2)
 
 책 리뷰 및 독서 관리 플랫폼입니다.
 <br>
