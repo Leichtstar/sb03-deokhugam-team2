@@ -24,7 +24,7 @@ public record PowerUserScoreDto(
     private static final double COMMENT_COUNT_WEIGHT = 0.3;
 
     public double calculateScore() {
-        double normalizedReviewScore = reviewScoreSum;
+        double normalizedReviewScore = Math.min(reviewScoreSum / 20.0, 1.0);
         double normalizedLike = Math.log1p(likeCount) / 10.0;
         double normalizedComment = Math.log1p(commentCount) / 10.0;
         return (normalizedReviewScore * REVIEW_SCORE_WEIGHT)
