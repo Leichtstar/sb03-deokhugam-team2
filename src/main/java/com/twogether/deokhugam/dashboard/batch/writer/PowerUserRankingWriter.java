@@ -33,11 +33,6 @@ public class PowerUserRankingWriter implements ItemWriter<PowerUserRanking> {
         }
 
         try {
-            rankingList.sort(
-                Comparator.comparingDouble(PowerUserRanking::getScore).reversed()
-                    .thenComparing(PowerUserRanking::getCreatedAt)
-            );
-
             RankingPeriod period = rankingList.get(0).getPeriod();
             powerUserRankingRepository.deleteByPeriod(period);
 
@@ -58,12 +53,12 @@ public class PowerUserRankingWriter implements ItemWriter<PowerUserRanking> {
             }
 
             powerUserRankingRepository.saveAll(rankingList);
+            powerUserRankingRepository.flush();
 
-            // 커스텀 메트릭 - 저장 건수 카운터
             meterRegistry.counter("batch.power_user.saved.count", "period", period.name())
                 .increment(rankingList.size());
 
-            log.info("파워 유저 랭킹 {}건 저장 완료", rankingList.size());
+            log.info("파워 유저 랭킹 {}건 저장 완료 (period: {})", rankingList.size(), period);
 
         } catch (Exception e) {
             log.error("파워 유저 랭킹 저장 실패", e);
