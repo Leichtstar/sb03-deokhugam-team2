@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BookRepository extends JpaRepository<Book, UUID> {
 	boolean existsByIsbn(String isbn);
+	//키워드 없을 시
 	@Query("""
     SELECT COUNT(b) FROM Book b
     WHERE b.isDeleted = false
