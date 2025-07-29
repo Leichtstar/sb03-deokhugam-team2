@@ -53,7 +53,7 @@ public class JpaPowerUserScoreReader implements ItemReader<PowerUserScoreDto> {
         Map<UUID, Double> reviewScoreMap = em.createQuery("""
             SELECT r.user.id, SUM(r.likeCount * 0.3 + r.commentCount * 0.7)
             FROM Review r
-            WHERE r.createdAt >= :start AND r.createdAt < :end
+            WHERE r.createdAt >= :start AND r.createdAt <= :end
               AND r.isDeleted = false
             GROUP BY r.user.id
         """, Object[].class)
@@ -70,7 +70,7 @@ public class JpaPowerUserScoreReader implements ItemReader<PowerUserScoreDto> {
             SELECT l.reviewLikePK.userId, COUNT(l)
             FROM ReviewLike l
             WHERE l.liked = true
-              AND l.review.createdAt >= :start AND l.review.createdAt < :end
+              AND l.review.createdAt >= :start AND l.review.createdAt <= :end
             GROUP BY l.reviewLikePK.userId
         """, Object[].class)
             .setParameter("start", start)
@@ -85,7 +85,7 @@ public class JpaPowerUserScoreReader implements ItemReader<PowerUserScoreDto> {
         Map<UUID, Long> commentCountMap = em.createQuery("""
             SELECT c.user.id, COUNT(c)
             FROM Comment c
-            WHERE c.createdAt >= :start AND c.createdAt < :end
+            WHERE c.createdAt >= :start AND c.createdAt <= :end
               AND c.isDeleted = false
             GROUP BY c.user.id
         """, Object[].class)
