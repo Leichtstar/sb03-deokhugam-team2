@@ -9,10 +9,10 @@
 DROP TABLE IF EXISTS notifications;
 DROP TABLE IF EXISTS comments;
 DROP TABLE IF EXISTS review_like;
-DROP TABLE IF EXISTS reviews;
 DROP TABLE IF EXISTS power_user_ranking;
 DROP TABLE IF EXISTS popular_review_ranking;
 DROP TABLE IF EXISTS popular_book_ranking;
+DROP TABLE IF EXISTS reviews;
 DROP TABLE IF EXISTS books;
 DROP TABLE IF EXISTS users;
 
@@ -66,9 +66,9 @@ CREATE TABLE reviews (
                          CONSTRAINT fk_reviews_user_id FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
--- Partial Index → H2에서는 지원되지 않음 → 단순 Unique로 대체
-CREATE UNIQUE INDEX uq_reviews_book_user_simple
-    ON reviews (book_id, user_id);
+-- 논리 삭제 컬럼을 포함해 Unique 제약을 유지하면서 중복 허용
+CREATE UNIQUE INDEX uq_reviews_book_user_deleted_comp
+    ON reviews (book_id, user_id, is_deleted);
 
 -- 리뷰 좋아요 테이블
 CREATE TABLE review_like (
