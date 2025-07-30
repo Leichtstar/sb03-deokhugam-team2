@@ -171,3 +171,4 @@ src/
 http://twogether-read.site/
 
 ## 프로젝트 회고록
+https://www.notion.so/codeit/2-2gether-Read-2396fd228e8d805e99fef9879be8b529?source=copy_link
