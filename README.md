@@ -168,5 +168,6 @@ src/
 - [x] **로깅 시스템** - Logback 기반 구조화된 로깅
 
 ## 구현 홈페이지
+http://twogether-read.site/
 
 ## 프로젝트 회고록
