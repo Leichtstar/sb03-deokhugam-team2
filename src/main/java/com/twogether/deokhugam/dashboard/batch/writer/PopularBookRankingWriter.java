@@ -59,6 +59,7 @@ public class PopularBookRankingWriter implements ItemWriter<PopularBookRanking> 
             }
 
             popularBookRankingRepository.saveAll(rankingList);
+            popularBookRankingRepository.flush();
 
             // 커스텀 메트릭 - 저장 건수 카운터 등록
             meterRegistry.counter("batch.popular_book.saved.count", "period", period.name())

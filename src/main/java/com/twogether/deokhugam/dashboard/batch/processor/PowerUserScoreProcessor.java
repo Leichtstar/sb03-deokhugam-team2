@@ -9,27 +9,38 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;
 
+@Slf4j
 public class PowerUserScoreProcessor implements ItemProcessor<PowerUserScoreDto, PowerUserRanking> {
 
-    private final EntityManager em;
+    private final Map<UUID, User> userMap;
     private final Instant executionTime;
     private final MeterRegistry meterRegistry;
+    private final EntityManager em;
 
-    public PowerUserScoreProcessor(EntityManager em, Instant executionTime, MeterRegistry meterRegistry) {
-        this.em = em;
+    public PowerUserScoreProcessor(Map<UUID, User> userMap,
+        Instant executionTime,
+        MeterRegistry meterRegistry,
+        EntityManager em) {
+        this.userMap = userMap;
         this.executionTime = executionTime;
         this.meterRegistry = meterRegistry;
+        this.em = em;
     }
 
     @Override
     public PowerUserRanking process(PowerUserScoreDto dto) {
         Timer.Sample sample = Timer.start(meterRegistry);
 
-        User user = em.find(User.class, dto.userId());
-        if (user == null) return null;
+        User user = userMap.get(dto.userId());
+        if (user == null) {
+            log.warn("PowerUserScoreProcessor: 유저 누락 → userId={}, nickname={}", dto.userId(), dto.nickname());
+            return null;
+        }
 
         double baseScore = dto.calculateScore();
         double freshnessBonus = calculateFreshnessBonus(dto.userId());
@@ -37,7 +48,7 @@ public class PowerUserScoreProcessor implements ItemProcessor<PowerUserScoreDto,
 
         meterRegistry.counter("batch.power_user.processed.count").increment();
         sample.stop(Timer.builder("batch.power_user.processed.timer")
-            .description("파워 유저 점수 계산에 소요된 시간")
+            .description("파워 유저 점수 계산 시간")
             .tag("userId", dto.userId().toString())
             .register(meterRegistry));
 
@@ -55,23 +66,29 @@ public class PowerUserScoreProcessor implements ItemProcessor<PowerUserScoreDto,
     }
 
     private double calculateFreshnessBonus(UUID userId) {
-        Instant latestReviewTime = getMaxCreatedAt(
-            "SELECT MAX(r.createdAt) FROM Review r WHERE r.user.id = :userId AND r.isDeleted = false", userId);
+        Instant latestReviewTime = getMaxCreatedAt("""
+            SELECT MAX(r.createdAt) FROM Review r
+            WHERE r.user.id = :userId AND r.isDeleted = false
+        """, userId);
 
-        Instant latestCommentTime = getMaxCreatedAt(
-            "SELECT MAX(c.createdAt) FROM Comment c WHERE c.user.id = :userId AND c.isDeleted = false", userId);
-
-        // ⚠ ReviewLike에는 createdAt 없으므로 제외
+        Instant latestCommentTime = getMaxCreatedAt("""
+            SELECT MAX(c.createdAt) FROM Comment c
+            WHERE c.user.id = :userId AND c.isDeleted = false
+        """, userId);
 
         Instant latestActivity = maxInstant(latestReviewTime, latestCommentTime);
-
         return computeBonus(latestActivity);
     }
 
     private Instant getMaxCreatedAt(String jpql, UUID userId) {
-        TypedQuery<Instant> query = em.createQuery(jpql, Instant.class);
-        query.setParameter("userId", userId);
-        return query.getSingleResult();
+        try {
+            TypedQuery<Instant> query = em.createQuery(jpql, Instant.class);
+            query.setParameter("userId", userId);
+            return query.getSingleResult();
+        } catch (Exception e) {
+            log.warn("쿼리 실행 중 오류 발생: {}", jpql, e);
+            return null;
+        }
     }
 
     private Instant maxInstant(Instant a, Instant b) {
@@ -82,7 +99,6 @@ public class PowerUserScoreProcessor implements ItemProcessor<PowerUserScoreDto,
 
     private double computeBonus(Instant time) {
         if (time == null) return 0.0;
-
         long hoursAgo = Duration.between(time, Instant.now()).toHours();
         if (hoursAgo < 1) return 0.003;
         if (hoursAgo < 6) return 0.002;

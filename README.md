@@ -69,12 +69,16 @@ https://www.notion.so/ohgiraffers/2gether-Read-207649136c1180e8a801c3cb2d59b319
 
 ### 황지인: 리뷰 관리 (`/api/reviews`)
 - 리뷰 작성 API (`POST /api/reviews`)
-- 리뷰 목록 조회 API (`GET /api/reviews`)
-- 특정 리뷰 조회 API (`GET /api/reviews/{reviewId}`)
-- 리뷰 수정 API (`PATCH /api/reviews/{reviewId}`)
-- 리뷰 논리 삭제 API (`DELETE /api/reviews/{reviewId}`)
+![녹화_2025_08_01_00_00_39_219](https://github.com/user-attachments/assets/e75f3528-2d01-4c24-9231-b10ff29f3b01)
+- 리뷰 목록 조회 API (`GET /api/reviews`), 특정 리뷰 조회 API (`GET /api/reviews/{reviewId}`)
+![녹화_2025_08_01_00_09_28_668](https://github.com/user-attachments/assets/ab58f09b-bea0-4d87-b550-4eadac474d9a)
+
+- 리뷰 수정 API (`PATCH /api/reviews/{reviewId}`), 리뷰 논리 삭제 API (`DELETE /api/reviews/{reviewId}`)
+![녹화_2025_08_01_00_11_52_507](https://github.com/user-attachments/assets/2e8ee783-a130-4a03-ac8f-a1decab131c8)
 - 리뷰 물리 삭제 API (`DELETE /api/reviews/{reviewId}/hard`)
 - 리뷰 좋아요/취소 API (`POST /api/reviews/{reviewId}/like`)
+![녹화_2025_08_01_00_16_22_203](https://github.com/user-attachments/assets/6dea0a63-5e6a-4d25-ae80-06bf3d87128b)
+
 
 ### 이승진: 댓글 관리 (`/api/comments`)
 - 댓글 작성 API (`POST /api/comments`)
@@ -167,6 +171,8 @@ src/
 - [x] **테스트 커버리지** - JaCoCo를 통한 코드 품질 관리 (목표: 80%)
 - [x] **로깅 시스템** - Logback 기반 구조화된 로깅
 
-## 구현 홈페이지
+## 📖 구현 홈페이지
+http://twogether-read.site/
 
-## 프로젝트 회고록
+## 💌 프로젝트 회고록
+https://www.notion.so/codeit/3-2396fd228e8d808786e0ffccc7842337?p=2396fd228e8d805e99fef9879be8b529&pm=s

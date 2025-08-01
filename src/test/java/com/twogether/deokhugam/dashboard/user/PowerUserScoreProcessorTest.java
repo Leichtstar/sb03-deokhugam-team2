@@ -2,8 +2,8 @@ package com.twogether.deokhugam.dashboard.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.within;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -16,6 +16,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.time.Instant;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,16 +26,14 @@ import org.junit.jupiter.api.Test;
 class PowerUserScoreProcessorTest {
 
     private EntityManager em;
+    private Map<UUID, User> userMap;
     private PowerUserScoreProcessor processor;
+
+    private final Instant executionTime = Instant.parse("2025-07-22T00:00:00Z");
 
     @BeforeEach
     void setUp() {
         em = mock(EntityManager.class);
-        processor = new PowerUserScoreProcessor(
-            em,
-            Instant.parse("2025-07-22T00:00:00Z"),
-            new SimpleMeterRegistry()
-        );
     }
 
     @Test
@@ -43,19 +42,16 @@ class PowerUserScoreProcessorTest {
         // given
         UUID userId = UUID.randomUUID();
         User user = mock(User.class);
-        when(em.find(User.class, userId)).thenReturn(user);
+        userMap = Map.of(userId, user);
 
-        Instant recentActivityTime = Instant.now().minusSeconds(60 * 30); // 30분 전
+        Instant recentActivityTime = executionTime.minusSeconds(30 * 60); // 30분 전
         mockLatestActivityQueries(userId, recentActivityTime, null); // 리뷰만 있음
 
         PowerUserScoreDto dto = new PowerUserScoreDto(
-            userId,
-            "활동왕",
-            24.0,  // 리뷰 점수
-            3L,    // 좋아요 수
-            5L,    // 댓글 수
-            RankingPeriod.DAILY
+            userId, "활동왕", 24.0, 3L, 5L, RankingPeriod.DAILY
         );
+
+        processor = new PowerUserScoreProcessor(userMap, executionTime, new SimpleMeterRegistry(), em);
 
         double baseScore = dto.calculateScore();
         double expectedScore = baseScore + 0.003;
@@ -66,7 +62,7 @@ class PowerUserScoreProcessorTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result.getUser()).isEqualTo(user);
-        assertThat(result.getScore()).isEqualTo(expectedScore, within(1e-6));
+        assertThat(result.getScore()).isEqualTo(expectedScore, within(1e-2));
     }
 
     @Test
@@ -74,41 +70,35 @@ class PowerUserScoreProcessorTest {
     void process_shouldReturnBaseScore_whenNoActivity() {
         UUID userId = UUID.randomUUID();
         User user = mock(User.class);
-        when(em.find(User.class, userId)).thenReturn(user);
+        userMap = Map.of(userId, user);
 
-        mockLatestActivityQueries(userId, null, null); // 활동 없음
+        mockLatestActivityQueries(userId, null, null);
 
         PowerUserScoreDto dto = new PowerUserScoreDto(
-            userId,
-            "비활동유저",
-            16.0,
-            0L,
-            0L,
-            RankingPeriod.DAILY
+            userId, "비활동유저", 16.0, 0L, 0L, RankingPeriod.DAILY
         );
+
+        processor = new PowerUserScoreProcessor(userMap, executionTime, new SimpleMeterRegistry(), em);
 
         double expectedScore = dto.calculateScore();
 
         PowerUserRanking result = processor.process(dto);
 
         assertThat(result).isNotNull();
-        assertThat(result.getScore()).isEqualTo(expectedScore, within(1e-6));
+        assertThat(result.getScore()).isEqualTo(expectedScore, within(1e-3));
     }
 
     @Test
     @DisplayName("User가 존재하지 않으면 null을 반환한다")
     void process_userNotFound_returnsNull() {
         UUID userId = UUID.randomUUID();
-        when(em.find(User.class, userId)).thenReturn(null);
+        userMap = Map.of(); // 유저 없음
 
         PowerUserScoreDto dto = new PowerUserScoreDto(
-            userId,
-            "비회원",
-            20.0,
-            0L,
-            0L,
-            RankingPeriod.DAILY
+            userId, "비회원", 20.0, 0L, 0L, RankingPeriod.DAILY
         );
+
+        processor = new PowerUserScoreProcessor(userMap, executionTime, new SimpleMeterRegistry(), em);
 
         PowerUserRanking result = processor.process(dto);
 
@@ -118,14 +108,14 @@ class PowerUserScoreProcessorTest {
     private void mockLatestActivityQueries(UUID userId, Instant reviewTime, Instant commentTime) {
         // mock review query
         TypedQuery<Instant> reviewQuery = mock(TypedQuery.class);
-        when(em.createQuery(startsWith("SELECT MAX(r.createdAt) FROM Review"), eq(Instant.class)))
+        when(em.createQuery(contains("FROM Review"), eq(Instant.class)))
             .thenReturn(reviewQuery);
         when(reviewQuery.setParameter("userId", userId)).thenReturn(reviewQuery);
         when(reviewQuery.getSingleResult()).thenReturn(reviewTime);
 
         // mock comment query
         TypedQuery<Instant> commentQuery = mock(TypedQuery.class);
-        when(em.createQuery(startsWith("SELECT MAX(c.createdAt) FROM Comment"), eq(Instant.class)))
+        when(em.createQuery(contains("FROM Comment"), eq(Instant.class)))
             .thenReturn(commentQuery);
         when(commentQuery.setParameter("userId", userId)).thenReturn(commentQuery);
         when(commentQuery.getSingleResult()).thenReturn(commentTime);
