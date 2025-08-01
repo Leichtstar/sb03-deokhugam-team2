@@ -171,8 +171,8 @@ src/
 - [x] **테스트 커버리지** - JaCoCo를 통한 코드 품질 관리 (목표: 80%)
 - [x] **로깅 시스템** - Logback 기반 구조화된 로깅
 
-## 구현 홈페이지
+## 📖 구현 홈페이지
 http://twogether-read.site/
 
-## 프로젝트 회고록
-https://www.notion.so/codeit/2-2gether-Read-2396fd228e8d805e99fef9879be8b529?source=copy_link
+## 💌 프로젝트 회고록
+https://www.notion.so/codeit/3-2396fd228e8d808786e0ffccc7842337?p=2396fd228e8d805e99fef9879be8b529&pm=s
